@@ -1,21 +1,24 @@
 import telebot
-from telebot import types
 import os
+from db import init_db, add_user
 
-BOT_TOKEN = os.environ["8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ"]
-WEB_APP_URL = os.environ["https://ggerscoin-production.up.railway.app/"]
+BOT_TOKEN = os.environ.get("8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ")
 
-bot = telebot.TeleBot(BOT_TOKEN)
+bot = telebot.TeleBot(https://ggerscoin-production.up.railway.app/)
 
-@bot.message_handler(commands=["start"])
-def start(msg):
-    kb = types.InlineKeyboardMarkup()
-    web = types.WebAppInfo(url=WEB_APP_URL)
-    kb.add(types.InlineKeyboardButton("🚀 فتح التطبيق", web_app=web))
+init_db()
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    user_id = message.from_user.id
+    username = message.from_user.username
+
+    add_user(user_id, username)
+
     bot.send_message(
-        msg.chat.id,
-        "مرحبًا بك في GgersCoin 👋\nاضغط لفتح التطبيق:",
-        reply_markup=kb
+        message.chat.id,
+        "👋 أهلاً بك في GgersCoin\n\nتم تسجيلك بنجاح ✅"
     )
 
+print("Bot is running...")
 bot.infinity_polling()
