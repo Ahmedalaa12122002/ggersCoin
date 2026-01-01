@@ -1,78 +1,27 @@
 import telebot
-import os
-from datetime import date
-from db import init_db, add_user, get_user, update_daily
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-BOT_TOKEN = os.environ.get("8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ")
-bot = telebot.TeleBot(https://ggerscoin-production.up.railway.app/)
+BOT_TOKEN = "8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ"
+WEB_APP_URL = "https://ggerscoin-production.up.railway.app/"
 
-init_db()
+bot = telebot.TeleBot(BOT_TOKEN)
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=["start"])
 def start(message):
-    user_id = message.from_user.id
-    username = message.from_user.username
-    add_user(user_id, username)
+    kb = InlineKeyboardMarkup()
+    kb.add(
+        InlineKeyboardButton(
+            text="🚀 فتح تطبيق GgersCoin",
+            web_app={"url": WEB_APP_URL}
+        )
+    )
 
     bot.send_message(
         message.chat.id,
-        "👋 أهلاً بك في GgersCoin\n\n"
-        "🎁 استخدم الأمر /daily للحصول على المكافأة اليومية\n"
-        "💰 استخدم الأمر /points لمعرفة رصيدك"
+        "أهلاً بك في **GgersCoin** 👋\n\n"
+        "اضغط الزر بالأسفل لفتح التطبيق",
+        reply_markup=kb,
+        parse_mode="Markdown"
     )
 
-@bot.message_handler(commands=['daily'])
-def daily(message):
-    user_id = message.from_user.id
-    data = get_user(user_id)
-
-    if not data:
-        bot.send_message(message.chat.id, "❌ حدث خطأ، أرسل /start")
-        return
-
-    points, last_daily, streak = data
-    today = date.today()
-
-    if last_daily == today:
-        bot.send_message(message.chat.id, "⏳ لقد حصلت على مكافأة اليوم بالفعل")
-        return
-
-    if last_daily == today.replace(day=today.day - 1):
-        streak += 1
-    else:
-        streak = 1
-
-    reward = 50 + (streak - 1) * 5
-    if reward > 80:
-        reward = 80
-
-    update_daily(user_id, reward, streak)
-
-    bot.send_message(
-        message.chat.id,
-        f"🎉 مكافأة يومية!\n\n"
-        f"🔥 اليوم المتتالي: {streak}\n"
-        f"💰 حصلت على: {reward} نقطة"
-    )
-
-@bot.message_handler(commands=['points'])
-def points(message):
-    user_id = message.from_user.id
-    data = get_user(user_id)
-
-    if not data:
-        bot.send_message(message.chat.id, "❌ حدث خطأ")
-        return
-
-    points, _, _ = data
-    usd = points / 10000
-
-    bot.send_message(
-        message.chat.id,
-        f"💰 رصيدك الحالي:\n\n"
-        f"🔸 {points} نقطة\n"
-        f"💵 ≈ {usd:.2f} دولار"
-    )
-
-print("Bot is running...")
 bot.infinity_polling()
