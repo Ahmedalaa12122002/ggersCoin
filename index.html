@@ -25,11 +25,11 @@ body {
 #content {
   padding: 20px;
   text-align: center;
-  animation: fadeIn 0.4s ease;
+  animation: fadeIn 0.35s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -38,12 +38,13 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
-  height: 75px;
+  height: 80px;
   background: #111;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   border-top: 1px solid #222;
+  padding: 0 6px;
 }
 
 /* ===== زر عادي ===== */
@@ -52,49 +53,48 @@ body {
   height: 100%;
   background: none;
   border: none;
-  color: #ccc;
-  font-size: 13px;
+  color: #bbb;
+  font-size: 11px;
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: 0.25s;
 }
 
 .nav-btn span {
   display: block;
-  font-size: 22px;
+  font-size: 20px;
 }
 
 /* ===== زر الرئيسية ===== */
 .home-btn {
-  width: 75px;
-  height: 75px;
+  width: 78px;
+  height: 78px;
   background: #ffd700;
   border-radius: 50%;
   color: #000;
   font-size: 26px;
   border: none;
-  margin-top: -35px;
-  box-shadow: 0 0 20px rgba(255,215,0,0.6);
+  margin-top: -38px;
+  box-shadow: 0 0 25px rgba(255,215,0,0.7);
   position: relative;
   overflow: hidden;
   animation: pulse 2s infinite;
 }
 
-/* ===== Ripple Effect ===== */
+/* ===== Ripple ===== */
 .nav-btn::after,
 .home-btn::after {
   content: "";
   position: absolute;
   width: 0;
   height: 0;
-  background: rgba(255,215,0,0.4);
+  background: rgba(255,215,0,0.35);
   border-radius: 50%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
-  transition: width 0.4s, height 0.4s, opacity 0.6s;
 }
 
 .nav-btn:active::after,
@@ -102,28 +102,29 @@ body {
   width: 220px;
   height: 220px;
   opacity: 0;
+  transition: 0.5s;
 }
 
-/* ===== تأثير الضغط ===== */
+/* ===== ضغط ===== */
 .nav-btn:active {
-  transform: scale(0.92);
+  transform: scale(0.9);
 }
 
 .home-btn:active {
   transform: scale(0.88);
 }
 
-/* ===== زر نشط ===== */
+/* ===== نشط ===== */
 .nav-btn.active {
   color: #ffd700;
-  text-shadow: 0 0 6px rgba(255,215,0,0.6);
+  text-shadow: 0 0 6px rgba(255,215,0,0.7);
 }
 
-/* ===== توهج الرئيسية ===== */
+/* ===== توهج ===== */
 @keyframes pulse {
-  0% { box-shadow: 0 0 10px rgba(255,215,0,0.3); }
-  50% { box-shadow: 0 0 28px rgba(255,215,0,0.8); }
-  100% { box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+  0% { box-shadow: 0 0 12px rgba(255,215,0,0.4); }
+  50% { box-shadow: 0 0 30px rgba(255,215,0,0.9); }
+  100% { box-shadow: 0 0 12px rgba(255,215,0,0.4); }
 }
 </style>
 </head>
@@ -133,32 +134,36 @@ body {
 <!-- ===== المحتوى ===== -->
 <div id="content">
   <h2>🏠 الصفحة الرئيسية</h2>
-  <p>هنا المكافآت اليومية واللعبة لاحقًا</p>
+  <p>مكافآت يومية – اللعبة – نشاطك</p>
 </div>
 
-<!-- ===== شريط القوائم ===== -->
+<!-- ===== القوائم ===== -->
 <div class="navbar">
 
-  <button class="nav-btn" onclick="navigate('wallet', this)">
-    <span>💼</span>
-    المحفظة
+  <button class="nav-btn" onclick="nav('wallet', this)">
+    <span>💼</span>المحفظة
   </button>
 
-  <button class="nav-btn" onclick="navigate('tasks', this)">
-    <span>📋</span>
-    المهام
+  <button class="nav-btn" onclick="nav('tasks', this)">
+    <span>📋</span>المهام
   </button>
 
-  <button class="home-btn" onclick="navigate('home', this)">🏠</button>
+  <button class="home-btn" onclick="nav('home', this)">🏠</button>
 
-  <button class="nav-btn" onclick="navigate('settings', this)">
-    <span>⚙️</span>
-    الإعدادات
+  <button class="nav-btn" onclick="nav('referral', this)">
+    <span>👥</span>الإحالة
   </button>
 
-  <button class="nav-btn" onclick="navigate('vip', this)">
-    <span>⭐</span>
-    VIP
+  <button class="nav-btn" onclick="nav('logs', this)">
+    <span>🧾</span>السجلات
+  </button>
+
+  <button class="nav-btn" onclick="nav('vip', this)">
+    <span>⭐</span>VIP
+  </button>
+
+  <button class="nav-btn" onclick="nav('settings', this)">
+    <span>⚙️</span>الإعدادات
   </button>
 
 </div>
@@ -167,30 +172,26 @@ body {
 Telegram.WebApp.ready();
 Telegram.WebApp.expand();
 
-function navigate(page, btn) {
+function nav(page, btn) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   if (btn.classList.contains('nav-btn')) btn.classList.add('active');
 
-  const content = document.getElementById('content');
-  content.style.animation = 'none';
-  content.offsetHeight;
-  content.style.animation = null;
+  const c = document.getElementById('content');
+  c.style.animation = 'none';
+  c.offsetHeight;
+  c.style.animation = null;
 
-  if (page === 'home') {
-    content.innerHTML = `<h2>🏠 الصفحة الرئيسية</h2><p>مكافآت يومية – لعبة – نشاطك</p>`;
-  }
-  if (page === 'wallet') {
-    content.innerHTML = `<h2>💼 المحفظة</h2><p>سحب – إيداع – رصيدك</p>`;
-  }
-  if (page === 'tasks') {
-    content.innerHTML = `<h2>📋 المهام</h2><p>إعلانات – اشتراكات – كل 5 دقائق</p>`;
-  }
-  if (page === 'settings') {
-    content.innerHTML = `<h2>⚙️ الإعدادات</h2><p>الدعم – الحساب – الأمان</p>`;
-  }
-  if (page === 'vip') {
-    content.innerHTML = `<h2>⭐ VIP</h2><p>ترقيات – مميزات – مضاعفات</p>`;
-  }
+  const pages = {
+    home: '🏠 الصفحة الرئيسية<br><p>مكافآت – لعبة – نشاط</p>',
+    wallet: '💼 المحفظة<br><p>رصيد – سحب – إيداع</p>',
+    tasks: '📋 المهام<br><p>إعلانات – اشتراكات – كل 5 دقائق</p>',
+    referral: '👥 الإحالة<br><p>رابط الدعوة – عمولات</p>',
+    logs: '🧾 السجلات<br><p>كل عملياتك السابقة</p>',
+    vip: '⭐ VIP<br><p>ترقيات – مضاعفات – مميزات</p>',
+    settings: '⚙️ الإعدادات<br><p>الدعم – الحساب – الأمان</p>'
+  };
+
+  c.innerHTML = `<h2>${pages[page]}</h2>`;
 }
 </script>
 
