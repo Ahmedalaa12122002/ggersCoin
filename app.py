@@ -4,7 +4,10 @@ from db import init_db
 
 app = Flask(__name__)
 
-init_db()
+try:
+    init_db()
+except Exception as e:
+    print("DB ERROR:", e)
 
 @app.route("/")
 def home():
