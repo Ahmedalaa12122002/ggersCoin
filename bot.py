@@ -8,22 +8,14 @@ WEB_APP_URL = os.environ["https://ggerscoin-production.up.railway.app/"]
 bot = telebot.TeleBot(BOT_TOKEN)
 
 @bot.message_handler(commands=["start"])
-def start(message):
-    keyboard = types.InlineKeyboardMarkup()
-    
-    web_app = types.WebAppInfo(url=WEB_APP_URL)
-    
-    button = types.InlineKeyboardButton(
-        text="🚀 فتح التطبيق",
-        web_app=web_app
-    )
-    
-    keyboard.add(button)
-
+def start(msg):
+    kb = types.InlineKeyboardMarkup()
+    web = types.WebAppInfo(url=WEB_APP_URL)
+    kb.add(types.InlineKeyboardButton("🚀 فتح التطبيق", web_app=web))
     bot.send_message(
-        message.chat.id,
-        "اضغط الزر لفتح التطبيق 👇",
-        reply_markup=keyboard
+        msg.chat.id,
+        "مرحبًا بك في GgersCoin 👋\nاضغط لفتح التطبيق:",
+        reply_markup=kb
     )
 
 bot.infinity_polling()
