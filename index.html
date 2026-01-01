@@ -1,22 +1,76 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>GgersCoin</title>
-  <style>
-    body {
-      background:#000;
-      color:#ffd700;
-      font-family:Arial;
-      text-align:center;
-      padding-top:40px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GgersCoin</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #000;
+  color: #fff;
+}
+
+.page {
+  display: none;
+  padding: 20px;
+}
+
+.page.active {
+  display: block;
+}
+
+nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #111;
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid #333;
+}
+
+nav button {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: #ffd700;
+  font-size: 14px;
+}
+</style>
 </head>
+
 <body>
-  <h1>GgersCoin</h1>
-  <p>🎁 مكافأة يومية نشطة</p>
-  <p>💰 10000 نقطة = 1 دولار</p>
-  <p>🚀 المزيد قادم…</p>
+
+<div id="home" class="page active">🏠 الرئيسية</div>
+<div id="wallet" class="page">💼 المحفظة</div>
+<div id="tasks" class="page">📋 المهام</div>
+<div id="settings" class="page">⚙️ الإعدادات</div>
+<div id="vip" class="page">⭐ VIP</div>
+
+<nav>
+  <button onclick="show('home')">🏠</button>
+  <button onclick="show('wallet')">💼</button>
+  <button onclick="show('tasks')">📋</button>
+  <button onclick="show('settings')">⚙️</button>
+  <button onclick="show('vip')">⭐</button>
+</nav>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+
 </body>
-</html>
+  </html>
