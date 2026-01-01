@@ -1,116 +1,21 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>GgersCoin</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<style>
-body{
-  margin:0;
-  background:#0f172a;
-  color:#fff;
-  font-family:Arial;
-  text-align:center;
-}
-.card{
-  background:#1e293b;
-  margin:20px;
-  padding:20px;
-  border-radius:14px;
-}
-.bar{
-  height:22px;
-  background:#334155;
-  border-radius:12px;
-  overflow:hidden;
-  margin:10px 0;
-}
-.fill{
-  height:100%;
-  width:0%;
-  background:#facc15;
-}
-button{
-  padding:14px 20px;
-  font-size:18px;
-  border:none;
-  border-radius:10px;
-  background:#22c55e;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>GgersCoin</title>
+  <style>
+    body {
+      background: #000;
+      color: #ffd700;
+      font-family: Arial;
+      text-align: center;
+      padding-top: 40px;
+    }
+  </style>
 </head>
-
 <body>
-
-<h2>🎮 لعبة العداد الذكي</h2>
-
-<div class="card">
-  <p>نقاطك:</p>
-  <h1 id="pts">0</h1>
-  <p id="vip">VIP: 0</p>
-
-  <div class="bar">
-    <div class="fill" id="fill"></div>
-  </div>
-
-  <p id="status">اضغط للبدء</p>
-  <button onclick="start()">ابدأ</button>
-</div>
-
-<script>
-const tg = window.Telegram.WebApp;
-tg.expand();
-
-const uid = tg.initDataUnsafe.user.id;
-let timer;
-
-fetch("/status",{
-  method:"POST",
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({user_id:uid})
-})
-.then(r=>r.json())
-.then(d=>{
-  document.getElementById("pts").innerText = d.points;
-  document.getElementById("vip").innerText = "VIP: " + d.vip;
-});
-
-function start(){
-  fetch("/play",{
-    method:"POST",
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({user_id:uid})
-  })
-  .then(r=>r.json())
-  .then(d=>{
-    if(d.wait){
-      run(d.wait);
-    }else{
-      document.getElementById("pts").innerText = d.points;
-    }
-  });
-}
-
-function run(seconds){
-  let total = seconds;
-  let left = seconds;
-  clearInterval(timer);
-
-  timer = setInterval(()=>{
-    left--;
-    let p = 100 - (left/total*100);
-    document.getElementById("fill").style.width = p+"%";
-    document.getElementById("status").innerText = "جارٍ الحساب...";
-    if(left<=0){
-      clearInterval(timer);
-      document.getElementById("status").innerText = "تم الربح 🎉";
-      start();
-    }
-  },1000);
-}
-</script>
-
+  <h1>GgersCoin</h1>
+  <p>مرحبا بك في التطبيق</p>
+  <p>سيتم إضافة الميزات قريبًا 🚀</p>
 </body>
-  </html>
+</html>
