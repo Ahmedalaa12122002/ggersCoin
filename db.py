@@ -3,10 +3,18 @@ import os
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-conn = psycopg2.connect(DATABASE_URL)
-cur = conn.cursor()
+conn = None
+cur = None
 
 def init_db():
+    global conn, cur
+    if not DATABASE_URL:
+        print("DATABASE_URL not found")
+        return
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
     cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
         user_id BIGINT PRIMARY KEY,
@@ -15,11 +23,4 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
-    conn.commit()
-
-def add_user(user_id, username):
-    cur.execute(
-        "INSERT INTO users (user_id, username) VALUES (%s, %s) ON CONFLICT DO NOTHING",
-        (user_id, username)
-    )
     conn.commit()
