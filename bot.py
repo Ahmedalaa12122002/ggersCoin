@@ -3,8 +3,8 @@ import os
 from datetime import date
 from db import init_db, add_user, get_user, update_daily
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-bot = telebot.TeleBot(BOT_TOKEN)
+BOT_TOKEN = os.environ.get("8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ")
+bot = telebot.TeleBot(https://ggerscoin-production.up.railway.app/)
 
 init_db()
 
