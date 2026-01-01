@@ -29,68 +29,84 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
-  text-align:center;
+  font-size:24px;
   transition:opacity .3s ease;
 }
 
 /* شريط القوائم */
 .navbar{
-  height:90px;
+  height:100px;
   background:#111;
   display:flex;
   justify-content:space-around;
-  align-items:center;
+  align-items:flex-end;
   border-top:1px solid #222;
+  padding-bottom:10px;
 }
 
 /* زر عادي */
 .nav-btn{
-  width:70px;
-  height:70px;
-  border-radius:18px;
+  width:80px;
+  height:80px;
+  border-radius:20px;
   background:#1a1a1a;
   color:#ccc;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  font-size:12px;
+  font-size:13px;
   cursor:pointer;
   transition:all .25s ease;
 }
 
-/* زر الرئيسية */
-.home-btn{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  background:gold;
-  color:#000;
-  font-size:14px;
-  transform:translateY(-28px);
-  box-shadow:0 0 30px rgba(255,215,0,.9);
+/* أيقونة */
+.nav-btn span.icon{
+  font-size:22px;
+  margin-bottom:4px;
 }
 
-/* تأثير الضغط */
+/* زر الرئيسية */
+.home-btn{
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  background:#ffd700;
+  color:#000;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  transform:translateY(-35px);
+  box-shadow:0 0 35px rgba(255,215,0,.9);
+}
+
+/* أيقونة الرئيسية */
+.home-btn .icon{
+  font-size:30px;
+  line-height:1;
+}
+
+/* تأثيرات */
 .nav-btn:active,
 .home-btn:active{
-  transform:scale(.9);
+  transform:scale(.92);
 }
 
 .nav-btn:hover{
   background:#222;
-  color:gold;
+  color:#ffd700;
 }
 
-/* توهج زر الرئيسية */
+/* نبض زر الرئيسية */
 .home-btn{
   animation:pulse 2s infinite;
 }
 
 @keyframes pulse{
   0%{box-shadow:0 0 15px rgba(255,215,0,.4);}
-  50%{box-shadow:0 0 35px rgba(255,215,0,.9);}
+  50%{box-shadow:0 0 40px rgba(255,215,0,.95);}
   100%{box-shadow:0 0 15px rgba(255,215,0,.4);}
 }
 </style>
@@ -102,48 +118,48 @@ body{
   الرئيسية
 </div>
 
-<!-- شريط القوائم (من اليمين لليسار) -->
+<!-- القوائم (يمين ➜ شمال) -->
 <div class="navbar">
 
   <!-- الإعدادات -->
   <div class="nav-btn" onclick="changePage('الإعدادات')">
-    ⚙️
+    <span class="icon">⚙️</span>
     <span>الإعدادات</span>
   </div>
 
   <!-- VIP -->
   <div class="nav-btn" onclick="changePage('VIP')">
-    ⭐
+    <span class="icon">⭐</span>
     <span>VIP</span>
   </div>
 
   <!-- المحفظة -->
   <div class="nav-btn" onclick="changePage('المحفظة')">
-    💼
+    <span class="icon">💼</span>
     <span>المحفظة</span>
   </div>
 
   <!-- الرئيسية -->
   <div class="home-btn" onclick="changePage('الرئيسية')">
-    🏠
+    <span class="icon">🏠</span>
     <span>الرئيسية</span>
   </div>
 
   <!-- المهام -->
   <div class="nav-btn" onclick="changePage('المهام')">
-    📋
+    <span class="icon">📋</span>
     <span>المهام</span>
   </div>
 
   <!-- الإحالة -->
   <div class="nav-btn" onclick="changePage('الإحالة')">
-    👥
+    <span class="icon">👥</span>
     <span>الإحالة</span>
   </div>
 
   <!-- السجلات -->
   <div class="nav-btn" onclick="changePage('السجلات')">
-    📑
+    <span class="icon">📑</span>
     <span>السجلات</span>
   </div>
 
