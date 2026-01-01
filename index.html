@@ -23,13 +23,13 @@ body {
 
 /* ===== المحتوى ===== */
 #content {
-  padding: 20px;
+  padding: 22px;
   text-align: center;
   animation: fadeIn 0.35s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -38,10 +38,9 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
-  height: 80px;
+  height: 82px;
   background: #111;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   border-top: 1px solid #222;
   padding: 0 6px;
@@ -63,20 +62,20 @@ body {
 
 .nav-btn span {
   display: block;
-  font-size: 20px;
+  font-size: 21px;
 }
 
 /* ===== زر الرئيسية ===== */
 .home-btn {
-  width: 78px;
-  height: 78px;
+  width: 80px;
+  height: 80px;
   background: #ffd700;
   border-radius: 50%;
   color: #000;
   font-size: 26px;
   border: none;
-  margin-top: -38px;
-  box-shadow: 0 0 25px rgba(255,215,0,0.7);
+  margin-top: -40px;
+  box-shadow: 0 0 28px rgba(255,215,0,0.75);
   position: relative;
   overflow: hidden;
   animation: pulse 2s infinite;
@@ -99,20 +98,15 @@ body {
 
 .nav-btn:active::after,
 .home-btn:active::after {
-  width: 220px;
-  height: 220px;
+  width: 240px;
+  height: 240px;
   opacity: 0;
   transition: 0.5s;
 }
 
 /* ===== ضغط ===== */
-.nav-btn:active {
-  transform: scale(0.9);
-}
-
-.home-btn:active {
-  transform: scale(0.88);
-}
+.nav-btn:active { transform: scale(0.9); }
+.home-btn:active { transform: scale(0.88); }
 
 /* ===== نشط ===== */
 .nav-btn.active {
@@ -122,9 +116,9 @@ body {
 
 /* ===== توهج ===== */
 @keyframes pulse {
-  0% { box-shadow: 0 0 12px rgba(255,215,0,0.4); }
-  50% { box-shadow: 0 0 30px rgba(255,215,0,0.9); }
-  100% { box-shadow: 0 0 12px rgba(255,215,0,0.4); }
+  0% { box-shadow: 0 0 14px rgba(255,215,0,0.4); }
+  50% { box-shadow: 0 0 32px rgba(255,215,0,0.9); }
+  100% { box-shadow: 0 0 14px rgba(255,215,0,0.4); }
 }
 </style>
 </head>
@@ -133,11 +127,11 @@ body {
 
 <!-- ===== المحتوى ===== -->
 <div id="content">
-  <h2>🏠 الصفحة الرئيسية</h2>
-  <p>مكافآت يومية – اللعبة – نشاطك</p>
+  <h2>🏠 الرئيسية</h2>
+  <p>مكافآت يومية – اللعبة – النشاط</p>
 </div>
 
-<!-- ===== القوائم ===== -->
+<!-- ===== شريط القوائم ===== -->
 <div class="navbar">
 
   <button class="nav-btn" onclick="nav('wallet', this)">
@@ -182,11 +176,11 @@ function nav(page, btn) {
   c.style.animation = null;
 
   const pages = {
-    home: '🏠 الصفحة الرئيسية<br><p>مكافآت – لعبة – نشاط</p>',
-    wallet: '💼 المحفظة<br><p>رصيد – سحب – إيداع</p>',
+    home: '🏠 الرئيسية<br><p>مكافآت – لعبة العداد – نشاطك</p>',
+    wallet: '💼 المحفظة<br><p>رصيدك – سحب – إيداع</p>',
     tasks: '📋 المهام<br><p>إعلانات – اشتراكات – كل 5 دقائق</p>',
-    referral: '👥 الإحالة<br><p>رابط الدعوة – عمولات</p>',
-    logs: '🧾 السجلات<br><p>كل عملياتك السابقة</p>',
+    referral: '👥 الإحالة<br><p>رابطك – أرباح الدعوات</p>',
+    logs: '🧾 السجلات<br><p>كل عملياتك بالتفصيل</p>',
     vip: '⭐ VIP<br><p>ترقيات – مضاعفات – مميزات</p>',
     settings: '⚙️ الإعدادات<br><p>الدعم – الحساب – الأمان</p>'
   };
