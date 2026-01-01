@@ -2,97 +2,115 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>نقاطي</title>
+<title>GgersCoin</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
 body{
   margin:0;
-  font-family:Arial;
   background:#0f172a;
   color:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+  font-family:Arial;
+  text-align:center;
 }
 .card{
   background:#1e293b;
-  padding:25px;
+  margin:20px;
+  padding:20px;
   border-radius:14px;
-  width:90%;
-  max-width:360px;
-  text-align:center;
 }
-.balance{
-  font-size:38px;
+.bar{
+  height:22px;
+  background:#334155;
+  border-radius:12px;
+  overflow:hidden;
   margin:10px 0;
 }
-.timer{
-  margin:10px 0;
-  color:#94a3b8;
+.fill{
+  height:100%;
+  width:0%;
+  background:#facc15;
 }
 button{
-  width:100%;
-  padding:14px;
+  padding:14px 20px;
   font-size:18px;
   border:none;
   border-radius:10px;
   background:#22c55e;
-  color:#000;
-}
-button:disabled{
-  background:#555;
-  color:#ccc;
 }
 </style>
 </head>
 
 <body>
 
+<h2>🎮 لعبة العداد الذكي</h2>
+
 <div class="card">
-  <h2>💰 نقاطك</h2>
-  <div class="balance" id="points">0</div>
-  <div class="timer" id="timer">جاهز للربح</div>
-  <button id="btn" onclick="earn()">احصل على نقطة</button>
+  <p>نقاطك:</p>
+  <h1 id="pts">0</h1>
+  <p id="vip">VIP: 0</p>
+
+  <div class="bar">
+    <div class="fill" id="fill"></div>
+  </div>
+
+  <p id="status">اضغط للبدء</p>
+  <button onclick="start()">ابدأ</button>
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// محاكاة فقط (Front-end)
-let points = 0;
-let wait = 0;
-const btn = document.getElementById("btn");
-const timer = document.getElementById("timer");
-const pointsEl = document.getElementById("points");
+const uid = tg.initDataUnsafe.user.id;
+let timer;
 
-function earn(){
-  points++;
-  pointsEl.innerText = points;
-  wait = 300; // 5 دقائق
-  btn.disabled = true;
-  countdown();
+fetch("/status",{
+  method:"POST",
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({user_id:uid})
+})
+.then(r=>r.json())
+.then(d=>{
+  document.getElementById("pts").innerText = d.points;
+  document.getElementById("vip").innerText = "VIP: " + d.vip;
+});
+
+function start(){
+  fetch("/play",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({user_id:uid})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.wait){
+      run(d.wait);
+    }else{
+      document.getElementById("pts").innerText = d.points;
+    }
+  });
 }
 
-function countdown(){
-  const i = setInterval(()=>{
-    if(wait <= 0){
-      clearInterval(i);
-      timer.innerText = "جاهز للربح";
-      btn.disabled = false;
-    }else{
-      const m = Math.floor(wait / 60);
-      const s = wait % 60;
-      timer.innerText = `انتظر ${m}:${String(s).padStart(2,'0')}`;
-      wait--;
+function run(seconds){
+  let total = seconds;
+  let left = seconds;
+  clearInterval(timer);
+
+  timer = setInterval(()=>{
+    left--;
+    let p = 100 - (left/total*100);
+    document.getElementById("fill").style.width = p+"%";
+    document.getElementById("status").innerText = "جارٍ الحساب...";
+    if(left<=0){
+      clearInterval(timer);
+      document.getElementById("status").innerText = "تم الربح 🎉";
+      start();
     }
   },1000);
 }
 </script>
 
 </body>
-</html>
+  </html>
