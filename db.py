@@ -10,11 +10,16 @@ def init_db():
     cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
         user_id BIGINT PRIMARY KEY,
+        username TEXT,
         points BIGINT DEFAULT 0,
-        last_daily DATE,
-        streak INT DEFAULT 0,
-        ref_by BIGINT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+    conn.commit()
+
+def add_user(user_id, username):
+    cur.execute(
+        "INSERT INTO users (user_id, username) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+        (user_id, username)
+    )
     conn.commit()
