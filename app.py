@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_file
 import os
 from db import init_db
 
@@ -8,7 +8,7 @@ init_db()
 
 @app.route("/")
 def home():
-    return send_from_directory(".", "index.html")
+    return send_file("index.html")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
