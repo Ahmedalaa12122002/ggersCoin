@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GgersCoin</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -10,158 +10,186 @@
 <style>
 * {
   box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
   background: #000;
   color: #fff;
+  height: 100vh;
   overflow: hidden;
 }
 
-/* الصفحات */
-.page {
-  position: absolute;
-  width: 100%;
-  height: calc(100vh - 90px);
+/* ===== المحتوى ===== */
+#content {
   padding: 20px;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.35s ease;
-  pointer-events: none;
+  text-align: center;
+  animation: fadeIn 0.4s ease;
 }
 
-.page.active {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* شريط القوائم */
-nav {
+/* ===== شريط القوائم ===== */
+.navbar {
   position: fixed;
   bottom: 0;
   width: 100%;
-  height: 90px;
-  background: #0e0e0e;
-  border-top: 1px solid #333;
+  height: 75px;
+  background: #111;
   display: flex;
   justify-content: space-around;
   align-items: center;
+  border-top: 1px solid #222;
 }
 
-/* الأزرار العادية */
+/* ===== زر عادي ===== */
 .nav-btn {
   flex: 1;
-  height: 70px;
+  height: 100%;
   background: none;
   border: none;
-  color: #aaa;
+  color: #ccc;
   font-size: 13px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
   transition: color 0.3s;
 }
 
 .nav-btn span {
+  display: block;
   font-size: 22px;
 }
 
-.nav-btn.active {
-  color: #ffd700;
-}
-
-/* زر الرئيسية (كبير + وسط) */
+/* ===== زر الرئيسية ===== */
 .home-btn {
   width: 75px;
   height: 75px;
   background: #ffd700;
-  color: #000;
   border-radius: 50%;
-  border: none;
+  color: #000;
   font-size: 26px;
+  border: none;
   margin-top: -35px;
-  box-shadow: 0 0 15px rgba(255,215,0,0.4);
-  transition: transform 0.3s;
+  box-shadow: 0 0 20px rgba(255,215,0,0.6);
+  position: relative;
+  overflow: hidden;
+  animation: pulse 2s infinite;
+}
+
+/* ===== Ripple Effect ===== */
+.nav-btn::after,
+.home-btn::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  background: rgba(255,215,0,0.4);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: width 0.4s, height 0.4s, opacity 0.6s;
+}
+
+.nav-btn:active::after,
+.home-btn:active::after {
+  width: 220px;
+  height: 220px;
+  opacity: 0;
+}
+
+/* ===== تأثير الضغط ===== */
+.nav-btn:active {
+  transform: scale(0.92);
 }
 
 .home-btn:active {
-  transform: scale(0.9);
+  transform: scale(0.88);
+}
+
+/* ===== زر نشط ===== */
+.nav-btn.active {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255,215,0,0.6);
+}
+
+/* ===== توهج الرئيسية ===== */
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+  50% { box-shadow: 0 0 28px rgba(255,215,0,0.8); }
+  100% { box-shadow: 0 0 10px rgba(255,215,0,0.3); }
 }
 </style>
 </head>
 
 <body>
 
-<!-- الصفحات -->
-<div id="home" class="page active">
-  <h2>🏠 الرئيسية</h2>
-  <p>المكافأة اليومية – اللعبة – الأرباح</p>
+<!-- ===== المحتوى ===== -->
+<div id="content">
+  <h2>🏠 الصفحة الرئيسية</h2>
+  <p>هنا المكافآت اليومية واللعبة لاحقًا</p>
 </div>
 
-<div id="wallet" class="page">
-  <h2>💼 المحفظة</h2>
-  <p>سحب – إيداع</p>
-</div>
+<!-- ===== شريط القوائم ===== -->
+<div class="navbar">
 
-<div id="tasks" class="page">
-  <h2>📋 المهام</h2>
-  <p>مهام – إعلانات – اشتراكات</p>
-</div>
-
-<div id="settings" class="page">
-  <h2>⚙️ الإعدادات</h2>
-  <p>الدعم – الحساب</p>
-</div>
-
-<div id="vip" class="page">
-  <h2>⭐ VIP</h2>
-  <p>مميزات – ترقيات</p>
-</div>
-
-<!-- القوائم -->
-<nav>
-  <button class="nav-btn" onclick="showPage('wallet', this)">
+  <button class="nav-btn" onclick="navigate('wallet', this)">
     <span>💼</span>
     المحفظة
   </button>
 
-  <button class="nav-btn" onclick="showPage('tasks', this)">
+  <button class="nav-btn" onclick="navigate('tasks', this)">
     <span>📋</span>
     المهام
   </button>
 
-  <button class="home-btn" onclick="showPage('home', this)">
-    🏠
-  </button>
+  <button class="home-btn" onclick="navigate('home', this)">🏠</button>
 
-  <button class="nav-btn" onclick="showPage('settings', this)">
+  <button class="nav-btn" onclick="navigate('settings', this)">
     <span>⚙️</span>
     الإعدادات
   </button>
 
-  <button class="nav-btn" onclick="showPage('vip', this)">
+  <button class="nav-btn" onclick="navigate('vip', this)">
     <span>⭐</span>
     VIP
   </button>
-</nav>
+
+</div>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+Telegram.WebApp.ready();
+Telegram.WebApp.expand();
 
-function showPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-
+function navigate(page, btn) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  if (btn.classList.contains('nav-btn')) {
-    btn.classList.add('active');
+  if (btn.classList.contains('nav-btn')) btn.classList.add('active');
+
+  const content = document.getElementById('content');
+  content.style.animation = 'none';
+  content.offsetHeight;
+  content.style.animation = null;
+
+  if (page === 'home') {
+    content.innerHTML = `<h2>🏠 الصفحة الرئيسية</h2><p>مكافآت يومية – لعبة – نشاطك</p>`;
+  }
+  if (page === 'wallet') {
+    content.innerHTML = `<h2>💼 المحفظة</h2><p>سحب – إيداع – رصيدك</p>`;
+  }
+  if (page === 'tasks') {
+    content.innerHTML = `<h2>📋 المهام</h2><p>إعلانات – اشتراكات – كل 5 دقائق</p>`;
+  }
+  if (page === 'settings') {
+    content.innerHTML = `<h2>⚙️ الإعدادات</h2><p>الدعم – الحساب – الأمان</p>`;
+  }
+  if (page === 'vip') {
+    content.innerHTML = `<h2>⭐ VIP</h2><p>ترقيات – مميزات – مضاعفات</p>`;
   }
 }
 </script>
