@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GgersCoin</title>
 
@@ -17,18 +17,25 @@ body {
   font-family: Arial, sans-serif;
   background: #000;
   color: #fff;
+  overflow: hidden;
 }
 
-/* صفحات المحتوى */
+/* الصفحات */
 .page {
-  display: none;
+  position: absolute;
+  width: 100%;
+  height: calc(100vh - 90px);
   padding: 20px;
-  padding-bottom: 110px; /* مساحة للأزرار الكبيرة */
-  min-height: 100vh;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.35s ease;
+  pointer-events: none;
 }
 
 .page.active {
-  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 /* شريط القوائم */
@@ -36,33 +43,54 @@ nav {
   position: fixed;
   bottom: 0;
   width: 100%;
-  background: #111;
+  height: 90px;
+  background: #0e0e0e;
+  border-top: 1px solid #333;
   display: flex;
-  border-top: 2px solid #333;
+  justify-content: space-around;
+  align-items: center;
 }
 
-/* زر القائمة */
-nav button {
+/* الأزرار العادية */
+.nav-btn {
   flex: 1;
-  height: 90px;              /* ⬅️ كبير */
+  height: 70px;
   background: none;
   border: none;
-  color: #ffd700;
-  font-size: 18px;           /* ⬅️ خط واضح */
+  color: #aaa;
+  font-size: 13px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  cursor: pointer;
+  gap: 4px;
+  transition: color 0.3s;
 }
 
-nav button span {
-  font-size: 26px;           /* ⬅️ أيقونة كبيرة */
+.nav-btn span {
+  font-size: 22px;
 }
 
-nav button:active {
-  background: #222;
+.nav-btn.active {
+  color: #ffd700;
+}
+
+/* زر الرئيسية (كبير + وسط) */
+.home-btn {
+  width: 75px;
+  height: 75px;
+  background: #ffd700;
+  color: #000;
+  border-radius: 50%;
+  border: none;
+  font-size: 26px;
+  margin-top: -35px;
+  box-shadow: 0 0 15px rgba(255,215,0,0.4);
+  transition: transform 0.3s;
+}
+
+.home-btn:active {
+  transform: scale(0.9);
 }
 </style>
 </head>
@@ -87,37 +115,36 @@ nav button:active {
 
 <div id="settings" class="page">
   <h2>⚙️ الإعدادات</h2>
-  <p>الدعم – معلومات الحساب</p>
+  <p>الدعم – الحساب</p>
 </div>
 
 <div id="vip" class="page">
   <h2>⭐ VIP</h2>
-  <p>ترقيات – مميزات إضافية</p>
+  <p>مميزات – ترقيات</p>
 </div>
 
-<!-- القوائم السفلية -->
+<!-- القوائم -->
 <nav>
-  <button onclick="show('home')">
-    <span>🏠</span>
-    الرئيسية
-  </button>
-
-  <button onclick="show('wallet')">
+  <button class="nav-btn" onclick="showPage('wallet', this)">
     <span>💼</span>
     المحفظة
   </button>
 
-  <button onclick="show('tasks')">
+  <button class="nav-btn" onclick="showPage('tasks', this)">
     <span>📋</span>
     المهام
   </button>
 
-  <button onclick="show('settings')">
+  <button class="home-btn" onclick="showPage('home', this)">
+    🏠
+  </button>
+
+  <button class="nav-btn" onclick="showPage('settings', this)">
     <span>⚙️</span>
     الإعدادات
   </button>
 
-  <button onclick="show('vip')">
+  <button class="nav-btn" onclick="showPage('vip', this)">
     <span>⭐</span>
     VIP
   </button>
@@ -128,11 +155,16 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-function show(id) {
+function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn.classList.contains('nav-btn')) {
+    btn.classList.add('active');
+  }
 }
 </script>
 
 </body>
-    </html>
+</html>
