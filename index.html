@@ -1,1 +1,193 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GgersCoin</title>
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== المحتوى ===== */
+#content {
+  padding: 22px;
+  text-align: center;
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== شريط القوائم ===== */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 82px;
+  background: #111;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #222;
+  padding: 0 6px;
+}
+
+/* ===== زر عادي ===== */
+.nav-btn {
+  flex: 1;
+  height: 100%;
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 11px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.nav-btn span {
+  display: block;
+  font-size: 21px;
+}
+
+/* ===== زر الرئيسية ===== */
+.home-btn {
+  width: 80px;
+  height: 80px;
+  background: #ffd700;
+  border-radius: 50%;
+  color: #000;
+  font-size: 26px;
+  border: none;
+  margin-top: -40px;
+  box-shadow: 0 0 28px rgba(255,215,0,0.75);
+  position: relative;
+  overflow: hidden;
+  animation: pulse 2s infinite;
+}
+
+/* ===== Ripple ===== */
+.nav-btn::after,
+.home-btn::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  background: rgba(255,215,0,0.35);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+.nav-btn:active::after,
+.home-btn:active::after {
+  width: 240px;
+  height: 240px;
+  opacity: 0;
+  transition: 0.5s;
+}
+
+/* ===== ضغط ===== */
+.nav-btn:active { transform: scale(0.9); }
+.home-btn:active { transform: scale(0.88); }
+
+/* ===== نشط ===== */
+.nav-btn.active {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255,215,0,0.7);
+}
+
+/* ===== توهج ===== */
+@keyframes pulse {
+  0% { box-shadow: 0 0 14px rgba(255,215,0,0.4); }
+  50% { box-shadow: 0 0 32px rgba(255,215,0,0.9); }
+  100% { box-shadow: 0 0 14px rgba(255,215,0,0.4); }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== المحتوى ===== -->
+<div id="content">
+  <h2>🏠 الرئيسية</h2>
+  <p>مكافآت يومية – اللعبة – النشاط</p>
+</div>
+
+<!-- ===== شريط القوائم ===== -->
+<div class="navbar">
+
+  <button class="nav-btn" onclick="nav('wallet', this)">
+    <span>💼</span>المحفظة
+  </button>
+
+  <button class="nav-btn" onclick="nav('tasks', this)">
+    <span>📋</span>المهام
+  </button>
+
+  <button class="home-btn" onclick="nav('home', this)">🏠</button>
+
+  <button class="nav-btn" onclick="nav('referral', this)">
+    <span>👥</span>الإحالة
+  </button>
+
+  <button class="nav-btn" onclick="nav('logs', this)">
+    <span>🧾</span>السجلات
+  </button>
+
+  <button class="nav-btn" onclick="nav('vip', this)">
+    <span>⭐</span>VIP
+  </button>
+
+  <button class="nav-btn" onclick="nav('settings', this)">
+    <span>⚙️</span>الإعدادات
+  </button>
+
+</div>
+
+<script>
+Telegram.WebApp.ready();
+Telegram.WebApp.expand();
+
+function nav(page, btn) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn.classList.contains('nav-btn')) btn.classList.add('active');
+
+  const c = document.getElementById('content');
+  c.style.animation = 'none';
+  c.offsetHeight;
+  c.style.animation = null;
+
+  const pages = {
+    home: '🏠 الرئيسية<br><p>مكافآت – لعبة العداد – نشاطك</p>',
+    wallet: '💼 المحفظة<br><p>رصيدك – سحب – إيداع</p>',
+    tasks: '📋 المهام<br><p>إعلانات – اشتراكات – كل 5 دقائق</p>',
+    referral: '👥 الإحالة<br><p>رابطك – أرباح الدعوات</p>',
+    logs: '🧾 السجلات<br><p>كل عملياتك بالتفصيل</p>',
+    vip: '⭐ VIP<br><p>ترقيات – مضاعفات – مميزات</p>',
+    settings: '⚙️ الإعدادات<br><p>الدعم – الحساب – الأمان</p>'
+  };
+
+  c.innerHTML = `<h2>${pages[page]}</h2>`;
+}
+</script>
+
+</body>
+  </html>
