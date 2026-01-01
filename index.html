@@ -8,57 +8,119 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   background: #000;
   color: #fff;
 }
 
+/* صفحات المحتوى */
 .page {
   display: none;
   padding: 20px;
+  padding-bottom: 110px; /* مساحة للأزرار الكبيرة */
+  min-height: 100vh;
 }
 
 .page.active {
   display: block;
 }
 
+/* شريط القوائم */
 nav {
   position: fixed;
   bottom: 0;
   width: 100%;
   background: #111;
   display: flex;
-  justify-content: space-around;
-  border-top: 1px solid #333;
+  border-top: 2px solid #333;
 }
 
+/* زر القائمة */
 nav button {
   flex: 1;
-  padding: 10px;
+  height: 90px;              /* ⬅️ كبير */
   background: none;
   border: none;
   color: #ffd700;
-  font-size: 14px;
+  font-size: 18px;           /* ⬅️ خط واضح */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+nav button span {
+  font-size: 26px;           /* ⬅️ أيقونة كبيرة */
+}
+
+nav button:active {
+  background: #222;
 }
 </style>
 </head>
 
 <body>
 
-<div id="home" class="page active">🏠 الرئيسية</div>
-<div id="wallet" class="page">💼 المحفظة</div>
-<div id="tasks" class="page">📋 المهام</div>
-<div id="settings" class="page">⚙️ الإعدادات</div>
-<div id="vip" class="page">⭐ VIP</div>
+<!-- الصفحات -->
+<div id="home" class="page active">
+  <h2>🏠 الرئيسية</h2>
+  <p>المكافأة اليومية – اللعبة – الأرباح</p>
+</div>
 
+<div id="wallet" class="page">
+  <h2>💼 المحفظة</h2>
+  <p>سحب – إيداع</p>
+</div>
+
+<div id="tasks" class="page">
+  <h2>📋 المهام</h2>
+  <p>مهام – إعلانات – اشتراكات</p>
+</div>
+
+<div id="settings" class="page">
+  <h2>⚙️ الإعدادات</h2>
+  <p>الدعم – معلومات الحساب</p>
+</div>
+
+<div id="vip" class="page">
+  <h2>⭐ VIP</h2>
+  <p>ترقيات – مميزات إضافية</p>
+</div>
+
+<!-- القوائم السفلية -->
 <nav>
-  <button onclick="show('home')">🏠</button>
-  <button onclick="show('wallet')">💼</button>
-  <button onclick="show('tasks')">📋</button>
-  <button onclick="show('settings')">⚙️</button>
-  <button onclick="show('vip')">⭐</button>
+  <button onclick="show('home')">
+    <span>🏠</span>
+    الرئيسية
+  </button>
+
+  <button onclick="show('wallet')">
+    <span>💼</span>
+    المحفظة
+  </button>
+
+  <button onclick="show('tasks')">
+    <span>📋</span>
+    المهام
+  </button>
+
+  <button onclick="show('settings')">
+    <span>⚙️</span>
+    الإعدادات
+  </button>
+
+  <button onclick="show('vip')">
+    <span>⭐</span>
+    VIP
+  </button>
 </nav>
 
 <script>
@@ -73,4 +135,4 @@ function show(id) {
 </script>
 
 </body>
-  </html>
+    </html>
