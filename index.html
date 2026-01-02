@@ -23,21 +23,21 @@ body{
 
 /* ===== CONTENT ===== */
 #content{
-  height:calc(100vh - 100px);
+  height:calc(100vh - 110px);
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:opacity .35s ease, transform .35s ease;
+  transition:.35s;
 }
 
-/* ===== MAIN CARD ===== */
+/* ===== CARD ===== */
 .card{
-  width:92%;
-  max-width:420px;
+  width:94%;
+  max-width:430px;
   background:#0f0f0f;
-  border-radius:20px;
+  border-radius:22px;
   padding:20px;
-  box-shadow:0 0 40px rgba(0,0,0,.8);
+  box-shadow:0 0 45px rgba(0,0,0,.9);
   text-align:center;
 }
 
@@ -45,49 +45,60 @@ body{
 .header{
   display:flex;
   justify-content:space-between;
-  font-size:14px;
-  opacity:.85;
+  font-size:15px;
+  opacity:.9;
 }
 
+/* ===== TITLE ===== */
 .title{
-  font-size:26px;
-  margin:15px 0;
+  font-size:28px;
+  margin:12px 0;
 }
 
-/* ===== FARM ===== */
-.crop{
-  font-size:46px;
+/* ===== FARM VISUAL ===== */
+.farm{
+  font-size:70px;
   margin:10px 0;
+  transition:.3s;
 }
 
+.farmer{
+  font-size:40px;
+  margin-top:5px;
+}
+
+/* ===== BUTTON ===== */
 .btn{
-  margin-top:15px;
-  padding:14px;
-  border-radius:16px;
+  margin-top:14px;
+  padding:16px;
+  border-radius:18px;
   background:#161616;
   color:#fff;
   border:none;
-  font-size:16px;
+  font-size:17px;
   width:100%;
   cursor:pointer;
   transition:.25s;
 }
 
 .btn.glow{
-  box-shadow:0 0 18px rgba(255,200,0,.35);
+  box-shadow:0 0 20px rgba(255,200,0,.4);
 }
 
 .btn:active{
-  transform:scale(.97);
+  transform:scale(.96);
 }
 
+/* ===== TIMER ===== */
 .timer{
-  margin-top:12px;
+  margin-top:10px;
   opacity:.8;
+  font-size:15px;
 }
 
+/* ===== PROGRESS ===== */
 .progress{
-  height:8px;
+  height:9px;
   background:#222;
   border-radius:6px;
   overflow:hidden;
@@ -105,18 +116,19 @@ body{
   position:fixed;
   bottom:0;
   width:100%;
-  height:100px;
+  height:110px;
   background:rgba(15,15,15,0.96);
-  backdrop-filter:blur(12px);
+  backdrop-filter:blur(14px);
   display:flex;
   justify-content:space-around;
   align-items:center;
   border-top:1px solid #222;
 }
 
+/* ===== NAV BUTTON ===== */
 .nav-btn{
-  width:58px;
-  height:58px;
+  width:66px;
+  height:66px;
   border-radius:50%;
   background:#141414;
   display:flex;
@@ -124,29 +136,32 @@ body{
   align-items:center;
   justify-content:center;
   color:#aaa;
-  font-size:11px;
+  font-size:12px;
   transition:.25s;
 }
 
 .nav-btn .icon{
-  font-size:20px;
+  font-size:26px;
+  margin-bottom:2px;
 }
 
+/* ===== HOME BUTTON (BIGGEST) ===== */
 .home-btn{
-  width:82px;
-  height:82px;
-  margin-top:-18px;
+  width:92px;
+  height:92px;
+  margin-top:-22px;
 }
 
 .home-btn .icon{
-  font-size:30px;
+  font-size:38px;
 }
 
+/* ===== ACTIVE ===== */
 .nav-btn.active{
   color:#fff;
   box-shadow:
-    0 0 18px rgba(255,200,0,.35),
-    0 0 32px rgba(255,200,0,.15);
+    0 0 20px rgba(255,200,0,.35),
+    0 0 36px rgba(255,200,0,.18);
 }
 
 .nav-btn:active{
@@ -158,15 +173,17 @@ body{
 <body>
 
 <div id="content">
-  <div class="card" id="home">
+  <div class="card">
+
     <div class="header">
-      <div>VIP: <span id="vip">0</span> 👑</div>
       <div>النقاط: <span id="points">0</span> 💰</div>
+      <div>VIP: <span id="vip">0</span> 👑</div>
     </div>
 
     <div class="title">WinHive 🌾</div>
 
-    <div class="crop" id="crop">0 🌾</div>
+    <div class="farm" id="farm">🌱</div>
+    <div class="farmer" id="farmer"></div>
 
     <button class="btn glow" id="plantBtn" onclick="startFarm()">ابدأ الزراعة</button>
 
@@ -177,21 +194,40 @@ body{
     <div class="progress">
       <div id="bar"></div>
     </div>
+
   </div>
 </div>
 
 <!-- ===== NAV BAR ===== -->
 <div class="nav-bar">
 
-  <div class="nav-btn" onclick="go('الإعدادات',this)">⚙️<div>الإعدادات</div></div>
-  <div class="nav-btn" onclick="go('VIP',this)">⭐<div>VIP</div></div>
-  <div class="nav-btn" onclick="go('المحفظة',this)">💼<div>المحفظة</div></div>
+  <div class="nav-btn" onclick="go('السجلات',this)">
+    <div class="icon">🧾</div>السجلات
+  </div>
 
-  <div class="nav-btn home-btn active" onclick="go('الرئيسية',this)">🏠<div>الرئيسية</div></div>
+  <div class="nav-btn" onclick="go('الإحالة',this)">
+    <div class="icon">👥</div>الإحالة
+  </div>
 
-  <div class="nav-btn" onclick="go('المهام',this)">📋<div>المهام</div></div>
-  <div class="nav-btn" onclick="go('الإحالة',this)">👥<div>الإحالة</div></div>
-  <div class="nav-btn" onclick="go('السجلات',this)">🧾<div>السجلات</div></div>
+  <div class="nav-btn" onclick="go('المهام',this)">
+    <div class="icon">📋</div>المهام
+  </div>
+
+  <div class="nav-btn home-btn active" onclick="go('الرئيسية',this)">
+    <div class="icon">🏠</div>الرئيسية
+  </div>
+
+  <div class="nav-btn" onclick="go('المحفظة',this)">
+    <div class="icon">💼</div>المحفظة
+  </div>
+
+  <div class="nav-btn" onclick="go('VIP',this)">
+    <div class="icon">⭐</div>VIP
+  </div>
+
+  <div class="nav-btn" onclick="go('الإعدادات',this)">
+    <div class="icon">⚙️</div>الإعدادات
+  </div>
 
 </div>
 
@@ -200,7 +236,6 @@ Telegram.WebApp.ready();
 
 let time = 260;
 let farming = false;
-let crops = 0;
 let interval;
 
 function startFarm(){
@@ -208,15 +243,19 @@ function startFarm(){
   farming = true;
   time = 260;
   document.getElementById("plantBtn").innerText="الزراعة جارية...";
+  document.getElementById("farm").innerText="🌾";
+  document.getElementById("farmer").innerText="👨‍🌾";
+
   interval = setInterval(()=>{
     time--;
     document.getElementById("timer").innerText=time+" ثانية ⏳";
     document.getElementById("bar").style.width=((260-time)/260*100)+"%";
+
     if(time<=0){
       clearInterval(interval);
       farming=false;
-      crops+=1;
-      document.getElementById("crop").innerText=crops+" 🌾";
+      document.getElementById("farm").innerText="🌾✨";
+      document.getElementById("farmer").innerText="";
       document.getElementById("plantBtn").innerText="ابدأ الزراعة";
       document.getElementById("timer").innerText="جاهز للحصاد ✅";
     }
@@ -250,4 +289,4 @@ function go(name,el){
 </script>
 
 </body>
-  </html>
+</html>
