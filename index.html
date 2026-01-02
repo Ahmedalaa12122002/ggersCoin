@@ -9,140 +9,170 @@
 
 <style>
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
     font-family: Tahoma, Arial;
 }
 
 body {
-    margin: 0;
     background: #000;
     color: #fff;
-    text-align: center;
+    overflow: hidden;
 }
 
-/* العنوان */
-.page-title {
-    margin-top: 40px;
+/* محتوى الصفحة */
+#content {
+    height: calc(100vh - 90px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 22px;
-    font-weight: bold;
 }
 
 /* شريط القوائم */
 .navbar {
     position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 95%;
-    background: rgba(30,30,30,0.95);
-    border-radius: 25px;
-    padding: 10px;
+    bottom: 0;
+    width: 100%;
+    height: 90px;
+    background: #111;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
 }
 
-/* زر عادي */
-.nav-btn {
-    width: 52px;
-    height: 52px;
-    background: #222;
+/* زر */
+.nav-item {
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
-    color: #fff;
-    font-size: 11px;
+    background: #1f1f1f;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    transition: 0.2s;
+    justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 
-.nav-btn:active {
-    transform: scale(0.85);
-    background: #444;
+.nav-item i {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+/* تأثير الضغط */
+.nav-item:active {
+    transform: scale(0.9);
+    background: #ffd500;
+    color: #000;
+    box-shadow: 0 0 18px rgba(255,213,0,0.7);
 }
 
 /* زر الرئيسية */
-.home-btn {
-    width: 72px;
-    height: 72px;
-    background: #FFD700;
+.nav-item.main {
+    width: 74px;
+    height: 74px;
+    background: #ffd500;
     color: #000;
+    box-shadow: 0 0 25px rgba(255,213,0,0.9);
+    transform: translateY(-14px);
+}
+
+.nav-item.main:active {
+    transform: translateY(-14px) scale(0.92);
+}
+
+/* Ripple */
+.ripple {
+    position: absolute;
     border-radius: 50%;
-    font-size: 12px;
-    font-weight: bold;
-    margin-top: -35px;
-    box-shadow: 0 0 15px #FFD700;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background-color: rgba(255, 255, 255, 0.5);
 }
 
-.home-btn:active {
-    transform: scale(0.9);
-}
-
-/* إيموجي */
-.icon {
-    font-size: 18px;
-    margin-bottom: 2px;
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div class="page-title">الرئيسية</div>
+<div id="content">الرئيسية</div>
 
-<!-- شريط القوائم -->
 <div class="navbar">
-
-    <!-- الإعدادات -->
-    <div class="nav-btn">
-        <div class="icon">⚙️</div>
+    <!-- من اليمين لليسار -->
+    <div class="nav-item" onclick="showPage('الإعدادات')">
+        <i>⚙️</i>
         الإعدادات
     </div>
 
-    <!-- VIP -->
-    <div class="nav-btn">
-        <div class="icon">⭐</div>
+    <div class="nav-item" onclick="showPage('VIP')">
+        <i>⭐</i>
         VIP
     </div>
 
-    <!-- المحفظة -->
-    <div class="nav-btn">
-        <div class="icon">💼</div>
+    <div class="nav-item" onclick="showPage('المحفظة')">
+        <i>💼</i>
         المحفظة
     </div>
 
-    <!-- الرئيسية -->
-    <div class="home-btn">
-        <div class="icon">🏠</div>
+    <div class="nav-item main" onclick="showPage('الرئيسية')">
+        <i>🏠</i>
         الرئيسية
     </div>
 
-    <!-- المهام -->
-    <div class="nav-btn">
-        <div class="icon">📋</div>
+    <div class="nav-item" onclick="showPage('المهام')">
+        <i>📋</i>
         المهام
     </div>
 
-    <!-- الإحالة -->
-    <div class="nav-btn">
-        <div class="icon">👥</div>
+    <div class="nav-item" onclick="showPage('الإحالة')">
+        <i>👥</i>
         الإحالة
     </div>
 
-    <!-- السجلات -->
-    <div class="nav-btn">
-        <div class="icon">🧾</div>
+    <div class="nav-item" onclick="showPage('السجلات')">
+        <i>🧾</i>
         السجلات
     </div>
-
 </div>
 
 <script>
-Telegram.WebApp.ready();
-Telegram.WebApp.expand();
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+/* تغيير الصفحة */
+function showPage(name) {
+    document.getElementById("content").innerText = name;
+}
+
+/* Ripple Effect */
+document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+        const circle = document.createElement("span");
+        const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+        const radius = diameter / 2;
+
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.left = `${e.clientX - btn.offsetLeft - radius}px`;
+        circle.style.top = `${e.clientY - btn.offsetTop - radius}px`;
+        circle.classList.add("ripple");
+
+        const ripple = btn.getElementsByClassName("ripple")[0];
+        if (ripple) ripple.remove();
+
+        btn.appendChild(circle);
+    });
+});
 </script>
 
 </body>
 </html>
-
