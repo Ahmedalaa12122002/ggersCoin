@@ -1,31 +1,36 @@
 import telebot
-from telebot import types
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-TOKEN = "8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ"
-WEB_APP_URL = "https://ggerscoin-production.up.railway.app/"
+BOT_TOKEN = "8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ"
+WEBAPP_URL = "https://ggerscoin-production.up.railway.app/"
 
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(BOT_TOKEN, parse_mode="HTML")
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    markup = types.InlineKeyboardMarkup(row_width=1)
-
-    open_app = types.InlineKeyboardButton(
-        "🚀 دخول تطبيق GgersCoin",
-        web_app=types.WebAppInfo(url=WEB_APP_URL)
+    kb = InlineKeyboardMarkup()
+    kb.add(
+        InlineKeyboardButton(
+            "🚀 دخول تطبيق GgersCoin",
+            web_app={"url": WEBAPP_URL}
+        )
     )
-
-    markup.add(open_app)
 
     bot.send_message(
         message.chat.id,
-        "🎉 مرحبًا بك في **GgersCoin**\n\n"
-        "💰 اكسب نقاط\n"
-        "📋 نفّذ مهام\n"
-        "🔥 مكافآت يومية\n\n"
-        "👇 اضغط الزر للدخول إلى التطبيق",
-        reply_markup=markup,
-        parse_mode="Markdown"
+        """
+👋 <b>مرحبًا بك في GgersCoin</b>
+
+💰 اكسب نقاط
+🎯 نفّذ مهام
+⭐ ترقية VIP
+🎮 ألعاب ذكية
+💸 سحب أرباحك
+
+⬇️ اضغط الزر بالأسفل للدخول إلى التطبيق
+        """,
+        reply_markup=kb
     )
 
+print("Bot is running...")
 bot.infinity_polling()
