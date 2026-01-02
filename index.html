@@ -8,284 +8,207 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:system-ui;
-}
-
-body{
-  background:#000;
-  color:#fff;
-  overflow:hidden;
-}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#000;color:#fff;overflow:hidden}
 
 /* ===== CONTENT ===== */
 #content{
   height:calc(100vh - 110px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:.35s;
-}
-
-/* ===== CARD ===== */
-.card{
-  width:94%;
-  max-width:430px;
-  background:#0f0f0f;
-  border-radius:22px;
   padding:20px;
-  box-shadow:0 0 45px rgba(0,0,0,.9);
-  text-align:center;
-}
-
-/* ===== HEADER ===== */
-.header{
-  display:flex;
-  justify-content:space-between;
-  font-size:15px;
-  opacity:.9;
-}
-
-/* ===== TITLE ===== */
-.title{
-  font-size:28px;
-  margin:12px 0;
-}
-
-/* ===== FARM VISUAL ===== */
-.farm{
-  font-size:70px;
-  margin:10px 0;
-  transition:.3s;
-}
-
-.farmer{
-  font-size:40px;
-  margin-top:5px;
-}
-
-/* ===== BUTTON ===== */
-.btn{
-  margin-top:14px;
-  padding:16px;
-  border-radius:18px;
-  background:#161616;
-  color:#fff;
-  border:none;
-  font-size:17px;
-  width:100%;
-  cursor:pointer;
-  transition:.25s;
-}
-
-.btn.glow{
-  box-shadow:0 0 20px rgba(255,200,0,.4);
-}
-
-.btn:active{
-  transform:scale(.96);
-}
-
-/* ===== TIMER ===== */
-.timer{
-  margin-top:10px;
-  opacity:.8;
-  font-size:15px;
-}
-
-/* ===== PROGRESS ===== */
-.progress{
-  height:9px;
-  background:#222;
-  border-radius:6px;
   overflow:hidden;
-  margin-top:12px;
 }
 
-.progress div{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#ffcc00,#ff9f00);
-}
-
-/* ===== NAV BAR ===== */
+/* ===== NAV ===== */
 .nav-bar{
   position:fixed;
   bottom:0;
   width:100%;
   height:110px;
-  background:rgba(15,15,15,0.96);
-  backdrop-filter:blur(14px);
+  background:rgba(15,15,15,.96);
   display:flex;
   justify-content:space-around;
   align-items:center;
   border-top:1px solid #222;
 }
 
-/* ===== NAV BUTTON ===== */
 .nav-btn{
-  width:66px;
-  height:66px;
+  width:56px;
+  height:56px;
   border-radius:50%;
   background:#141414;
+  color:#aaa;
+  font-size:11px;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  color:#aaa;
-  font-size:12px;
-  transition:.25s;
 }
 
-.nav-btn .icon{
-  font-size:26px;
-  margin-bottom:2px;
-}
+.nav-btn .icon{font-size:18px}
 
-/* ===== HOME BUTTON (BIGGEST) ===== */
 .home-btn{
-  width:92px;
-  height:92px;
-  margin-top:-22px;
+  width:78px;
+  height:78px;
+  margin-top:-18px;
 }
+.home-btn .icon{font-size:30px}
 
-.home-btn .icon{
-  font-size:38px;
-}
-
-/* ===== ACTIVE ===== */
 .nav-btn.active{
   color:#fff;
-  box-shadow:
-    0 0 20px rgba(255,200,0,.35),
-    0 0 36px rgba(255,200,0,.18);
+  box-shadow:0 0 18px rgba(255,200,0,.35);
 }
 
-.nav-btn:active{
-  transform:scale(.92);
+/* ===== FARM ===== */
+.card{
+  background:#0e0e0e;
+  border-radius:20px;
+  padding:18px;
+  margin-bottom:15px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  font-size:14px;
+  margin-bottom:10px;
+}
+
+.center{text-align:center}
+
+.farm{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-top:15px;
+}
+
+.plot{
+  background:#1a1a1a;
+  border-radius:14px;
+  height:90px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  cursor:pointer;
+}
+
+.task{
+  background:#111;
+  border-radius:14px;
+  padding:14px;
+  margin-top:12px;
+  font-size:14px;
+}
+.task span{color:#ffcc00}
+
+/* ===== BTN ===== */
+.btn{
+  background:#1a1a1a;
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="content">
-  <div class="card">
+<div id="content"></div>
 
-    <div class="header">
-      <div>النقاط: <span id="points">0</span> 💰</div>
-      <div>VIP: <span id="vip">0</span> 👑</div>
-    </div>
-
-    <div class="title">WinHive 🌾</div>
-
-    <div class="farm" id="farm">🌱</div>
-    <div class="farmer" id="farmer"></div>
-
-    <button class="btn glow" id="plantBtn" onclick="startFarm()">ابدأ الزراعة</button>
-
-    <div class="timer" id="timer">260 ثانية ⏳</div>
-
-    <button class="btn" onclick="harvest()">احصد</button>
-
-    <div class="progress">
-      <div id="bar"></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ===== NAV BAR ===== -->
+<!-- ===== NAV ===== -->
 <div class="nav-bar">
-
-  <div class="nav-btn" onclick="go('السجلات',this)">
-    <div class="icon">🧾</div>السجلات
-  </div>
-
-  <div class="nav-btn" onclick="go('الإحالة',this)">
-    <div class="icon">👥</div>الإحالة
-  </div>
-
-  <div class="nav-btn" onclick="go('المهام',this)">
-    <div class="icon">📋</div>المهام
-  </div>
-
-  <div class="nav-btn home-btn active" onclick="go('الرئيسية',this)">
-    <div class="icon">🏠</div>الرئيسية
-  </div>
-
-  <div class="nav-btn" onclick="go('المحفظة',this)">
-    <div class="icon">💼</div>المحفظة
-  </div>
-
-  <div class="nav-btn" onclick="go('VIP',this)">
-    <div class="icon">⭐</div>VIP
-  </div>
-
-  <div class="nav-btn" onclick="go('الإعدادات',this)">
-    <div class="icon">⚙️</div>الإعدادات
-  </div>
-
+  <div class="nav-btn" onclick="go('settings',this)">⚙️<div>الإعدادات</div></div>
+  <div class="nav-btn" onclick="go('vip',this)">⭐<div>VIP</div></div>
+  <div class="nav-btn" onclick="go('wallet',this)">💼<div>المحفظة</div></div>
+  <div class="nav-btn home-btn active" onclick="go('home',this)">🏠<div>الرئيسية</div></div>
+  <div class="nav-btn" onclick="go('tasks',this)">📋<div>المهام</div></div>
+  <div class="nav-btn" onclick="go('ref',this)">👥<div>الإحالة</div></div>
+  <div class="nav-btn" onclick="go('logs',this)">🧾<div>السجلات</div></div>
 </div>
 
 <script>
 Telegram.WebApp.ready();
 
-let time = 260;
-let farming = false;
-let interval;
+/* ===== STATE ===== */
+let points = Number(localStorage.getItem("points")||0);
+let plots = JSON.parse(localStorage.getItem("plots")||"[0,0,0,0]");
+let task = localStorage.getItem("task") || "ازرع أرض واحدة";
 
-function startFarm(){
-  if(farming) return;
-  farming = true;
-  time = 260;
-  document.getElementById("plantBtn").innerText="الزراعة جارية...";
-  document.getElementById("farm").innerText="🌾";
-  document.getElementById("farmer").innerText="👨‍🌾";
+/* ===== HOME ===== */
+function renderHome(){
+document.getElementById("content").innerHTML=`
+<div class="card">
+  <div class="header">
+    <div>👑 VIP: 0</div>
+    <div>💰 النقاط: ${points}</div>
+  </div>
 
-  interval = setInterval(()=>{
-    time--;
-    document.getElementById("timer").innerText=time+" ثانية ⏳";
-    document.getElementById("bar").style.width=((260-time)/260*100)+"%";
+  <div class="center">
+    <h2>🌾 WinHive</h2>
+  </div>
 
-    if(time<=0){
-      clearInterval(interval);
-      farming=false;
-      document.getElementById("farm").innerText="🌾✨";
-      document.getElementById("farmer").innerText="";
-      document.getElementById("plantBtn").innerText="ابدأ الزراعة";
-      document.getElementById("timer").innerText="جاهز للحصاد ✅";
-    }
-  },1000);
+  <div class="farm">
+    ${plots.map((p,i)=>`
+      <div class="plot" onclick="action(${i})">
+        ${p==0?"🟫":p==1?"🌱":"🌾"}
+      </div>`).join("")}
+  </div>
+
+  <div class="task">
+    🎯 المهمة: <span>${task}</span>
+  </div>
+</div>
+`;
 }
 
-function harvest(){
-  if(time>0) return;
-  document.getElementById("points").innerText =
-    parseInt(document.getElementById("points").innerText)+1;
+/* ===== ACTION ===== */
+function action(i){
+ if(plots[i]==0){
+   plots[i]=1;
+   checkTask("plant");
+ }
+ else if(plots[i]==1){
+   plots[i]=2;
+ }
+ else{
+   plots[i]=0;
+   points+=2;
+   checkTask("harvest");
+ }
+ save();
+ renderHome();
 }
 
-function go(name,el){
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-
-  const c=document.getElementById('content');
-  c.style.opacity=0;
-  c.style.transform='translateY(10px)';
-
-  setTimeout(()=>{
-    if(name!=="الرئيسية"){
-      c.innerHTML="<div class='card'><div class='title'>"+name+"</div><div style='opacity:.6'>قريبًا...</div></div>";
-    }else{
-      location.reload();
-    }
-    c.style.opacity=1;
-    c.style.transform='translateY(0)';
-  },200);
+/* ===== TASK LOGIC ===== */
+function checkTask(type){
+ if(task.includes("ازرع") && type=="plant"){
+   points+=1;
+   task="احصد محصول واحد";
+ }
+ else if(task.includes("احصد") && type=="harvest"){
+   points+=2;
+   task="ازرع أرض واحدة";
+ }
 }
+
+/* ===== SAVE ===== */
+function save(){
+ localStorage.setItem("points",points);
+ localStorage.setItem("plots",JSON.stringify(plots));
+ localStorage.setItem("task",task);
+}
+
+/* ===== NAV ===== */
+function go(page,el){
+ document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+ el.classList.add("active");
+ if(page=="home") renderHome();
+ else document.getElementById("content").innerHTML=`<div class="center">${page}</div>`;
+}
+
+renderHome();
 </script>
 
 </body>
