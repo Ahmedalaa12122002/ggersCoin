@@ -4,12 +4,12 @@ import os
 app = Flask(__name__)
 
 @app.route("/")
-def index():
+def home():
     return send_from_directory(".", "index.html")
 
-@app.route("/<path:path>")
-def static_files(path):
-    return send_from_directory(".", path)
+@app.route("/health")
+def health():
+    return "OK", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
