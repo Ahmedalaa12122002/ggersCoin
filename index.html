@@ -29,47 +29,47 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:24px;
+  font-size:26px;
   transition:opacity .3s ease;
 }
 
 /* شريط القوائم */
 .navbar{
-  height:100px;
+  height:105px;
   background:#111;
   display:flex;
   justify-content:space-around;
   align-items:flex-end;
   border-top:1px solid #222;
-  padding-bottom:10px;
+  padding-bottom:12px;
 }
 
-/* زر عادي */
+/* زر عادي (دائري) */
 .nav-btn{
-  width:80px;
-  height:80px;
-  border-radius:20px;
+  width:78px;
+  height:78px;
+  border-radius:50%;
   background:#1a1a1a;
   color:#ccc;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  font-size:13px;
+  font-size:12px;
   cursor:pointer;
   transition:all .25s ease;
 }
 
 /* أيقونة */
-.nav-btn span.icon{
+.nav-btn .icon{
   font-size:22px;
   margin-bottom:4px;
 }
 
 /* زر الرئيسية */
 .home-btn{
-  width:100px;
-  height:100px;
+  width:95px;
+  height:95px;
   border-radius:50%;
   background:#ffd700;
   color:#000;
@@ -77,9 +77,9 @@ body{
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  font-size:14px;
-  transform:translateY(-35px);
-  box-shadow:0 0 35px rgba(255,215,0,.9);
+  font-size:13px;
+  transform:translateY(-15px); /* ⬅ نزلناه شوية */
+  box-shadow:0 0 30px rgba(255,215,0,.9);
 }
 
 /* أيقونة الرئيسية */
@@ -88,12 +88,13 @@ body{
   line-height:1;
 }
 
-/* تأثيرات */
+/* تأثير الضغط */
 .nav-btn:active,
 .home-btn:active{
   transform:scale(.92);
 }
 
+/* Hover */
 .nav-btn:hover{
   background:#222;
   color:#ffd700;
@@ -115,49 +116,42 @@ body{
 <body>
 
 <div id="content">
-  الرئيسية
+  مرحبًا بك في GgersCoin
 </div>
 
-<!-- القوائم (يمين ➜ شمال) -->
+<!-- القوائم (يمين ← شمال) -->
 <div class="navbar">
 
-  <!-- الإعدادات -->
   <div class="nav-btn" onclick="changePage('الإعدادات')">
     <span class="icon">⚙️</span>
     <span>الإعدادات</span>
   </div>
 
-  <!-- VIP -->
   <div class="nav-btn" onclick="changePage('VIP')">
     <span class="icon">⭐</span>
     <span>VIP</span>
   </div>
 
-  <!-- المحفظة -->
   <div class="nav-btn" onclick="changePage('المحفظة')">
     <span class="icon">💼</span>
     <span>المحفظة</span>
   </div>
 
-  <!-- الرئيسية -->
   <div class="home-btn" onclick="changePage('الرئيسية')">
     <span class="icon">🏠</span>
     <span>الرئيسية</span>
   </div>
 
-  <!-- المهام -->
   <div class="nav-btn" onclick="changePage('المهام')">
     <span class="icon">📋</span>
     <span>المهام</span>
   </div>
 
-  <!-- الإحالة -->
   <div class="nav-btn" onclick="changePage('الإحالة')">
     <span class="icon">👥</span>
     <span>الإحالة</span>
   </div>
 
-  <!-- السجلات -->
   <div class="nav-btn" onclick="changePage('السجلات')">
     <span class="icon">📑</span>
     <span>السجلات</span>
