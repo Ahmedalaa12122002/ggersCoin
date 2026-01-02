@@ -5,35 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GgersCoin</title>
 
-<!-- Telegram Mini App -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-/* ================== RESET ================== */
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color:transparent;
 }
 html,body{
   height:100%;
-  overflow:hidden;
   background:#000;
-  font-family:system-ui, sans-serif;
   color:#fff;
+  overflow:hidden;
+  font-family:system-ui,sans-serif;
 }
 
-/* ================== APP ================== */
-.app{
-  height:100%;
-  display:flex;
-  flex-direction:column;
-}
-
-/* ================== CONTENT ================== */
+/* ====== CONTENT ====== */
 .content{
-  flex:1;
+  height:100%;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -41,7 +32,7 @@ html,body{
   font-weight:bold;
 }
 
-/* ================== NAV BAR ================== */
+/* ====== NAV ====== */
 .nav{
   position:fixed;
   bottom:0;
@@ -53,13 +44,12 @@ html,body{
   justify-content:space-around;
   align-items:center;
   border-top:1px solid #222;
-  contain:layout;
 }
 
-/* ================== BUTTON ================== */
+/* ====== BUTTON ====== */
 .btn{
-  width:52px;
-  height:52px;
+  width:54px;
+  height:54px;
   border-radius:50%;
   background:#1a1a1a;
   display:flex;
@@ -68,81 +58,62 @@ html,body{
   justify-content:center;
   font-size:11px;
   color:#bbb;
-  cursor:pointer;
   position:relative;
-  transition:
-    background .25s ease,
-    box-shadow .25s ease,
-    transform .15s ease;
+  cursor:pointer;
+  transition:transform .15s ease;
   overflow:hidden;
 }
 
-/* Hover */
-.btn:hover{
-  background:#222;
-}
-
-/* Active press (NO MOVE SCREEN) */
+/* PRESS SCALE */
 .btn:active{
   transform:scale(.9);
-  box-shadow:0 0 12px rgba(255,215,0,.35);
 }
 
-/* Ripple effect */
-.btn::after{
-  content:"";
-  position:absolute;
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  background:rgba(255,215,0,.25);
-  transform:scale(0);
-  opacity:0;
-}
-.btn:active::after{
-  animation:ripple .45s ease-out;
-}
-@keyframes ripple{
-  0%{transform:scale(0);opacity:.6;}
-  100%{transform:scale(1.6);opacity:0;}
-}
-
-/* Icon */
+/* ICON */
 .icon{
   font-size:18px;
   margin-bottom:3px;
 }
 
-/* ================== MAIN BUTTON ================== */
+/* ====== YELLOW WAVE EFFECT ====== */
+.btn::after{
+  content:"";
+  position:absolute;
+  width:140%;
+  height:140%;
+  border-radius:50%;
+  background:rgba(255,215,0,.45);
+  transform:scale(0);
+  opacity:0;
+}
+
+.btn:active::after{
+  animation:wave .45s ease-out;
+}
+
+@keyframes wave{
+  0%{transform:scale(0);opacity:.6;}
+  100%{transform:scale(1);opacity:0;}
+}
+
+/* ====== ACTIVE PAGE (TEXT ONLY) ====== */
+.btn.active{
+  color:#FFD700;
+}
+
+/* ====== HOME BUTTON (NO YELLOW) ====== */
 .btn.main{
-  width:68px;
-  height:68px;
-  background:#FFD700;
-  color:#000;
-  font-weight:bold;
-  box-shadow:0 0 18px rgba(255,215,0,.6);
-  margin-top:-22px; /* ثابت بدون تحريك */
+  width:66px;
+  height:66px;
+  margin-top:-20px;
+  background:#1a1a1a;
   z-index:2;
-  animation:pulse 2.2s infinite;
 }
 .btn.main .icon{
   font-size:22px;
 }
 
-/* Pulse animation */
-@keyframes pulse{
-  0%{box-shadow:0 0 12px rgba(255,215,0,.6);}
-  50%{box-shadow:0 0 26px rgba(255,215,0,.95);}
-  100%{box-shadow:0 0 12px rgba(255,215,0,.6);}
-}
-
-/* ================== ACTIVE STATE ================== */
-.btn.active{
-  background:#222;
-  color:#FFD700;
-}
-
-/* ================== HIDE SCROLL SHIFT ================== */
+/* Prevent page shift */
 body{
   touch-action:manipulation;
 }
@@ -150,75 +121,69 @@ body{
 </head>
 
 <body>
-<div class="app">
 
-  <!-- CONTENT -->
-  <div class="content" id="page">
+<div class="content" id="page">الرئيسية</div>
+
+<div class="nav">
+
+  <!-- الإعدادات -->
+  <div class="btn" onclick="go(this,'الإعدادات')">
+    <div class="icon">⚙️</div>
+    الإعدادات
+  </div>
+
+  <!-- VIP -->
+  <div class="btn" onclick="go(this,'VIP')">
+    <div class="icon">⭐</div>
+    VIP
+  </div>
+
+  <!-- المحفظة -->
+  <div class="btn" onclick="go(this,'المحفظة')">
+    <div class="icon">💼</div>
+    المحفظة
+  </div>
+
+  <!-- الرئيسية -->
+  <div class="btn main active" onclick="go(this,'الرئيسية')">
+    <div class="icon">🏠</div>
     الرئيسية
   </div>
 
-  <!-- NAV -->
-  <div class="nav">
-
-    <!-- الإعدادات -->
-    <div class="btn" onclick="go('الإعدادات')">
-      <div class="icon">⚙️</div>
-      الإعدادات
-    </div>
-
-    <!-- VIP -->
-    <div class="btn" onclick="go('VIP')">
-      <div class="icon">⭐</div>
-      VIP
-    </div>
-
-    <!-- المحفظة -->
-    <div class="btn" onclick="go('المحفظة')">
-      <div class="icon">💼</div>
-      المحفظة
-    </div>
-
-    <!-- الرئيسية -->
-    <div class="btn main active" onclick="go('الرئيسية')">
-      <div class="icon">🏠</div>
-      الرئيسية
-    </div>
-
-    <!-- المهام -->
-    <div class="btn" onclick="go('المهام')">
-      <div class="icon">📋</div>
-      المهام
-    </div>
-
-    <!-- الإحالة -->
-    <div class="btn" onclick="go('الإحالة')">
-      <div class="icon">👥</div>
-      الإحالة
-    </div>
-
-    <!-- السجلات -->
-    <div class="btn" onclick="go('السجلات')">
-      <div class="icon">🧾</div>
-      السجلات
-    </div>
-
+  <!-- المهام -->
+  <div class="btn" onclick="go(this,'المهام')">
+    <div class="icon">📋</div>
+    المهام
   </div>
+
+  <!-- الإحالة -->
+  <div class="btn" onclick="go(this,'الإحالة')">
+    <div class="icon">👥</div>
+    الإحالة
+  </div>
+
+  <!-- السجلات -->
+  <div class="btn" onclick="go(this,'السجلات')">
+    <div class="icon">🧾</div>
+    السجلات
+  </div>
+
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-function go(name){
+function go(el,name){
   document.getElementById("page").innerText = name;
-
   document.querySelectorAll(".btn").forEach(b=>b.classList.remove("active"));
-  event.currentTarget.classList.add("active");
+  el.classList.add("active");
 
   if(tg.HapticFeedback){
     tg.HapticFeedback.impactOccurred("light");
   }
 }
 </script>
+
 </body>
-  </html>
+</html>
