@@ -1,1 +1,580 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinHive</title>
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:system-ui;
+}
+
+body{
+  background:#000;
+  color:#fff;
+  overflow:hidden;
+}
+
+/* ===== CONTENT ===== */
+#content{
+  height:calc(100vh - 110px);
+  padding:20px;
+  overflow:hidden;
+  transition:opacity .3s ease, transform .3s ease;
+}
+
+/* ===== NAV BAR ===== */
+.nav-bar{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  height:110px;
+  background:rgba(15,15,15,.96);
+  backdrop-filter:blur(12px);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  border-top:1px solid #222;
+}
+
+/* ===== NAV BUTTON ===== */
+.nav-btn{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:#141414;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#aaa;
+  font-size:11px;
+  transition:.25s;
+}
+
+.nav-btn .icon{
+  font-size:18px;
+  margin-bottom:3px;
+}
+
+/* ===== HOME BUTTON ===== */
+.home-btn{
+  width:78px;
+  height:78px;
+  margin-top:-18px;
+}
+
+.home-btn .icon{
+  font-size:30px;
+}
+
+/* ===== ACTIVE ===== */
+.nav-btn.active{
+  color:#fff;
+  box-shadow:
+    0 0 16px rgba(255,200,0,.35),
+    0 0 28px rgba(255,200,0,.15);
+}
+
+.nav-btn:active{
+  transform:scale(.92);
+}
+
+/* ===== CARD ===== */
+.card{
+  background:#0e0e0e;
+  border-radius:20px;
+  padding:18px;
+  margin-bottom:15px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  font-size:14px;
+}
+
+.center{text-align:center}
+
+/* ===== FARM GRID ===== */
+.farm{
+  display:grid;
+  gap:12px;
+  margin-top:15px;
+}
+
+.plot{
+  background:#1a1a1a;
+  border-radius:14px;
+  height:90px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  cursor:pointer;
+}
+
+/* ===== TASK ===== */
+.task{
+  background:#111;
+  border-radius:14px;
+  padding:14px;
+  margin-top:12px;
+  font-size:14px;
+}
+.task span{color:#ffcc00}
+</style>
+</head>
+
+<body>
+
+<div id="content"></div>
+
+<!-- ===== NAV BAR (7 MENUS) ===== -->
+<div class="nav-bar">
+
+  <div class="nav-btn" onclick="go('settings',this)">
+    <div class="icon">⚙️</div>الإعدادات
+  </div>
+
+  <div class="nav-btn" onclick="go('vip',this)">
+    <div class="icon">⭐</div>VIP
+  </div>
+
+  <div class="nav-btn" onclick="go('wallet',this)">
+    <div class="icon">💼</div>المحفظة
+  </div>
+
+  <div class="nav-btn home-btn active" onclick="go('home',this)">
+    <div class="icon">🏠</div>الرئيسية
+  </div>
+
+  <div class="nav-btn" onclick="go('tasks',this)">
+    <div class="icon">📋</div>المهام
+  </div>
+
+  <div class="nav-btn" onclick="go('ref',this)">
+    <div class="icon">👥</div>الإحالة
+  </div>
+
+  <div class="nav-btn" onclick="go('logs',this)">
+    <div class="icon">🧾</div>السجلات
+  </div>
+
+                         </div>
+  <script>
+/* ===============================
+   TELEGRAM INIT
+================================ */
+Telegram.WebApp.ready();
+
+/* ===============================
+   NAV STATE
+================================ */
+let currentPage = 'home';
+
+/* ===============================
+   PAGES PLACEHOLDERS
+   (سيتم استبدال home لاحقًا)
+================================ */
+const pages = {
+  home: `
+    <div class="card center">
+      <h2>🌾 WinHive</h2>
+      <div style="opacity:.6;margin-top:8px">جارٍ تحميل المزرعة…</div>
+    </div>
+  `,
+  tasks: `
+    <div class="card center">
+      <h3>📋 المهام</h3>
+      <div style="opacity:.6">قريبًا</div>
+    </div>
+  `,
+  wallet: `
+    <div class="card center">
+      <h3>💼 المحفظة</h3>
+      <div style="opacity:.6">قريبًا</div>
+    </div>
+  `,
+  vip: `
+    <div class="card center">
+      <h3>⭐ VIP</h3>
+      <div style="opacity:.6">قريبًا</div>
+    </div>
+  `,
+  ref: `
+    <div class="card center">
+      <h3>👥 الإحالة</h3>
+      <div style="opacity:.6">قريبًا</div>
+    </div>
+  `,
+  logs: `
+    <div class="card center">
+      <h3>🧾 السجلات</h3>
+      <div style="opacity:.6">قريبًا</div>
+    </div>
+  `,
+  settings: `
+    <div class="card center">
+      <h3>⚙️ الإعدادات</h3>
+      <div style="opacity:.6">قريبًا</div>
+    </div>
+  `
+};
+
+/* ===============================
+   NAV FUNCTION
+================================ */
+function go(page, el){
+  if(page === currentPage) return;
+  currentPage = page;
+
+  document.querySelectorAll('.nav-btn')
+    .forEach(b => b.classList.remove('active'));
+  if(el) el.classList.add('active');
+
+  const c = document.getElementById('content');
+  c.style.opacity = 0;
+  c.style.transform = 'translateY(10px)';
+
+  setTimeout(() => {
+    c.innerHTML = pages[page] || pages.home;
+    c.style.opacity = 1;
+    c.style.transform = 'translateY(0)';
+  }, 180);
+}
+
+/* ===============================
+   LOAD HOME FIRST
+================================ */
+document.getElementById('content').innerHTML = pages.home;
+  </script>
+  <script>
+/* ===============================
+   PHASE 1 – LAND SYSTEM
+================================ */
+
+// مستوى VIP (افتراضي 0)
+let vipLevel = Number(localStorage.getItem("vipLevel") || 0);
+
+// النقاط (ستُستخدم لاحقًا)
+let points = Number(localStorage.getItem("points") || 0);
+
+// عدد الأراضي الكلي
+const TOTAL_PLOTS = 6;
+
+// حالة كل أرض:
+// 0 = فاضية
+// 1 = مزروعة (قيد النمو)
+// 2 = جاهزة للحصاد
+let plots = JSON.parse(
+  localStorage.getItem("plots") ||
+  JSON.stringify(Array(TOTAL_PLOTS).fill(0))
+);
+
+// حساب الأراضي المفتوحة حسب VIP
+function unlockedPlots(){
+  return Math.min(1 + vipLevel, TOTAL_PLOTS);
+}
+
+/* ===============================
+   HOME PAGE (OVERRIDE)
+================================ */
+pages.home = function(){
+  let openCount = unlockedPlots();
+
+  return `
+  <div class="card">
+    <div class="header">
+      <div>💰 النقاط: ${points}</div>
+      <div>👑 VIP: ${vipLevel}</div>
+    </div>
+
+    <div class="center" style="margin:10px 0">
+      <h2>🌾 WinHive</h2>
+      <div style="opacity:.6;font-size:13px">
+        أراضي مفتوحة: ${openCount} / ${TOTAL_PLOTS}
+      </div>
+    </div>
+
+    <div class="farm" style="grid-template-columns:repeat(3,1fr)">
+      ${plots.map((state,i)=>{
+        if(i < openCount){
+          return `
+            <div class="plot" onclick="plotClick(${i})">
+              🟫
+            </div>
+          `;
+        }else{
+          return `
+            <div class="plot" style="opacity:.35;cursor:not-allowed">
+              🔒
+            </div>
+          `;
+        }
+      }).join("")}
+    </div>
+
+    <div class="task">
+      🔒 افتح أراضي إضافية عن طريق ترقية VIP
+    </div>
+  </div>
+  `;
+};
+
+/* ===============================
+   CLICK PLACEHOLDER
+   (سيتم تطويره بالجزء 4)
+================================ */
+function plotClick(index){
+  alert("🌱 الزراعة ستتوفر في الخطوة التالية");
+}
+
+/* ===============================
+   INITIAL RENDER UPDATE
+================================ */
+document.getElementById("content").innerHTML = pages.home();
+  </script>
+  <script>
+/* ===============================
+   PHASE 1 – FARMING (WHEAT)
+================================ */
+
+// وقت زراعة القمح (تجربة: 30 ثانية)
+const WHEAT_TIME = 30 * 1000; // 5 دقائق = 5 * 60 * 1000
+
+// أوقات نهاية الزراعة لكل أرض
+let growTimers = JSON.parse(
+  localStorage.getItem("growTimers") ||
+  JSON.stringify(Array(TOTAL_PLOTS).fill(null))
+);
+
+/* ===============================
+   UPDATE HOME PAGE (OVERRIDE)
+================================ */
+pages.home = function(){
+  let openCount = unlockedPlots();
+  let now = Date.now();
+
+  return `
+  <div class="card">
+    <div class="header">
+      <div>💰 النقاط: ${points}</div>
+      <div>👑 VIP: ${vipLevel}</div>
+    </div>
+
+    <div class="center" style="margin:10px 0">
+      <h2>🌾 WinHive</h2>
+      <div style="opacity:.6;font-size:13px">
+        مزرعة القمح — أراضي مفتوحة: ${openCount}/${TOTAL_PLOTS}
+      </div>
+    </div>
+
+    <div class="farm" style="grid-template-columns:repeat(3,1fr)">
+      ${plots.map((state,i)=>{
+        if(i >= openCount){
+          return `<div class="plot" style="opacity:.35">🔒</div>`;
+        }
+
+        // أرض فاضية
+        if(state === 0){
+          return `<div class="plot" onclick="plant(${i})">🟫</div>`;
+        }
+
+        // مزروعة (قيد النمو)
+        if(state === 1){
+          let left = Math.max(0, Math.ceil((growTimers[i]-now)/1000));
+          return `<div class="plot">🌱<div style="font-size:11px">${left}s</div></div>`;
+        }
+
+        // جاهزة للحصاد
+        return `<div class="plot" onclick="harvest(${i})">🌾</div>`;
+      }).join("")}
+    </div>
+
+    <div class="task">
+      🌱 ازرع القمح وانتظر حتى يجهز للحصاد
+    </div>
+  </div>
+  `;
+};
+
+/* ===============================
+   PLANT WHEAT
+================================ */
+function plant(index){
+  if(plots[index] !== 0) return;
+
+  plots[index] = 1;
+  growTimers[index] = Date.now() + WHEAT_TIME;
+
+  saveFarm();
+  refreshHome();
+}
+
+/* ===============================
+   CHECK GROWTH
+================================ */
+function checkGrowth(){
+  let now = Date.now();
+  let changed = false;
+
+  plots.forEach((state,i)=>{
+    if(state === 1 && growTimers[i] <= now){
+      plots[i] = 2; // جاهز للحصاد
+      growTimers[i] = null;
+      changed = true;
+    }
+  });
+
+  if(changed){
+    saveFarm();
+    refreshHome();
+  }
+}
+
+/* ===============================
+   SAVE & REFRESH
+================================ */
+function saveFarm(){
+  localStorage.setItem("plots", JSON.stringify(plots));
+  localStorage.setItem("growTimers", JSON.stringify(growTimers));
+}
+
+function refreshHome(){
+  if(currentPage === "home"){
+    document.getElementById("content").innerHTML = pages.home();
+  }
+}
+
+/* ===============================
+   AUTO CHECK TIMER
+================================ */
+setInterval(checkGrowth, 1000);
+  </script>
+  <script>
+/* ===============================
+   PHASE 1 – HARVEST & TASKS
+================================ */
+
+// نظام المهام
+let taskState = JSON.parse(
+  localStorage.getItem("taskState") ||
+  JSON.stringify({
+    type: "harvest", // harvest / plant
+    target: 5,
+    progress: 0,
+    reward: 10
+  })
+);
+
+/* ===============================
+   HARVEST
+================================ */
+function harvest(index){
+  if(plots[index] !== 2) return;
+
+  // إعادة الأرض فاضية
+  plots[index] = 0;
+
+  // نقاط الحصاد الأساسية
+  points += 1;
+
+  // تحديث المهمة
+  if(taskState.type === "harvest"){
+    taskState.progress += 1;
+    if(taskState.progress >= taskState.target){
+      points += taskState.reward;
+      nextTask();
+    }
+  }
+
+  saveAll();
+  refreshHome();
+}
+
+/* ===============================
+   NEXT TASK
+================================ */
+function nextTask(){
+  // التبديل بين مهام الزراعة والحصاد
+  if(taskState.type === "harvest"){
+    taskState = {
+      type: "plant",
+      target: 3,
+      progress: 0,
+      reward: 5
+    };
+  }else{
+    taskState = {
+      type: "harvest",
+      target: 5,
+      progress: 0,
+      reward: 10
+    };
+  }
+}
+
+/* ===============================
+   OVERRIDE TASK DISPLAY
+================================ */
+const oldHome = pages.home;
+pages.home = function(){
+  let html = oldHome();
+
+  let taskText =
+    taskState.type === "harvest"
+    ? `احصد ${taskState.target} مرات`
+    : `ازرع ${taskState.target} مرات`;
+
+  html = html.replace(
+    '</div>\n\n    <div class="task">',
+    `</div>
+    <div class="task">
+      🎯 المهمة الحالية: <span>${taskText}</span><br>
+      التقدم: ${taskState.progress} / ${taskState.target}<br>
+      المكافأة: ${taskState.reward} نقطة
+    </div>`
+  );
+
+  return html;
+};
+
+/* ===============================
+   PLANT TASK TRACKING
+================================ */
+const oldPlant = plant;
+plant = function(index){
+  if(plots[index] !== 0) return;
+
+  plots[index] = 1;
+  growTimers[index] = Date.now() + WHEAT_TIME;
+
+  if(taskState.type === "plant"){
+    taskState.progress += 1;
+    if(taskState.progress >= taskState.target){
+      points += taskState.reward;
+      nextTask();
+    }
+  }
+
+  saveAll();
+  refreshHome();
+};
+
+/* ===============================
+   SAVE ALL
+================================ */
+function saveAll(){
+  localStorage.setItem("plots", JSON.stringify(plots));
+  localStorage.setItem("growTimers", JSON.stringify(growTimers));
+  localStorage.setItem("points", points);
+  localStorage.setItem("taskState", JSON.stringify(taskState));
+}
+  </script>
