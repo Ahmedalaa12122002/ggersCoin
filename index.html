@@ -8,107 +8,83 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:#000;color:#fff;overflow:hidden}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:system-ui;
+}
+
+body{
+  background:#000;
+  color:#fff;
+  overflow:hidden;
+}
 
 /* ===== CONTENT ===== */
 #content{
   height:calc(100vh - 110px);
   padding:20px;
   overflow:hidden;
+  transition:opacity .3s ease, transform .3s ease;
 }
 
-/* ===== NAV ===== */
+/* ===== NAV BAR ===== */
 .nav-bar{
   position:fixed;
   bottom:0;
   width:100%;
   height:110px;
-  background:rgba(15,15,15,.96);
+  background:rgba(15,15,15,0.96);
+  backdrop-filter:blur(12px);
   display:flex;
   justify-content:space-around;
   align-items:center;
   border-top:1px solid #222;
 }
 
+/* ===== BUTTON ===== */
 .nav-btn{
   width:56px;
   height:56px;
   border-radius:50%;
   background:#141414;
-  color:#aaa;
-  font-size:11px;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
+  color:#aaa;
+  font-size:11px;
+  transition:all .25s ease;
 }
 
-.nav-btn .icon{font-size:18px}
+.nav-btn .icon{
+  font-size:18px;
+  margin-bottom:3px;
+}
 
+/* ===== HOME BUTTON (BIGGER) ===== */
 .home-btn{
   width:78px;
   height:78px;
   margin-top:-18px;
 }
-.home-btn .icon{font-size:30px}
 
+.home-btn .icon{
+  font-size:30px;
+}
+
+/* ===== ACTIVE (YELLOW GLOW SOFT) ===== */
 .nav-btn.active{
   color:#fff;
-  box-shadow:0 0 18px rgba(255,200,0,.35);
+  box-shadow:
+    0 0 16px rgba(255,200,0,.35),
+    0 0 28px rgba(255,200,0,.15);
 }
 
-/* ===== FARM ===== */
-.card{
-  background:#0e0e0e;
-  border-radius:20px;
-  padding:18px;
-  margin-bottom:15px;
-}
-
-.header{
-  display:flex;
-  justify-content:space-between;
-  font-size:14px;
-  margin-bottom:10px;
-}
-
-.center{text-align:center}
-
-.farm{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  margin-top:15px;
-}
-
-.plot{
-  background:#1a1a1a;
-  border-radius:14px;
-  height:90px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-  cursor:pointer;
-}
-
-.task{
-  background:#111;
-  border-radius:14px;
-  padding:14px;
-  margin-top:12px;
-  font-size:14px;
-}
-.task span{color:#ffcc00}
-
-/* ===== BTN ===== */
-.btn{
-  background:#1a1a1a;
-  border-radius:14px;
-  padding:12px;
-  text-align:center;
-  margin-top:10px;
+/* ===== PRESS EFFECT ===== */
+.nav-btn:active{
+  transform:scale(.92);
 }
 </style>
 </head>
@@ -117,99 +93,234 @@ body{background:#000;color:#fff;overflow:hidden}
 
 <div id="content"></div>
 
-<!-- ===== NAV ===== -->
+<!-- ===== NAV BAR (7 MENUS – محفوظة) ===== -->
 <div class="nav-bar">
-  <div class="nav-btn" onclick="go('settings',this)">⚙️<div>الإعدادات</div></div>
-  <div class="nav-btn" onclick="go('vip',this)">⭐<div>VIP</div></div>
-  <div class="nav-btn" onclick="go('wallet',this)">💼<div>المحفظة</div></div>
-  <div class="nav-btn home-btn active" onclick="go('home',this)">🏠<div>الرئيسية</div></div>
-  <div class="nav-btn" onclick="go('tasks',this)">📋<div>المهام</div></div>
-  <div class="nav-btn" onclick="go('ref',this)">👥<div>الإحالة</div></div>
-  <div class="nav-btn" onclick="go('logs',this)">🧾<div>السجلات</div></div>
-</div>
 
+  <div class="nav-btn" onclick="go('settings',this)">
+    <div class="icon">⚙️</div>
+    الإعدادات
+  </div>
+
+  <div class="nav-btn" onclick="go('vip',this)">
+    <div class="icon">⭐</div>
+    VIP
+  </div>
+
+  <div class="nav-btn" onclick="go('wallet',this)">
+    <div class="icon">💼</div>
+    المحفظة
+  </div>
+
+  <div class="nav-btn home-btn active" onclick="go('home',this)">
+    <div class="icon">🏠</div>
+    الرئيسية
+  </div>
+
+  <div class="nav-btn" onclick="go('tasks',this)">
+    <div class="icon">📋</div>
+    المهام
+  </div>
+
+  <div class="nav-btn" onclick="go('ref',this)">
+    <div class="icon">👥</div>
+    الإحالة
+  </div>
+
+  <div class="nav-btn" onclick="go('logs',this)">
+    <div class="icon">🧾</div>
+    السجلات
+  </div>
+
+</div>
 <script>
 Telegram.WebApp.ready();
 
 /* ===== STATE ===== */
-let points = Number(localStorage.getItem("points")||0);
-let plots = JSON.parse(localStorage.getItem("plots")||"[0,0,0,0]");
-let task = localStorage.getItem("task") || "ازرع أرض واحدة";
+let currentPage = 'home';
 
-/* ===== HOME ===== */
-function renderHome(){
-document.getElementById("content").innerHTML=`
-<div class="card">
-  <div class="header">
-    <div>👑 VIP: 0</div>
-    <div>💰 النقاط: ${points}</div>
-  </div>
+/* ===== PAGE CONTENT ===== */
+const pages = {
+  home: `
+    <div style="text-align:center;margin-top:40px">
+      <h2>🌾 WinHive</h2>
+      <p style="opacity:.6;margin-top:10px">
+        ابدأ رحلتك في المزرعة
+      </p>
+    </div>
+  `,
 
-  <div class="center">
-    <h2>🌾 WinHive</h2>
-  </div>
+  tasks: `
+    <div style="text-align:center;margin-top:40px">
+      <h3>📋 المهام</h3>
+      <p style="opacity:.6">قريبًا…</p>
+    </div>
+  `,
 
-  <div class="farm">
-    ${plots.map((p,i)=>`
-      <div class="plot" onclick="action(${i})">
-        ${p==0?"🟫":p==1?"🌱":"🌾"}
-      </div>`).join("")}
-  </div>
+  wallet: `
+    <div style="text-align:center;margin-top:40px">
+      <h3>💼 المحفظة</h3>
+      <p style="opacity:.6">رصيدك سيظهر هنا</p>
+    </div>
+  `,
 
-  <div class="task">
-    🎯 المهمة: <span>${task}</span>
-  </div>
-</div>
-`;
+  vip: `
+    <div style="text-align:center;margin-top:40px">
+      <h3>⭐ VIP</h3>
+      <p style="opacity:.6">مستويات VIP من 1 إلى 10</p>
+    </div>
+  `,
+
+  ref: `
+    <div style="text-align:center;margin-top:40px">
+      <h3>👥 الإحالة</h3>
+      <p style="opacity:.6">شارك رابطك</p>
+    </div>
+  `,
+
+  logs: `
+    <div style="text-align:center;margin-top:40px">
+      <h3>🧾 السجلات</h3>
+      <p style="opacity:.6">نشاطك السابق</p>
+    </div>
+  `,
+
+  settings: `
+    <div style="text-align:center;margin-top:40px">
+      <h3>⚙️ الإعدادات</h3>
+      <p style="opacity:.6">تحكم في حسابك</p>
+    </div>
+  `
+};
+
+/* ===== NAV FUNCTION ===== */
+function go(page, el){
+  if(page === currentPage) return;
+
+  currentPage = page;
+
+  document.querySelectorAll('.nav-btn')
+    .forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+
+  const c = document.getElementById('content');
+  c.style.opacity = 0;
+  c.style.transform = 'translateY(10px)';
+
+  setTimeout(() => {
+    c.innerHTML = pages[page];
+    c.style.opacity = 1;
+    c.style.transform = 'translateY(0)';
+  }, 180);
 }
 
-/* ===== ACTION ===== */
-function action(i){
- if(plots[i]==0){
-   plots[i]=1;
-   checkTask("plant");
- }
- else if(plots[i]==1){
-   plots[i]=2;
- }
- else{
-   plots[i]=0;
-   points+=2;
-   checkTask("harvest");
- }
- save();
- renderHome();
-}
-
-/* ===== TASK LOGIC ===== */
-function checkTask(type){
- if(task.includes("ازرع") && type=="plant"){
-   points+=1;
-   task="احصد محصول واحد";
- }
- else if(task.includes("احصد") && type=="harvest"){
-   points+=2;
-   task="ازرع أرض واحدة";
- }
-}
-
-/* ===== SAVE ===== */
-function save(){
- localStorage.setItem("points",points);
- localStorage.setItem("plots",JSON.stringify(plots));
- localStorage.setItem("task",task);
-}
-
-/* ===== NAV ===== */
-function go(page,el){
- document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
- el.classList.add("active");
- if(page=="home") renderHome();
- else document.getElementById("content").innerHTML=`<div class="center">${page}</div>`;
-}
-
-renderHome();
+/* ===== LOAD HOME FIRST ===== */
+document.getElementById('content').innerHTML = pages.home;
 </script>
+<script>
+/* ===============================
+   FARM GAME STATE
+================================ */
+let points = Number(localStorage.getItem("points") || 0);
+let plots  = JSON.parse(localStorage.getItem("plots") || "[0,0,0,0]");
+let task   = localStorage.getItem("task") || "ازرع أرض واحدة";
+let timer  = null;
+let growIndex = null;
 
-</body>
-</html>
+/* ===============================
+   FARM PAGE TEMPLATE
+================================ */
+function farmPage(){
+  return `
+  <div class="card">
+    <div class="header">
+      <div>💰 النقاط: ${points}</div>
+      <div>👑 VIP: 0</div>
+    </div>
+
+    <div class="center" style="margin-top:10px">
+      <h2>🌾 WinHive</h2>
+    </div>
+
+    <div class="farm">
+      ${plots.map((p,i)=>`
+        <div class="plot" onclick="plotAction(${i})">
+          ${p===0?"🟫":p===1?"🌱":"🌾"}
+        </div>
+      `).join("")}
+    </div>
+
+    <div class="task">
+      🎯 المهمة الحالية:
+      <br><span>${task}</span>
+    </div>
+  </div>
+  `;
+}
+
+/* ===============================
+   PLOT ACTION
+================================ */
+function plotAction(i){
+  if(plots[i] === 0){
+    plots[i] = 1;
+    startGrow(i);
+    checkTask("plant");
+  }
+  else if(plots[i] === 2){
+    plots[i] = 0;
+    points += 2;
+    checkTask("harvest");
+  }
+  saveState();
+  refreshHome();
+}
+
+/* ===============================
+   GROW TIMER
+================================ */
+function startGrow(i){
+  if(timer) return;
+  growIndex = i;
+  timer = setTimeout(()=>{
+    plots[growIndex] = 2;
+    timer = null;
+    saveState();
+    refreshHome();
+  }, 15000); // 15 ثانية (تجربة)
+}
+
+/* ===============================
+   TASK SYSTEM
+================================ */
+function checkTask(type){
+  if(task.includes("ازرع") && type==="plant"){
+    points += 1;
+    task = "احصد محصول واحد";
+  }
+  else if(task.includes("احصد") && type==="harvest"){
+    points += 2;
+    task = "ازرع أرض واحدة";
+  }
+}
+
+/* ===============================
+   SAVE & REFRESH
+================================ */
+function saveState(){
+  localStorage.setItem("points", points);
+  localStorage.setItem("plots", JSON.stringify(plots));
+  localStorage.setItem("task", task);
+}
+
+function refreshHome(){
+  if(currentPage === "home"){
+    document.getElementById("content").innerHTML = farmPage();
+  }
+}
+
+/* ===============================
+   OVERRIDE HOME PAGE
+================================ */
+pages.home = farmPage();
+document.getElementById("content").innerHTML = pages.home;
+</script>
