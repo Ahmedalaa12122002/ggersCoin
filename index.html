@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,28 +21,23 @@ body{
   overflow:hidden;
 }
 
-/* ================= CONTENT ================= */
+/* ===== CONTENT ===== */
 #content{
-  height:calc(100vh - 95px);
+  height:calc(100vh - 100px);
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:24px;
-  animation:pageFade 0.4s ease;
+  transition:opacity .35s ease, transform .35s ease;
 }
 
-@keyframes pageFade{
-  from{opacity:0; transform:translateY(12px);}
-  to{opacity:1; transform:translateY(0);}
-}
-
-/* ================= NAV BAR ================= */
+/* ===== NAV BAR ===== */
 .nav-bar{
   position:fixed;
   bottom:0;
   width:100%;
-  height:95px;
-  background:rgba(18,18,18,0.95);
+  height:100px;
+  background:rgba(15,15,15,0.96);
   backdrop-filter:blur(12px);
   display:flex;
   justify-content:space-around;
@@ -50,12 +45,12 @@ body{
   border-top:1px solid #222;
 }
 
-/* ===== NORMAL BUTTON ===== */
+/* ===== BUTTON ===== */
 .nav-btn{
-  width:56px;
-  height:56px;
+  width:58px;
+  height:58px;
   border-radius:50%;
-  background:#151515;
+  background:#141414;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -70,39 +65,29 @@ body{
   margin-bottom:3px;
 }
 
-/* ===== ACTIVE ===== */
-.nav-btn.active{
-  background:#f5c400;
-  color:#000;
-  box-shadow:0 0 18px rgba(245,196,0,.55);
-}
-
-/* ===== HOME BUTTON (ONLY BIGGER) ===== */
+/* ===== HOME BUTTON (BIGGER ONLY) ===== */
 .home-btn{
   width:82px;
   height:82px;
   margin-top:-18px;
-  font-size:13px;
 }
 
 .home-btn .icon{
   font-size:32px;
 }
 
-/* ===== PRESS EFFECT ===== */
-.nav-btn:active{
-  transform:scale(.92);
-}
-
-/* ===== PULSE GLOW ===== */
-@keyframes pulse{
-  0%{box-shadow:0 0 14px rgba(245,196,0,.4);}
-  50%{box-shadow:0 0 26px rgba(245,196,0,.75);}
-  100%{box-shadow:0 0 14px rgba(245,196,0,.4);}
-}
-
+/* ===== ACTIVE (SOFT YELLOW GLOW) ===== */
 .nav-btn.active{
-  animation:pulse 2s infinite;
+  color:#fff;
+  background:#141414;
+  box-shadow:
+    0 0 18px rgba(255,200,0,.35),
+    0 0 32px rgba(255,200,0,.15);
+}
+
+/* ===== PRESS FEEDBACK ===== */
+.nav-btn:active{
+  transform:scale(.93);
 }
 </style>
 </head>
@@ -111,7 +96,7 @@ body{
 
 <div id="content">الرئيسية</div>
 
-<!-- ================= NAV ================= -->
+<!-- ===== NAV ORDER (RIGHT ➜ LEFT) ===== -->
 <div class="nav-bar">
 
   <div class="nav-btn" onclick="go('الإعدادات',this)">
@@ -160,15 +145,15 @@ function go(name,el){
 
   const c=document.getElementById('content');
   c.style.opacity=0;
-  c.style.transform='translateY(12px)';
+  c.style.transform='translateY(10px)';
 
   setTimeout(()=>{
     c.innerText=name;
     c.style.opacity=1;
     c.style.transform='translateY(0)';
-  },150);
+  },180);
 }
 </script>
 
 </body>
-</html>
+                         </html>
