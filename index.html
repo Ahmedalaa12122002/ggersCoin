@@ -5,251 +5,220 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GgersCoin</title>
 
+<!-- Telegram Mini App -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-:root{
-  --gold:#FFD600;
-  --dark:#000;
-  --btn:#141414;
-}
-
+/* ================== RESET ================== */
 *{
+  margin:0;
+  padding:0;
   box-sizing:border-box;
   -webkit-tap-highlight-color: transparent;
-  user-select:none;
 }
-
-body{
-  margin:0;
-  background:#000;
-  color:#fff;
-  font-family: system-ui, -apple-system;
+html,body{
+  height:100%;
   overflow:hidden;
+  background:#000;
+  font-family:system-ui, sans-serif;
+  color:#fff;
 }
 
-/* ================== الصفحات ================== */
-.page{
-  position:absolute;
-  inset:0;
-  padding-bottom:120px;
-  opacity:0;
-  transform:translateX(30px);
-  pointer-events:none;
-  transition:
-    transform .35s cubic-bezier(.4,0,.2,1),
-    opacity .25s ease;
+/* ================== APP ================== */
+.app{
+  height:100%;
+  display:flex;
+  flex-direction:column;
 }
 
-.page.active{
-  opacity:1;
-  transform:translateX(0);
-  pointer-events:auto;
+/* ================== CONTENT ================== */
+.content{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  font-weight:bold;
 }
 
-.page.exit{
-  opacity:0;
-  transform:translateX(-30px);
-}
-
-/* ================== العنوان ================== */
-.header{
-  text-align:center;
-  margin-top:70px;
-  font-size:24px;
-  opacity:.95;
-}
-
-/* ================== شريط القوائم ================== */
+/* ================== NAV BAR ================== */
 .nav{
   position:fixed;
   bottom:0;
   left:0;
-  width:100%;
-  height:95px;
-  background:#0b0b0b;
+  right:0;
+  height:82px;
+  background:#111;
   display:flex;
   justify-content:space-around;
   align-items:center;
-  padding:10px 6px;
+  border-top:1px solid #222;
+  contain:layout;
 }
 
-/* ================== زر دائري ================== */
+/* ================== BUTTON ================== */
 .btn{
-  width:62px;
-  height:62px;
+  width:52px;
+  height:52px;
   border-radius:50%;
-  background:var(--btn);
+  background:#1a1a1a;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  color:#fff;
   font-size:11px;
+  color:#bbb;
+  cursor:pointer;
   position:relative;
-  overflow:hidden;
-  box-shadow:0 6px 12px rgba(0,0,0,.4);
   transition:
-    transform .18s cubic-bezier(.34,1.56,.64,1),
-    box-shadow .18s,
-    background .18s;
+    background .25s ease,
+    box-shadow .25s ease,
+    transform .15s ease;
+  overflow:hidden;
 }
 
-/* أيقونة */
-.icon{
-  font-size:21px;
-  margin-bottom:2px;
+/* Hover */
+.btn:hover{
+  background:#222;
 }
 
-.label{
-  font-size:10px;
-}
-
-/* ================== تأثير الضغط ================== */
+/* Active press (NO MOVE SCREEN) */
 .btn:active{
-  transform:scale(.82);
-  box-shadow:
-    0 0 0 rgba(0,0,0,0),
-    inset 0 0 0 2px rgba(255,255,255,.15);
+  transform:scale(.9);
+  box-shadow:0 0 12px rgba(255,215,0,.35);
 }
 
-/* ================== Ripple دائري ================== */
+/* Ripple effect */
 .btn::after{
   content:"";
   position:absolute;
-  inset:-10%;
+  width:100%;
+  height:100%;
   border-radius:50%;
-  background:radial-gradient(circle, rgba(255,255,255,.35) 10%, transparent 60%);
+  background:rgba(255,215,0,.25);
   transform:scale(0);
   opacity:0;
-  transition:transform .4s ease, opacity .4s ease;
 }
-
 .btn:active::after{
-  transform:scale(1);
-  opacity:1;
+  animation:ripple .45s ease-out;
+}
+@keyframes ripple{
+  0%{transform:scale(0);opacity:.6;}
+  100%{transform:scale(1.6);opacity:0;}
 }
 
-/* ================== زر الرئيسية ================== */
+/* Icon */
+.icon{
+  font-size:18px;
+  margin-bottom:3px;
+}
+
+/* ================== MAIN BUTTON ================== */
 .btn.main{
-  width:82px;
-  height:82px;
-  background:var(--gold);
+  width:68px;
+  height:68px;
+  background:#FFD700;
   color:#000;
-  transform:translateY(-22px);
-  box-shadow:
-    0 0 0 rgba(0,0,0,0),
-    0 14px 30px rgba(255,214,0,.45);
-  animation:pulse 2.4s infinite;
+  font-weight:bold;
+  box-shadow:0 0 18px rgba(255,215,0,.6);
+  margin-top:-22px; /* ثابت بدون تحريك */
+  z-index:2;
+  animation:pulse 2.2s infinite;
+}
+.btn.main .icon{
+  font-size:22px;
 }
 
-/* إيقاف النبض عند الضغط */
-.btn.main:active{
-  animation:none;
-  transform:translateY(-22px) scale(.82);
-}
-
-/* ================== Pulse ذهبي ================== */
+/* Pulse animation */
 @keyframes pulse{
-  0%{box-shadow:0 0 0 0 rgba(255,214,0,.45)}
-  70%{box-shadow:0 0 0 18px rgba(255,214,0,0)}
-  100%{box-shadow:0 0 0 0 rgba(255,214,0,0)}
+  0%{box-shadow:0 0 12px rgba(255,215,0,.6);}
+  50%{box-shadow:0 0 26px rgba(255,215,0,.95);}
+  100%{box-shadow:0 0 12px rgba(255,215,0,.6);}
+}
+
+/* ================== ACTIVE STATE ================== */
+.btn.active{
+  background:#222;
+  color:#FFD700;
+}
+
+/* ================== HIDE SCROLL SHIFT ================== */
+body{
+  touch-action:manipulation;
 }
 </style>
 </head>
 
 <body>
+<div class="app">
 
-<!-- ================== الصفحات ================== -->
-<div id="home" class="page active">
-  <div class="header">🏠 الرئيسية</div>
-</div>
-
-<div id="wallet" class="page">
-  <div class="header">💼 المحفظة</div>
-</div>
-
-<div id="tasks" class="page">
-  <div class="header">📋 المهام</div>
-</div>
-
-<div id="ref" class="page">
-  <div class="header">👥 الإحالة</div>
-</div>
-
-<div id="logs" class="page">
-  <div class="header">🧾 السجلات</div>
-</div>
-
-<div id="vip" class="page">
-  <div class="header">⭐ VIP</div>
-</div>
-
-<div id="settings" class="page">
-  <div class="header">⚙️ الإعدادات</div>
-</div>
-
-<!-- ================== القوائم ================== -->
-<div class="nav">
-
-  <div class="btn" onclick="openPage('settings')">
-    <div class="icon">⚙️</div>
-    <div class="label">الإعدادات</div>
+  <!-- CONTENT -->
+  <div class="content" id="page">
+    الرئيسية
   </div>
 
-  <div class="btn" onclick="openPage('vip')">
-    <div class="icon">⭐</div>
-    <div class="label">VIP</div>
-  </div>
+  <!-- NAV -->
+  <div class="nav">
 
-  <div class="btn" onclick="openPage('wallet')">
-    <div class="icon">💼</div>
-    <div class="label">المحفظة</div>
-  </div>
+    <!-- الإعدادات -->
+    <div class="btn" onclick="go('الإعدادات')">
+      <div class="icon">⚙️</div>
+      الإعدادات
+    </div>
 
-  <div class="btn main" onclick="openPage('home')">
-    <div class="icon">🏠</div>
-  </div>
+    <!-- VIP -->
+    <div class="btn" onclick="go('VIP')">
+      <div class="icon">⭐</div>
+      VIP
+    </div>
 
-  <div class="btn" onclick="openPage('tasks')">
-    <div class="icon">📋</div>
-    <div class="label">المهام</div>
-  </div>
+    <!-- المحفظة -->
+    <div class="btn" onclick="go('المحفظة')">
+      <div class="icon">💼</div>
+      المحفظة
+    </div>
 
-  <div class="btn" onclick="openPage('ref')">
-    <div class="icon">👥</div>
-    <div class="label">الإحالة</div>
-  </div>
+    <!-- الرئيسية -->
+    <div class="btn main active" onclick="go('الرئيسية')">
+      <div class="icon">🏠</div>
+      الرئيسية
+    </div>
 
-  <div class="btn" onclick="openPage('logs')">
-    <div class="icon">🧾</div>
-    <div class="label">السجلات</div>
-  </div>
+    <!-- المهام -->
+    <div class="btn" onclick="go('المهام')">
+      <div class="icon">📋</div>
+      المهام
+    </div>
 
+    <!-- الإحالة -->
+    <div class="btn" onclick="go('الإحالة')">
+      <div class="icon">👥</div>
+      الإحالة
+    </div>
+
+    <!-- السجلات -->
+    <div class="btn" onclick="go('السجلات')">
+      <div class="icon">🧾</div>
+      السجلات
+    </div>
+
+  </div>
 </div>
 
 <script>
-Telegram.WebApp.ready();
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-let currentPage = "home";
+function go(name){
+  document.getElementById("page").innerText = name;
 
-function openPage(id){
-  if(id === currentPage) return;
+  document.querySelectorAll(".btn").forEach(b=>b.classList.remove("active"));
+  event.currentTarget.classList.add("active");
 
-  const oldPage = document.getElementById(currentPage);
-  const newPage = document.getElementById(id);
-
-  oldPage.classList.remove("active");
-  oldPage.classList.add("exit");
-
-  setTimeout(()=>{
-    oldPage.classList.remove("exit");
-  },300);
-
-  newPage.classList.add("active");
-  currentPage = id;
+  if(tg.HapticFeedback){
+    tg.HapticFeedback.impactOccurred("light");
+  }
 }
 </script>
-
 </body>
   </html>
