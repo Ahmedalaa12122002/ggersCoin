@@ -1,7 +1,7 @@
 from telebot import TeleBot, types
 import os
 
-BOT_TOKEN = "8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ"
+BOT_TOKEN = "8440388547:AAF8Ftiu7Qmi1GLfHzViIRAzgZE7khvvXC8"
 WEB_APP_URL = "https://ggerscoin-production.up.railway.app/"
 
 bot = TeleBot(BOT_TOKEN)
