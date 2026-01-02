@@ -8,90 +8,149 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:#000;color:#fff;overflow:hidden}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:system-ui;
+}
+
+body{
+  background:#000;
+  color:#fff;
+  overflow:hidden;
+}
 
 /* ===== CONTENT ===== */
 #content{
   height:calc(100vh - 100px);
-  overflow-y:auto;
-  padding:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:opacity .35s ease, transform .35s ease;
 }
 
-/* ===== FARM CARD ===== */
+/* ===== MAIN CARD ===== */
 .card{
-  background:#111;
-  border-radius:18px;
-  padding:18px;
-  margin-bottom:16px;
-  box-shadow:0 0 25px rgba(255,200,0,.08);
+  width:92%;
+  max-width:420px;
+  background:#0f0f0f;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 0 40px rgba(0,0,0,.8);
+  text-align:center;
+}
+
+/* ===== HEADER ===== */
+.header{
+  display:flex;
+  justify-content:space-between;
+  font-size:14px;
+  opacity:.85;
 }
 
 .title{
-  text-align:center;
   font-size:26px;
-  font-weight:bold;
-  margin-bottom:10px;
+  margin:15px 0;
 }
 
-.stats{
-  display:flex;
-  justify-content:space-between;
-  margin-top:10px;
-  font-size:14px;
-  color:#ccc;
+/* ===== FARM ===== */
+.crop{
+  font-size:46px;
+  margin:10px 0;
 }
 
-.big{
-  text-align:center;
-  font-size:34px;
-  margin:18px 0;
-}
-
-button{
-  width:100%;
+.btn{
+  margin-top:15px;
   padding:14px;
-  border:none;
-  border-radius:14px;
-  font-size:16px;
-  background:#222;
+  border-radius:16px;
+  background:#161616;
   color:#fff;
+  border:none;
+  font-size:16px;
+  width:100%;
+  cursor:pointer;
+  transition:.25s;
 }
 
-button.primary{
-  background:#141414;
+.btn.glow{
   box-shadow:0 0 18px rgba(255,200,0,.35);
 }
 
-button:disabled{
-  opacity:.5;
+.btn:active{
+  transform:scale(.97);
+}
+
+.timer{
+  margin-top:12px;
+  opacity:.8;
 }
 
 .progress{
-  height:12px;
+  height:8px;
   background:#222;
-  border-radius:10px;
+  border-radius:6px;
   overflow:hidden;
   margin-top:12px;
 }
-.progress span{
-  display:block;
+
+.progress div{
   height:100%;
   width:0%;
-  background:linear-gradient(90deg,#ffcc00,#ff9900);
+  background:linear-gradient(90deg,#ffcc00,#ff9f00);
 }
 
-/* ===== TOAST ===== */
-#toast{
+/* ===== NAV BAR ===== */
+.nav-bar{
   position:fixed;
-  bottom:120px;
-  left:50%;
-  transform:translateX(-50%);
+  bottom:0;
+  width:100%;
+  height:100px;
+  background:rgba(15,15,15,0.96);
+  backdrop-filter:blur(12px);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  border-top:1px solid #222;
+}
+
+.nav-btn{
+  width:58px;
+  height:58px;
+  border-radius:50%;
   background:#141414;
-  padding:12px 20px;
-  border-radius:12px;
-  box-shadow:0 0 20px rgba(255,200,0,.4);
-  display:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#aaa;
+  font-size:11px;
+  transition:.25s;
+}
+
+.nav-btn .icon{
+  font-size:20px;
+}
+
+.home-btn{
+  width:82px;
+  height:82px;
+  margin-top:-18px;
+}
+
+.home-btn .icon{
+  font-size:30px;
+}
+
+.nav-btn.active{
+  color:#fff;
+  box-shadow:
+    0 0 18px rgba(255,200,0,.35),
+    0 0 32px rgba(255,200,0,.15);
+}
+
+.nav-btn:active{
+  transform:scale(.92);
 }
 </style>
 </head>
@@ -99,110 +158,96 @@ button:disabled{
 <body>
 
 <div id="content">
-
-  <div class="card">
-    <div class="title">🌾 WinHive</div>
-
-    <div class="stats">
-      <div>💰 النقاط: <span id="points">0</span></div>
-      <div>👑 VIP: <span id="vip">0</span></div>
+  <div class="card" id="home">
+    <div class="header">
+      <div>VIP: <span id="vip">0</span> 👑</div>
+      <div>النقاط: <span id="points">0</span> 💰</div>
     </div>
 
-    <div class="big">
-      🌾 <span id="crop">0</span>
-    </div>
+    <div class="title">WinHive 🌾</div>
 
-    <button id="startBtn" class="primary">ابدأ الزراعة</button>
+    <div class="crop" id="crop">0 🌾</div>
 
-    <div id="timer" style="text-align:center;margin-top:10px;color:#aaa"></div>
+    <button class="btn glow" id="plantBtn" onclick="startFarm()">ابدأ الزراعة</button>
 
-    <button id="harvestBtn" style="margin-top:10px" disabled>احصد</button>
+    <div class="timer" id="timer">260 ثانية ⏳</div>
+
+    <button class="btn" onclick="harvest()">احصد</button>
 
     <div class="progress">
-      <span id="bar"></span>
+      <div id="bar"></div>
     </div>
   </div>
-
 </div>
 
-<div id="toast"></div>
+<!-- ===== NAV BAR ===== -->
+<div class="nav-bar">
+
+  <div class="nav-btn" onclick="go('الإعدادات',this)">⚙️<div>الإعدادات</div></div>
+  <div class="nav-btn" onclick="go('VIP',this)">⭐<div>VIP</div></div>
+  <div class="nav-btn" onclick="go('المحفظة',this)">💼<div>المحفظة</div></div>
+
+  <div class="nav-btn home-btn active" onclick="go('الرئيسية',this)">🏠<div>الرئيسية</div></div>
+
+  <div class="nav-btn" onclick="go('المهام',this)">📋<div>المهام</div></div>
+  <div class="nav-btn" onclick="go('الإحالة',this)">👥<div>الإحالة</div></div>
+  <div class="nav-btn" onclick="go('السجلات',this)">🧾<div>السجلات</div></div>
+
+</div>
 
 <script>
 Telegram.WebApp.ready();
 
-/* ===== STATE ===== */
-let points = Number(localStorage.getItem("points")||0);
-let crop = Number(localStorage.getItem("crop")||0);
-let vip = Number(localStorage.getItem("vip")||0);
-
+let time = 260;
 let farming = false;
-let duration = 300; // 5 دقائق
-let left = 0;
+let crops = 0;
 let interval;
 
-/* ===== UI ===== */
-function update(){
-  pointsEl.textContent = points;
-  cropEl.textContent = crop;
-  vipEl.textContent = vip;
-}
-const pointsEl=document.getElementById("points");
-const cropEl=document.getElementById("crop");
-const vipEl=document.getElementById("vip");
-const timerEl=document.getElementById("timer");
-const bar=document.getElementById("bar");
-const toast=document.getElementById("toast");
-
-update();
-
-/* ===== FARM ===== */
-document.getElementById("startBtn").onclick=()=>{
+function startFarm(){
   if(farming) return;
-  farming=true;
-  left=duration;
-  bar.style.width="0%";
-  document.getElementById("harvestBtn").disabled=true;
-
-  interval=setInterval(()=>{
-    left--;
-    let done=((duration-left)/duration)*100;
-    bar.style.width=done+"%";
-    timerEl.textContent="⏳ "+left+" ثانية";
-
-    if(left<=0){
+  farming = true;
+  time = 260;
+  document.getElementById("plantBtn").innerText="الزراعة جارية...";
+  interval = setInterval(()=>{
+    time--;
+    document.getElementById("timer").innerText=time+" ثانية ⏳";
+    document.getElementById("bar").style.width=((260-time)/260*100)+"%";
+    if(time<=0){
       clearInterval(interval);
-      timerEl.textContent="✔️ جاهز للحصاد";
-      document.getElementById("harvestBtn").disabled=false;
+      farming=false;
+      crops+=1;
+      document.getElementById("crop").innerText=crops+" 🌾";
+      document.getElementById("plantBtn").innerText="ابدأ الزراعة";
+      document.getElementById("timer").innerText="جاهز للحصاد ✅";
     }
   },1000);
-};
+}
 
-document.getElementById("harvestBtn").onclick=()=>{
-  farming=false;
-  let fakeCrop=100+Math.floor(Math.random()*200);
-  crop+=fakeCrop;
+function harvest(){
+  if(time>0) return;
+  document.getElementById("points").innerText =
+    parseInt(document.getElementById("points").innerText)+1;
+}
 
-  let realPoints=1;
-  points+=realPoints;
+function go(name,el){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
 
-  localStorage.setItem("crop",crop);
-  localStorage.setItem("points",points);
+  const c=document.getElementById('content');
+  c.style.opacity=0;
+  c.style.transform='translateY(10px)';
 
-  showToast("🌾 حصاد "+fakeCrop+" | 💰 +"+realPoints+" نقطة");
-
-  update();
-  bar.style.width="0%";
-  timerEl.textContent="";
-  document.getElementById("harvestBtn").disabled=true;
-};
-
-/* ===== TOAST ===== */
-function showToast(msg){
-  toast.textContent=msg;
-  toast.style.display="block";
-  setTimeout(()=>toast.style.display="none",2500);
+  setTimeout(()=>{
+    if(name!=="الرئيسية"){
+      c.innerHTML="<div class='card'><div class='title'>"+name+"</div><div style='opacity:.6'>قريبًا...</div></div>";
+    }else{
+      location.reload();
+    }
+    c.style.opacity=1;
+    c.style.transform='translateY(0)';
+  },200);
 }
 </script>
 
 </body>
-</html>
+  </html>
