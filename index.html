@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ggersCoin</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -13,70 +13,71 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* ❌ يمنع أي تحريك */
   background: #000;
   color: #fff;
   font-family: system-ui, -apple-system;
-  overflow: hidden;
 }
 
-/* ===== الصفحة ===== */
+/* ===== المحتوى ===== */
 #content {
   position: absolute;
   top: 0;
-  bottom: 90px;
+  bottom: 95px;
   left: 0;
   right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
-  font-weight: bold;
-  transition: opacity .35s ease, transform .35s ease;
-}
-
-.page-hide {
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
-.page-show {
+  font-size: 28px;
+  font-weight: 600;
   opacity: 1;
-  transform: translateX(0);
+  transition: opacity .25s ease;
 }
+
+.fade-out { opacity: 0; }
+.fade-in  { opacity: 1; }
 
 /* ===== شريط القوائم ===== */
 .nav {
   position: fixed;
-  bottom: 10px;
-  left: 10px;
-  right: 10px;
-  height: 70px;
-  background: rgba(20,20,20,.9);
-  border-radius: 35px;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  height: 76px;
+  background: #111;
+  border-radius: 38px;
   display: flex;
-  justify-content: space-around;
   align-items: center;
+  justify-content: space-around;
 }
 
 /* ===== زر ===== */
 .btn {
-  width: 56px;
-  height: 56px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #bbb;
-  font-size: 12px;
+  color: #aaa;
+  font-size: 11px;
   cursor: pointer;
-  transition: color .2s ease;
   position: relative;
+  transition: color .2s ease, transform .15s ease;
 }
 
-/* ===== الهالة الصفراء الثابتة ===== */
+/* تأثير الضغط */
+.btn:active {
+  transform: scale(0.95);
+}
+
+/* ===== الزر النشط ===== */
 .btn.active {
   color: #000;
 }
@@ -84,34 +85,48 @@ body {
 .btn.active::before {
   content: "";
   position: absolute;
-  width: 64px;
-  height: 64px;
-  background: #ffd400;
+  inset: -6px;
+  background: radial-gradient(circle, #e6c200 40%, transparent 70%);
   border-radius: 50%;
   z-index: -1;
-  box-shadow: 0 0 25px rgba(255,212,0,.8);
+  animation: pulse 2.5s infinite;
 }
 
-/* أيقونة */
+/* ===== زر الرئيسية ===== */
+.btn.home {
+  width: 64px;
+  height: 64px;
+  font-size: 12px;
+}
+
+.btn.home .icon {
+  font-size: 24px;
+}
+
+/* ===== أيقونة ===== */
 .icon {
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1;
 }
 
-/* اسم */
 .label {
   font-size: 10px;
   margin-top: 2px;
+}
+
+/* ===== Pulse خفيف ===== */
+@keyframes pulse {
+  0%   { opacity: .6; }
+  50%  { opacity: .9; }
+  100% { opacity: .6; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- المحتوى -->
-<div id="content" class="page-show">الرئيسية</div>
+<div id="content" class="fade-in">الرئيسية</div>
 
-<!-- القوائم -->
 <div class="nav">
 
   <div class="btn" onclick="go(this,'الإعدادات')">
@@ -129,7 +144,7 @@ body {
     <div class="label">المحفظة</div>
   </div>
 
-  <div class="btn active" onclick="go(this,'الرئيسية')">
+  <div class="btn home active" onclick="go(this,'الرئيسية')">
     <div class="icon">🏠</div>
     <div class="label">الرئيسية</div>
   </div>
@@ -159,25 +174,23 @@ const content = document.getElementById("content");
 
 function go(el, text) {
 
-  // انتقال خروج
-  content.classList.remove("page-show");
-  content.classList.add("page-hide");
-
   // إزالة التفعيل
   document.querySelectorAll(".btn").forEach(b => b.classList.remove("active"));
   el.classList.add("active");
 
-  // اهتزاز خفيف
+  // Fade فقط (بدون تحريك)
+  content.classList.remove("fade-in");
+  content.classList.add("fade-out");
+
   if (tg.HapticFeedback) {
-    tg.HapticFeedback.impactOccurred("light");
+    tg.HapticFeedback.impactOccurred("soft");
   }
 
-  // تغيير المحتوى بعد الانتقال
   setTimeout(() => {
     content.innerText = text;
-    content.classList.remove("page-hide");
-    content.classList.add("page-show");
-  }, 200);
+    content.classList.remove("fade-out");
+    content.classList.add("fade-in");
+  }, 180);
 }
 </script>
 
