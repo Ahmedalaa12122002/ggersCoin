@@ -2,168 +2,151 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>GgersCoin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ggersCoin</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-html,body{
-  height:100%;
-  background:#000;
-  color:#fff;
-  overflow:hidden;
-  font-family:system-ui,sans-serif;
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ===== CONTENT ===== */
-.content{
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:26px;
-  font-weight:bold;
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: system-ui, -apple-system;
+  overflow: hidden;
 }
 
-/* ===== NAV BAR ===== */
-.nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:86px;
-  background:#111;
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  border-top:1px solid #222;
+/* ===== الصفحة ===== */
+#content {
+  position: absolute;
+  top: 0;
+  bottom: 90px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: bold;
+  transition: opacity .35s ease, transform .35s ease;
 }
 
-/* ===== BUTTON ===== */
-.btn{
-  width:56px;
-  height:56px;
-  border-radius:50%;
-  background:#1a1a1a;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  font-size:11px;
-  color:#aaa;
-  position:relative;
-  overflow:hidden;
-  cursor:pointer;
-  transition:transform .15s ease;
+.page-hide {
+  opacity: 0;
+  transform: translateX(-30px);
 }
 
-/* Press scale */
-.btn:active{
-  transform:scale(.9);
+.page-show {
+  opacity: 1;
+  transform: translateX(0);
 }
 
-/* ICON */
-.icon{
-  font-size:18px;
-  margin-bottom:3px;
+/* ===== شريط القوائم ===== */
+.nav {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  height: 70px;
+  background: rgba(20,20,20,.9);
+  border-radius: 35px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }
 
-/* ===== RIPPLE EFFECT ===== */
-.btn::after{
-  content:"";
-  position:absolute;
-  width:140%;
-  height:140%;
-  border-radius:50%;
-  background:rgba(255,215,0,.45);
-  transform:scale(0);
-  opacity:0;
+/* ===== زر ===== */
+.btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #bbb;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color .2s ease;
+  position: relative;
 }
 
-.btn:active::after{
-  animation:ripple .45s ease-out;
+/* ===== الهالة الصفراء الثابتة ===== */
+.btn.active {
+  color: #000;
 }
 
-@keyframes ripple{
-  0%{transform:scale(0);opacity:.6;}
-  100%{transform:scale(1);opacity:0;}
+.btn.active::before {
+  content: "";
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  background: #ffd400;
+  border-radius: 50%;
+  z-index: -1;
+  box-shadow: 0 0 25px rgba(255,212,0,.8);
 }
 
-/* ===== ACTIVE BUTTON (HALO) ===== */
-.btn.active{
-  color:#FFD700;
+/* أيقونة */
+.icon {
+  font-size: 22px;
+  line-height: 1;
 }
 
-.btn.active::before{
-  content:"";
-  position:absolute;
-  inset:-8px;
-  border-radius:50%;
-  background:rgba(255,215,0,.35);
-  z-index:-1;
-  filter:blur(8px);
-}
-
-/* ===== MAIN BUTTON ===== */
-.btn.main{
-  width:68px;
-  height:68px;
-  margin-top:-22px;
-  z-index:2;
-}
-
-.btn.main .icon{
-  font-size:22px;
+/* اسم */
+.label {
+  font-size: 10px;
+  margin-top: 2px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="content" id="page">الرئيسية</div>
+<!-- المحتوى -->
+<div id="content" class="page-show">الرئيسية</div>
 
+<!-- القوائم -->
 <div class="nav">
 
   <div class="btn" onclick="go(this,'الإعدادات')">
     <div class="icon">⚙️</div>
-    الإعدادات
+    <div class="label">الإعدادات</div>
   </div>
 
   <div class="btn" onclick="go(this,'VIP')">
     <div class="icon">⭐</div>
-    VIP
+    <div class="label">VIP</div>
   </div>
 
   <div class="btn" onclick="go(this,'المحفظة')">
     <div class="icon">💼</div>
-    المحفظة
+    <div class="label">المحفظة</div>
   </div>
 
-  <div class="btn main active" onclick="go(this,'الرئيسية')">
+  <div class="btn active" onclick="go(this,'الرئيسية')">
     <div class="icon">🏠</div>
-    الرئيسية
+    <div class="label">الرئيسية</div>
   </div>
 
   <div class="btn" onclick="go(this,'المهام')">
     <div class="icon">📋</div>
-    المهام
+    <div class="label">المهام</div>
   </div>
 
   <div class="btn" onclick="go(this,'الإحالة')">
     <div class="icon">👥</div>
-    الإحالة
+    <div class="label">الإحالة</div>
   </div>
 
   <div class="btn" onclick="go(this,'السجلات')">
     <div class="icon">🧾</div>
-    السجلات
+    <div class="label">السجلات</div>
   </div>
 
 </div>
@@ -172,18 +155,29 @@ html,body{
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-function go(el,name){
-  document.getElementById("page").innerText = name;
+const content = document.getElementById("content");
 
-  document.querySelectorAll(".btn").forEach(b=>{
-    b.classList.remove("active");
-  });
+function go(el, text) {
 
+  // انتقال خروج
+  content.classList.remove("page-show");
+  content.classList.add("page-hide");
+
+  // إزالة التفعيل
+  document.querySelectorAll(".btn").forEach(b => b.classList.remove("active"));
   el.classList.add("active");
 
-  if(tg.HapticFeedback){
+  // اهتزاز خفيف
+  if (tg.HapticFeedback) {
     tg.HapticFeedback.impactOccurred("light");
   }
+
+  // تغيير المحتوى بعد الانتقال
+  setTimeout(() => {
+    content.innerText = text;
+    content.classList.remove("page-hide");
+    content.classList.add("page-show");
+  }, 200);
 }
 </script>
 
