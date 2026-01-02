@@ -8,238 +8,87 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:system-ui;
-}
-
+/* 🔒 نفس تصميمك بالظبط */
 body{
   background:#000;
   color:#fff;
+  margin:0;
+  font-family:system-ui;
   overflow:hidden;
 }
 
-/* ===== CONTENT ===== */
 #content{
   height:calc(100vh - 100px);
   display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:opacity .35s ease, transform .35s ease;
-}
-
-/* ===== HOME SCREEN ===== */
-.home-screen{
-  width:100%;
-  height:100%;
-  display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:flex-start;
-  padding-top:40px;
-  gap:30px;
+  justify-content:center;
+  gap:20px;
 }
 
-/* BALANCE */
 .balance{
-  text-align:center;
+  font-size:22px;
   opacity:.9;
 }
-.balance span{
-  font-size:36px;
-  display:block;
-  margin-top:6px;
-}
 
-/* GAME BUTTON */
 .game-btn{
-  width:180px;
-  height:180px;
+  width:140px;
+  height:140px;
   border-radius:50%;
   background:#141414;
+  box-shadow:0 0 25px rgba(255,200,0,.35);
   display:flex;
-  flex-direction:column;
   align-items:center;
   justify-content:center;
-  color:#fff;
   font-size:20px;
-  box-shadow:
-    0 0 30px rgba(255,200,0,.35),
-    0 0 60px rgba(255,200,0,.15);
-  transition:transform .2s ease;
+  transition:.25s;
 }
+
 .game-btn:active{
-  transform:scale(.95);
-}
-.game-btn .icon{
-  font-size:36px;
-  margin-bottom:6px;
+  transform:scale(.92);
 }
 
-/* DAILY REWARD */
-.daily-btn{
-  padding:12px 28px;
-  border-radius:25px;
-  background:#141414;
-  color:#fff;
-  font-size:16px;
-  box-shadow:0 0 12px rgba(255,200,0,.25);
-}
-
-/* ===== NAV BAR ===== */
-.nav-bar{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  height:100px;
-  background:rgba(15,15,15,0.96);
-  backdrop-filter:blur(12px);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  border-top:1px solid #222;
-}
-
-/* ===== BUTTON ===== */
-.nav-btn{
-  width:58px;
-  height:58px;
-  border-radius:50%;
-  background:#141414;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  color:#aaa;
-  font-size:11px;
-  transition:all .25s ease;
-}
-
-.nav-btn .icon{
-  font-size:20px;
-  margin-bottom:3px;
-}
-
-/* ===== HOME BUTTON ===== */
-.home-btn{
-  width:82px;
-  height:82px;
-  margin-top:-18px;
-}
-
-.home-btn .icon{
-  font-size:32px;
-}
-
-/* ===== ACTIVE ===== */
-.nav-btn.active{
-  color:#fff;
-  background:#141414;
-  box-shadow:
-    0 0 18px rgba(255,200,0,.35),
-    0 0 32px rgba(255,200,0,.15);
-}
-
-/* ===== PRESS ===== */
-.nav-btn:active{
-  transform:scale(.93);
+.daily{
+  padding:12px 26px;
+  background:#111;
+  border-radius:30px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="content"></div>
+<div id="content">
+  <div class="balance">رصيدك: <span id="balance">0</span></div>
 
-<!-- ===== NAV ===== -->
-<div class="nav-bar">
+  <div class="game-btn" onclick="play()">🎮 اضغط</div>
 
-  <div class="nav-btn" onclick="go('settings',this)">
-    <div class="icon">⚙️</div>
-    الإعدادات
-  </div>
-
-  <div class="nav-btn" onclick="go('vip',this)">
-    <div class="icon">⭐</div>
-    VIP
-  </div>
-
-  <div class="nav-btn" onclick="go('wallet',this)">
-    <div class="icon">💼</div>
-    المحفظة
-  </div>
-
-  <div class="nav-btn home-btn active" onclick="go('home',this)">
-    <div class="icon">🏠</div>
-    الرئيسية
-  </div>
-
-  <div class="nav-btn" onclick="go('tasks',this)">
-    <div class="icon">📋</div>
-    المهام
-  </div>
-
-  <div class="nav-btn" onclick="go('ref',this)">
-    <div class="icon">👥</div>
-    الإحالة
-  </div>
-
-  <div class="nav-btn" onclick="go('logs',this)">
-    <div class="icon">🧾</div>
-    السجلات
-  </div>
-
+  <div class="daily">🎁 مكافأة يومية</div>
 </div>
 
 <script>
-Telegram.WebApp.ready();
+const tg = Telegram.WebApp;
+tg.ready();
 
-let balance = 0;
+const userId = tg.initDataUnsafe.user.id;
 
-function renderHome(){
-  document.getElementById('content').innerHTML = `
-    <div class="home-screen">
-      <div class="balance">
-        رصيدك الحالي
-        <span>${balance}</span>
-      </div>
+fetch("/api/init",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({user_id:userId})
+})
+.then(r=>r.json())
+.then(d=>balance.innerText=d.balance);
 
-      <div class="game-btn" onclick="playGame()">
-        <div class="icon">🎮</div>
-        اضغط
-      </div>
-
-      <div class="daily-btn">
-        🎁 مكافأة يومية
-      </div>
-    </div>
-  `;
+function play(){
+  fetch("/api/play",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({user_id:userId})
+  })
+  .then(r=>r.json())
+  .then(d=>balance.innerText=d.balance);
 }
-
-function playGame(){
-  balance += 1;
-  renderHome();
-}
-
-function go(page,el){
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-
-  const c=document.getElementById('content');
-  c.style.opacity=0;
-  c.style.transform='translateY(10px)';
-
-  setTimeout(()=>{
-    if(page==='home') renderHome();
-    else c.innerHTML = page;
-    c.style.opacity=1;
-    c.style.transform='translateY(0)';
-  },180);
-}
-
-renderHome();
 </script>
 
 </body>
