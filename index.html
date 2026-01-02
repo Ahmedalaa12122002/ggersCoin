@@ -3,55 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GgersCoin</title>
+<title>WinHive</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-/* 🔒 نفس تصميمك بالظبط */
-body{
-  background:#000;
-  color:#fff;
-  margin:0;
-  font-family:system-ui;
-  overflow:hidden;
-}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#000;color:#fff;overflow:hidden}
 
+/* ===== CONTENT ===== */
 #content{
   height:calc(100vh - 100px);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:20px;
+  overflow-y:auto;
+  padding:20px;
 }
 
-.balance{
-  font-size:22px;
-  opacity:.9;
-}
-
-.game-btn{
-  width:140px;
-  height:140px;
-  border-radius:50%;
-  background:#141414;
-  box-shadow:0 0 25px rgba(255,200,0,.35);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  transition:.25s;
-}
-
-.game-btn:active{
-  transform:scale(.92);
-}
-
-.daily{
-  padding:12px 26px;
+/* ===== FARM CARD ===== */
+.card{
   background:#111;
-  border-radius:30px;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 0 25px rgba(255,200,0,.08);
+}
+
+.title{
+  text-align:center;
+  font-size:26px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.stats{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+  font-size:14px;
+  color:#ccc;
+}
+
+.big{
+  text-align:center;
+  font-size:34px;
+  margin:18px 0;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  font-size:16px;
+  background:#222;
+  color:#fff;
+}
+
+button.primary{
+  background:#141414;
+  box-shadow:0 0 18px rgba(255,200,0,.35);
+}
+
+button:disabled{
+  opacity:.5;
+}
+
+.progress{
+  height:12px;
+  background:#222;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:12px;
+}
+.progress span{
+  display:block;
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#ffcc00,#ff9900);
+}
+
+/* ===== TOAST ===== */
+#toast{
+  position:fixed;
+  bottom:120px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#141414;
+  padding:12px 20px;
+  border-radius:12px;
+  box-shadow:0 0 20px rgba(255,200,0,.4);
+  display:none;
 }
 </style>
 </head>
@@ -59,35 +99,108 @@ body{
 <body>
 
 <div id="content">
-  <div class="balance">رصيدك: <span id="balance">0</span></div>
 
-  <div class="game-btn" onclick="play()">🎮 اضغط</div>
+  <div class="card">
+    <div class="title">🌾 WinHive</div>
 
-  <div class="daily">🎁 مكافأة يومية</div>
+    <div class="stats">
+      <div>💰 النقاط: <span id="points">0</span></div>
+      <div>👑 VIP: <span id="vip">0</span></div>
+    </div>
+
+    <div class="big">
+      🌾 <span id="crop">0</span>
+    </div>
+
+    <button id="startBtn" class="primary">ابدأ الزراعة</button>
+
+    <div id="timer" style="text-align:center;margin-top:10px;color:#aaa"></div>
+
+    <button id="harvestBtn" style="margin-top:10px" disabled>احصد</button>
+
+    <div class="progress">
+      <span id="bar"></span>
+    </div>
+  </div>
+
 </div>
 
+<div id="toast"></div>
+
 <script>
-const tg = Telegram.WebApp;
-tg.ready();
+Telegram.WebApp.ready();
 
-const userId = tg.initDataUnsafe.user.id;
+/* ===== STATE ===== */
+let points = Number(localStorage.getItem("points")||0);
+let crop = Number(localStorage.getItem("crop")||0);
+let vip = Number(localStorage.getItem("vip")||0);
 
-fetch("/api/init",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({user_id:userId})
-})
-.then(r=>r.json())
-.then(d=>balance.innerText=d.balance);
+let farming = false;
+let duration = 300; // 5 دقائق
+let left = 0;
+let interval;
 
-function play(){
-  fetch("/api/play",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({user_id:userId})
-  })
-  .then(r=>r.json())
-  .then(d=>balance.innerText=d.balance);
+/* ===== UI ===== */
+function update(){
+  pointsEl.textContent = points;
+  cropEl.textContent = crop;
+  vipEl.textContent = vip;
+}
+const pointsEl=document.getElementById("points");
+const cropEl=document.getElementById("crop");
+const vipEl=document.getElementById("vip");
+const timerEl=document.getElementById("timer");
+const bar=document.getElementById("bar");
+const toast=document.getElementById("toast");
+
+update();
+
+/* ===== FARM ===== */
+document.getElementById("startBtn").onclick=()=>{
+  if(farming) return;
+  farming=true;
+  left=duration;
+  bar.style.width="0%";
+  document.getElementById("harvestBtn").disabled=true;
+
+  interval=setInterval(()=>{
+    left--;
+    let done=((duration-left)/duration)*100;
+    bar.style.width=done+"%";
+    timerEl.textContent="⏳ "+left+" ثانية";
+
+    if(left<=0){
+      clearInterval(interval);
+      timerEl.textContent="✔️ جاهز للحصاد";
+      document.getElementById("harvestBtn").disabled=false;
+    }
+  },1000);
+};
+
+document.getElementById("harvestBtn").onclick=()=>{
+  farming=false;
+  let fakeCrop=100+Math.floor(Math.random()*200);
+  crop+=fakeCrop;
+
+  let realPoints=1;
+  points+=realPoints;
+
+  localStorage.setItem("crop",crop);
+  localStorage.setItem("points",points);
+
+  showToast("🌾 حصاد "+fakeCrop+" | 💰 +"+realPoints+" نقطة");
+
+  update();
+  bar.style.width="0%";
+  timerEl.textContent="";
+  document.getElementById("harvestBtn").disabled=true;
+};
+
+/* ===== TOAST ===== */
+function showToast(msg){
+  toast.textContent=msg;
+  toast.style.display="block";
+  setTimeout(()=>toast.style.display="none",2500);
 }
 </script>
 
