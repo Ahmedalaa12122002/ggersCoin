@@ -1,52 +1,43 @@
-import psycopg2
 import os
-from datetime import date
+import psycopg2
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-conn = None
-cur = None
+conn = psycopg2.connect(DATABASE_URL)
+conn.autocommit = True
 
 def init_db():
-    global conn, cur
-    if not DATABASE_URL:
-        print("DATABASE_URL not found")
-        return
-
-    conn = psycopg2.connect(DATABASE_URL)
-    cur = conn.cursor()
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        user_id BIGINT PRIMARY KEY,
-        username TEXT,
-        points BIGINT DEFAULT 0,
-        last_daily DATE,
-        daily_streak INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-    conn.commit()
-
-def add_user(user_id, username):
-    cur.execute("""
-        INSERT INTO users (user_id, username)
-        VALUES (%s, %s)
-        ON CONFLICT (user_id) DO NOTHING
-    """, (user_id, username))
-    conn.commit()
+    with conn.cursor() as cur:
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id BIGINT PRIMARY KEY,
+            balance INT DEFAULT 0,
+            vip BOOLEAN DEFAULT FALSE,
+            last_daily DATE
+        );
+        """)
 
 def get_user(user_id):
-    cur.execute("SELECT points, last_daily, daily_streak FROM users WHERE user_id=%s", (user_id,))
-    return cur.fetchone()
+    with conn.cursor() as cur:
+        cur.execute("SELECT * FROM users WHERE user_id=%s", (user_id,))
+        return cur.fetchone()
 
-def update_daily(user_id, points, streak):
-    today = date.today()
-    cur.execute("""
-        UPDATE users
-        SET points = points + %s,
-            last_daily = %s,
-            daily_streak = %s
-        WHERE user_id = %s
-    """, (points, today, streak, user_id))
-    conn.commit()
+def add_user(user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO users (user_id) VALUES (%s) ON CONFLICT DO NOTHING",
+            (user_id,)
+        )
+
+def add_balance(user_id, amount):
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE users SET balance = balance + %s WHERE user_id=%s",
+            (amount, user_id)
+        )
+
+def get_balance(user_id):
+    with conn.cursor() as cur:
+        cur.execute("SELECT balance FROM users WHERE user_id=%s", (user_id,))
+        row = cur.fetchone()
+        return row[0] if row else 0
