@@ -8,103 +8,101 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:system-ui;
 }
 
-body {
-  background: #000;
-  color: #fff;
-  overflow: hidden;
+body{
+  background:#000;
+  color:#fff;
+  overflow:hidden;
 }
 
 /* ================= CONTENT ================= */
-#content {
-  height: calc(100vh - 95px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  animation: fadeIn 0.35s ease;
+#content{
+  height:calc(100vh - 95px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  animation:pageFade 0.4s ease;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes pageFade{
+  from{opacity:0; transform:translateY(12px);}
+  to{opacity:1; transform:translateY(0);}
 }
 
 /* ================= NAV BAR ================= */
-.nav-bar {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 95px;
-  background: rgba(15,15,15,0.92);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-top: 1px solid #222;
+.nav-bar{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  height:95px;
+  background:rgba(18,18,18,0.95);
+  backdrop-filter:blur(12px);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  border-top:1px solid #222;
 }
 
 /* ===== NORMAL BUTTON ===== */
-.nav-btn {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #141414;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #aaa;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.25s ease;
+.nav-btn{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:#151515;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#aaa;
+  font-size:11px;
+  transition:all .25s ease;
 }
 
-.nav-btn .icon {
-  font-size: 20px;
-  margin-bottom: 3px;
+.nav-btn .icon{
+  font-size:20px;
+  margin-bottom:3px;
 }
 
-/* ===== ACTIVE BUTTON ===== */
-.nav-btn.active {
-  background: #f5c400;
-  color: #000;
-  box-shadow: 0 0 18px rgba(245,196,0,0.55);
+/* ===== ACTIVE ===== */
+.nav-btn.active{
+  background:#f5c400;
+  color:#000;
+  box-shadow:0 0 18px rgba(245,196,0,.55);
 }
 
-/* ===== HOME BUTTON (BIGGER REAL BUTTON) ===== */
-.home-btn {
-  width: 82px;
-  height: 82px;
-  margin-top: -18px;
-  font-size: 13px;
+/* ===== HOME BUTTON (ONLY BIGGER) ===== */
+.home-btn{
+  width:82px;
+  height:82px;
+  margin-top:-18px;
+  font-size:13px;
 }
 
-.home-btn .icon {
-  font-size: 32px;
-  margin-bottom: 4px;
+.home-btn .icon{
+  font-size:32px;
 }
 
 /* ===== PRESS EFFECT ===== */
-.nav-btn:active {
-  transform: scale(0.92);
+.nav-btn:active{
+  transform:scale(.92);
 }
 
-/* ===== GLOW PULSE ===== */
-@keyframes pulse {
-  0% { box-shadow: 0 0 14px rgba(245,196,0,0.45); }
-  50% { box-shadow: 0 0 24px rgba(245,196,0,0.75); }
-  100% { box-shadow: 0 0 14px rgba(245,196,0,0.45); }
+/* ===== PULSE GLOW ===== */
+@keyframes pulse{
+  0%{box-shadow:0 0 14px rgba(245,196,0,.4);}
+  50%{box-shadow:0 0 26px rgba(245,196,0,.75);}
+  100%{box-shadow:0 0 14px rgba(245,196,0,.4);}
 }
 
-.nav-btn.active {
-  animation: pulse 2s infinite;
+.nav-btn.active{
+  animation:pulse 2s infinite;
 }
 </style>
 </head>
@@ -116,34 +114,39 @@ body {
 <!-- ================= NAV ================= -->
 <div class="nav-bar">
 
-  <div class="nav-btn" onclick="navigate('السجلات', this)">
-    <div class="icon">🧾</div>
-    السجلات
+  <div class="nav-btn" onclick="go('الإعدادات',this)">
+    <div class="icon">⚙️</div>
+    الإعدادات
   </div>
 
-  <div class="nav-btn" onclick="navigate('الإحالة', this)">
-    <div class="icon">👥</div>
-    الإحالة
-  </div>
-
-  <div class="nav-btn home-btn active" onclick="navigate('الرئيسية', this)">
-    <div class="icon">🏠</div>
-    الرئيسية
-  </div>
-
-  <div class="nav-btn" onclick="navigate('المحفظة', this)">
-    <div class="icon">💼</div>
-    المحفظة
-  </div>
-
-  <div class="nav-btn" onclick="navigate('VIP', this)">
+  <div class="nav-btn" onclick="go('VIP',this)">
     <div class="icon">⭐</div>
     VIP
   </div>
 
-  <div class="nav-btn" onclick="navigate('الإعدادات', this)">
-    <div class="icon">⚙️</div>
-    الإعدادات
+  <div class="nav-btn" onclick="go('المحفظة',this)">
+    <div class="icon">💼</div>
+    المحفظة
+  </div>
+
+  <div class="nav-btn home-btn active" onclick="go('الرئيسية',this)">
+    <div class="icon">🏠</div>
+    الرئيسية
+  </div>
+
+  <div class="nav-btn" onclick="go('المهام',this)">
+    <div class="icon">📋</div>
+    المهام
+  </div>
+
+  <div class="nav-btn" onclick="go('الإحالة',this)">
+    <div class="icon">👥</div>
+    الإحالة
+  </div>
+
+  <div class="nav-btn" onclick="go('السجلات',this)">
+    <div class="icon">🧾</div>
+    السجلات
   </div>
 
 </div>
@@ -151,20 +154,19 @@ body {
 <script>
 Telegram.WebApp.ready();
 
-function navigate(name, el) {
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
-
+function go(name,el){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
 
-  const content = document.getElementById('content');
-  content.style.opacity = 0;
+  const c=document.getElementById('content');
+  c.style.opacity=0;
+  c.style.transform='translateY(12px)';
 
-  setTimeout(() => {
-    content.innerText = name;
-    content.style.opacity = 1;
-  }, 150);
+  setTimeout(()=>{
+    c.innerText=name;
+    c.style.opacity=1;
+    c.style.transform='translateY(0)';
+  },150);
 }
 </script>
 
