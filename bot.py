@@ -1,33 +1,26 @@
 import telebot
-import os
-import time
 
-TOKEN = "8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ"
+BOT_TOKEN = "8374900683:AAGBZ9Ni4jpsLDr0nemtPrJXL7U0nIZxskQ"
+WEB_APP_URL = "https://ggerscoin-production.up.railway.app/"
 
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(BOT_TOKEN)
 
-bot.remove_webhook()  # مهم جدًا لتجنب 409
-
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=["start"])
 def start(message):
-    bot.send_message(
-        message.chat.id,
-        "👋 أهلاً بك في GgersCoin\n\nاضغط الزر بالأسفل للدخول للتطبيق 👇",
-        reply_markup=telebot.types.InlineKeyboardMarkup().add(
-            telebot.types.InlineKeyboardButton(
-                "🚀 فتح التطبيق",
-                web_app=telebot.types.WebAppInfo(
-                    url="https://ggerscoin-production.up.railway.app/"
-                )
-            )
+    markup = telebot.types.InlineKeyboardMarkup()
+    markup.add(
+        telebot.types.InlineKeyboardButton(
+            "🚀 دخول التطبيق",
+            web_app=telebot.types.WebAppInfo(url=WEB_APP_URL)
         )
     )
 
-print("=== BOT STARTED ===")
+    bot.send_message(
+        message.chat.id,
+        "👋 مرحبًا بك في *GgersCoin*\n\nاضغط على الزر للدخول إلى التطبيق 👇",
+        reply_markup=markup,
+        parse_mode="Markdown"
+    )
 
-while True:
-    try:
-        bot.infinity_polling(timeout=10, long_polling_timeout=5)
-    except Exception as e:
-        print("Error:", e)
-        time.sleep(5)
+print("=== BOT STARTED ===")
+bot.infinity_polling()
