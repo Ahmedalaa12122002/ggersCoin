@@ -8,168 +8,139 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Tahoma, Arial;
+* {
+    box-sizing: border-box;
+    font-family: Tahoma, Arial;
 }
 
-body{
-  background:#000;
-  color:#fff;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
+body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    text-align: center;
 }
 
-/* المحتوى */
-#content{
-  flex:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:26px;
-  transition:opacity .3s ease;
+/* العنوان */
+.page-title {
+    margin-top: 40px;
+    font-size: 22px;
+    font-weight: bold;
 }
 
 /* شريط القوائم */
-.navbar{
-  height:105px;
-  background:#111;
-  display:flex;
-  justify-content:space-around;
-  align-items:flex-end;
-  border-top:1px solid #222;
-  padding-bottom:12px;
+.navbar {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%;
+    background: rgba(30,30,30,0.95);
+    border-radius: 25px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* زر عادي (دائري) */
-.nav-btn{
-  width:78px;
-  height:78px;
-  border-radius:50%;
-  background:#1a1a1a;
-  color:#ccc;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
-  cursor:pointer;
-  transition:all .25s ease;
+/* زر عادي */
+.nav-btn {
+    width: 52px;
+    height: 52px;
+    background: #222;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2s;
 }
 
-/* أيقونة */
-.nav-btn .icon{
-  font-size:22px;
-  margin-bottom:4px;
+.nav-btn:active {
+    transform: scale(0.85);
+    background: #444;
 }
 
 /* زر الرئيسية */
-.home-btn{
-  width:95px;
-  height:95px;
-  border-radius:50%;
-  background:#ffd700;
-  color:#000;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  font-size:13px;
-  transform:translateY(-15px); /* ⬅ نزلناه شوية */
-  box-shadow:0 0 30px rgba(255,215,0,.9);
+.home-btn {
+    width: 72px;
+    height: 72px;
+    background: #FFD700;
+    color: #000;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: -35px;
+    box-shadow: 0 0 15px #FFD700;
 }
 
-/* أيقونة الرئيسية */
-.home-btn .icon{
-  font-size:30px;
-  line-height:1;
+.home-btn:active {
+    transform: scale(0.9);
 }
 
-/* تأثير الضغط */
-.nav-btn:active,
-.home-btn:active{
-  transform:scale(.92);
-}
-
-/* Hover */
-.nav-btn:hover{
-  background:#222;
-  color:#ffd700;
-}
-
-/* نبض زر الرئيسية */
-.home-btn{
-  animation:pulse 2s infinite;
-}
-
-@keyframes pulse{
-  0%{box-shadow:0 0 15px rgba(255,215,0,.4);}
-  50%{box-shadow:0 0 40px rgba(255,215,0,.95);}
-  100%{box-shadow:0 0 15px rgba(255,215,0,.4);}
+/* إيموجي */
+.icon {
+    font-size: 18px;
+    margin-bottom: 2px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="content">
-  مرحبًا بك في GgersCoin
-</div>
+<div class="page-title">الرئيسية</div>
 
-<!-- القوائم (يمين ← شمال) -->
+<!-- شريط القوائم -->
 <div class="navbar">
 
-  <div class="nav-btn" onclick="changePage('الإعدادات')">
-    <span class="icon">⚙️</span>
-    <span>الإعدادات</span>
-  </div>
+    <!-- الإعدادات -->
+    <div class="nav-btn">
+        <div class="icon">⚙️</div>
+        الإعدادات
+    </div>
 
-  <div class="nav-btn" onclick="changePage('VIP')">
-    <span class="icon">⭐</span>
-    <span>VIP</span>
-  </div>
+    <!-- VIP -->
+    <div class="nav-btn">
+        <div class="icon">⭐</div>
+        VIP
+    </div>
 
-  <div class="nav-btn" onclick="changePage('المحفظة')">
-    <span class="icon">💼</span>
-    <span>المحفظة</span>
-  </div>
+    <!-- المحفظة -->
+    <div class="nav-btn">
+        <div class="icon">💼</div>
+        المحفظة
+    </div>
 
-  <div class="home-btn" onclick="changePage('الرئيسية')">
-    <span class="icon">🏠</span>
-    <span>الرئيسية</span>
-  </div>
+    <!-- الرئيسية -->
+    <div class="home-btn">
+        <div class="icon">🏠</div>
+        الرئيسية
+    </div>
 
-  <div class="nav-btn" onclick="changePage('المهام')">
-    <span class="icon">📋</span>
-    <span>المهام</span>
-  </div>
+    <!-- المهام -->
+    <div class="nav-btn">
+        <div class="icon">📋</div>
+        المهام
+    </div>
 
-  <div class="nav-btn" onclick="changePage('الإحالة')">
-    <span class="icon">👥</span>
-    <span>الإحالة</span>
-  </div>
+    <!-- الإحالة -->
+    <div class="nav-btn">
+        <div class="icon">👥</div>
+        الإحالة
+    </div>
 
-  <div class="nav-btn" onclick="changePage('السجلات')">
-    <span class="icon">📑</span>
-    <span>السجلات</span>
-  </div>
+    <!-- السجلات -->
+    <div class="nav-btn">
+        <div class="icon">🧾</div>
+        السجلات
+    </div>
 
 </div>
 
 <script>
 Telegram.WebApp.ready();
-
-function changePage(name){
-  const content=document.getElementById("content");
-  content.style.opacity=0;
-  setTimeout(()=>{
-    content.innerText=name;
-    content.style.opacity=1;
-  },200);
-}
+Telegram.WebApp.expand();
 </script>
 
 </body>
