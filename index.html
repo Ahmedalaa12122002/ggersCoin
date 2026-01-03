@@ -1,413 +1,83 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WinHive</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WinHive</title>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Telegram WebApp -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:#000;color:#fff;overflow:hidden}
-
-/* ===== CONTENT ===== */
-#content{
-  height:calc(100vh - 110px);
-  padding:15px;
-  overflow:auto;
-}
-
-/* ===== NAV ===== */
-.nav-bar{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  height:110px;
-  background:rgba(15,15,15,.97);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  border-top:1px solid #222;
-}
-.nav-btn{
-  width:58px;height:58px;
-  border-radius:50%;
-  background:#141414;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  color:#aaa;
-  font-size:11px;
-}
-.nav-btn .icon{font-size:20px}
-.home-btn{
-  width:82px;height:82px;
-  margin-top:-20px;
-}
-.home-btn .icon{font-size:30px}
-.nav-btn.active{
-  color:#fff;
-  box-shadow:0 0 18px rgba(255,200,0,.35);
-}
-
-/* ===== CARD ===== */
-.card{
-  background:#111;
-  border-radius:18px;
-  padding:15px;
-  margin-bottom:15px;
-}
-
-/* ===== FARM ===== */
-.farm{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-.land{
-  background:#5c3b1e;
-  border-radius:14px;
-  height:95px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  cursor:pointer;
-  position:relative;
-}
-.land.locked{opacity:.4}
-.land.planted{background:#4caf50}
-.land.ready{background:#f1c40f;color:#000}
-
-/* ===== PROGRESS ===== */
-.progress{
-  position:absolute;
-  bottom:6px;
-  width:80%;
-  height:6px;
-  background:#333;
-  border-radius:10px;
-  overflow:hidden;
-}
-.progress div{
-  height:100%;
-  background:#f5b400;
-  width:0%;
-}
-
-/* ===== BUTTON ===== */
-.btn{
-  background:#1c1c1c;
-  padding:12px;
-  border-radius:14px;
-  text-align:center;
-  margin-top:10px;
-}
-</style>
+  <!-- CSS سيتم استكماله في الجزء 2 -->
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<!-- ===== المحتوى الرئيسي (هنا تظهر المزرعة) ===== -->
 <div id="content"></div>
 
-<!-- ===== NAV BAR ===== -->
+<!-- ===== نافذة اختيار المحصول ===== -->
+<div id="cropMenu" class="overlay hidden">
+  <div class="card">
+    <h3>🌱 اختر المحصول</h3>
+
+    <button onclick="selectCrop('wheat')">🌾 قمح (5 دقائق)</button>
+    <button onclick="selectCrop('carrot')">🥕 جزر (10 دقائق)</button>
+    <button onclick="selectCrop('pepper')">🌶️ فلفل (15 دقيقة)</button>
+    <button onclick="selectCrop('grape')">🍇 عنب (20 دقيقة)</button>
+    <button onclick="selectCrop('rocket')">🥬 جرجير (30 دقيقة)</button>
+
+    <button class="cancel" onclick="closeCropMenu()">إلغاء</button>
+  </div>
+</div>
+
+<!-- ===== شريط القوائم السفلي (7 قوائم) ===== -->
 <div class="nav-bar">
 
-  <div class="nav-btn" onclick="goPage('الإعدادات',this)">
-    <div class="icon">⚙️</div>الإعدادات
+  <div class="nav-btn" onclick="goPage('logs',this)">
+    <span>🧾</span>
+    <small>السجلات</small>
   </div>
 
-  <div class="nav-btn" onclick="goPage('VIP',this)">
-    <div class="icon">⭐</div>VIP
+  <div class="nav-btn" onclick="goPage('ref',this)">
+    <span>👥</span>
+    <small>الإحالة</small>
   </div>
 
-  <div class="nav-btn" onclick="goPage('المحفظة',this)">
-    <div class="icon">💼</div>المحفظة
+  <div class="nav-btn" onclick="goPage('tasks',this)">
+    <span>📋</span>
+    <small>المهام</small>
   </div>
 
-  <div class="nav-btn home-btn active" onclick="goPage('الرئيسية',this)">
-    <div class="icon">🏠</div>الرئيسية
+  <div class="nav-btn home active" onclick="goPage('home',this)">
+    <span>🏡</span>
+    <small>الرئيسية</small>
   </div>
 
-  <div class="nav-btn" onclick="goPage('المهام',this)">
-    <div class="icon">📋</div>المهام
+  <div class="nav-btn" onclick="goPage('storage',this)">
+    <span>💼</span>
+    <small>المحفظة</small>
   </div>
 
-  <div class="nav-btn" onclick="goPage('الإحالة',this)">
-    <div class="icon">👥</div>الإحالة
+  <div class="nav-btn" onclick="goPage('vip',this)">
+    <span>⭐</span>
+    <small>VIP</small>
   </div>
 
-  <div class="nav-btn" onclick="goPage('السجلات',this)">
-    <div class="icon">🧾</div>السجلات
+  <div class="nav-btn" onclick="goPage('settings',this)">
+    <span>⚙️</span>
+    <small>الإعدادات</small>
   </div>
 
 </div>
-<!-- =========================
-     HOME PAGE STRUCTURE
-========================= -->
 
-<!-- ===== CROP SELECTION MENU ===== -->
-<div id="cropMenu" style="
-  position:fixed;
-  bottom:110px;
-  left:0;
-  right:0;
-  background:#111;
-  padding:15px;
-  border-radius:20px 20px 0 0;
-  display:none;
-  z-index:10;
-">
+<!-- JS سيتم استكماله في الجزء 3 -->
+<script src="game.js"></script>
 
-  <div class="card">
-    <b>🌱 اختر المحصول</b>
-
-    <div class="btn" onclick="selectCrop('wheat')">
-      🌾 قمح (5 دقائق)
-    </div>
-
-    <div class="btn" onclick="selectCrop('carrot')">
-      🥕 جزر (10 دقائق)
-    </div>
-
-    <div class="btn" onclick="selectCrop('pepper')">
-      🌶️ فلفل (15 دقيقة)
-    </div>
-
-    <div class="btn" onclick="closeCropMenu()" style="opacity:.6">
-      إلغاء
-    </div>
-  </div>
-  </div>
-  <script>
-/* =========================
-   TELEGRAM INIT (SAFE)
-========================= */
-if (window.Telegram && Telegram.WebApp) {
+<script>
   Telegram.WebApp.ready();
-}
-
-/* =========================
-   GLOBAL PAGE STATE
-========================= */
-let currentPage = "الرئيسية";
-
-/* =========================
-   GAME STATE
-========================= */
-let state = JSON.parse(localStorage.getItem("winhive")) || {
-  points: 0,
-  vip: 0,
-  lands: [
-    {state:"empty", crop:null, end:0},
-    {state:"locked", crop:null, end:0},
-    {state:"locked", crop:null, end:0},
-    {state:"locked", crop:null, end:0},
-    {state:"locked", crop:null, end:0},
-    {state:"locked", crop:null, end:0}
-  ],
-  task: {type:"harvest", target:3, progress:0, reward:50}
-};
-
-const crops = {
-  wheat:  {name:"قمح 🌾",   time:5},
-  carrot: {name:"جزر 🥕",   time:10},
-  pepper: {name:"فلفل 🌶️", time:15}
-};
-
-const VIP_LEVELS = {
-  0:{lands:1,speed:1},
-  1:{lands:2,speed:.98},
-  2:{lands:3,speed:.96},
-  3:{lands:4,speed:.94},
-  4:{lands:5,speed:.92},
-  5:{lands:6,speed:.90},
-  6:{lands:6,speed:.88},
-  7:{lands:6,speed:.86},
-  8:{lands:6,speed:.84},
-  9:{lands:6,speed:.82},
- 10:{lands:6,speed:.80}
-};
-
-let selectedLand = null;
-
-/* =========================
-   HELPERS
-========================= */
-function vipInfo(){
-  return VIP_LEVELS[Math.min(10, state.vip)];
-}
-function saveState(){
-  localStorage.setItem("winhive", JSON.stringify(state));
-}
-
-/* =========================
-   NAVIGATION (FIXED)
-========================= */
-function goPage(page, el){
-  currentPage = page;
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  if(el) el.classList.add('active');
-
-  if(page === "الرئيسية") renderHome();
-  else if(page === "VIP") renderVIP();
-  else renderSimple(page);
-}
-
-function renderSimple(name){
-  document.getElementById("content").innerHTML =
-    `<div class="card"><h2>${name}</h2><p>قيد التطوير</p></div>`;
-}
-
-/* =========================
-   HOME (FARM)
-========================= */
-function renderHome(){
-  if(currentPage !== "الرئيسية") return;
-
-  let html = `
-    <div class="card">
-      <div style="display:flex;justify-content:space-between">
-        <div>👑 VIP: ${state.vip}</div>
-        <div>💰 النقاط: ${state.points}</div>
-      </div>
-      <h2 style="text-align:center;margin:10px 0">WinHive 🌾</h2>
-    </div>
-
-    <div class="card">
-      <b>🎯 المهمة الحالية</b><br>
-      ${state.task.type === "harvest" ? "احصد" : "ازرع"}
-      ${state.task.target} مرات<br>
-      التقدم: ${state.task.progress}/${state.task.target}<br>
-      المكافأة: ${state.task.reward} نقطة
-    </div>
-
-    <div class="farm">
-  `;
-
-  state.lands.forEach((l,i)=>{
-    if(i >= vipInfo().lands){
-      html += `<div class="land locked">🔒 VIP</div>`;
-      return;
-    }
-    if(l.state === "empty"){
-      html += `<div class="land" onclick="openCropMenu(${i})">🌱<br>ازرع</div>`;
-      return;
-    }
-    if(l.state === "planted"){
-      const left = Math.ceil((l.end - Date.now())/1000);
-      if(left <= 0){
-        state.lands[i].state = "ready";
-        html += `<div class="land ready" onclick="harvest(${i})">🌾<br>احصد</div>`;
-      }else{
-        const total = crops[l.crop].time * 60;
-        const percent = Math.min(100, (1 - left/total)*100);
-        html += `
-          <div class="land planted">
-            🌱 ${crops[l.crop].name}<br>${left}ث
-            <div class="progress"><div style="width:${percent}%"></div></div>
-          </div>`;
-      }
-      return;
-    }
-    if(l.state === "ready"){
-      html += `<div class="land ready" onclick="harvest(${i})">🌾<br>احصد</div>`;
-    }
-  });
-
-  html += `</div>`;
-  document.getElementById("content").innerHTML = html;
-}
-
-/* =========================
-   FARM ACTIONS
-========================= */
-function openCropMenu(i){
-  selectedLand = i;
-  document.getElementById("cropMenu").style.display = "block";
-}
-function closeCropMenu(){
-  document.getElementById("cropMenu").style.display = "none";
-  selectedLand = null;
-}
-function selectCrop(type){
-  if(selectedLand === null) return;
-
-  const time = crops[type].time * 60000 * vipInfo().speed;
-  state.lands[selectedLand] = {
-    state:"planted",
-    crop:type,
-    end: Date.now() + time
-  };
-
-  progressTask("plant");
-  closeCropMenu();
-  saveState();
-  renderHome();
-}
-
-function harvest(i){
-  state.lands[i] = {state:"empty", crop:null, end:0};
-  state.points += 5;
-  progressTask("harvest");
-  saveState();
-  renderHome();
-}
-
-/* =========================
-   TASK SYSTEM
-========================= */
-function progressTask(type){
-  if(state.task.type !== type) return;
-  state.task.progress++;
-  if(state.task.progress >= state.task.target){
-    state.points += state.task.reward;
-    state.task = {
-      type: type === "harvest" ? "plant" : "harvest",
-      target: type === "harvest" ? 3 : 5,
-      progress: 0,
-      reward: type === "harvest" ? 30 : 80
-    };
-  }
-}
-
-/* =========================
-   VIP PAGE
-========================= */
-function renderVIP(){
-  document.getElementById("content").innerHTML = `
-    <div class="card">
-      <h2>⭐ VIP</h2>
-      <p>مستواك الحالي: VIP ${state.vip}</p>
-      <div class="btn" onclick="upgradeVIP()">ترقية VIP</div>
-    </div>
-  `;
-}
-function upgradeVIP(){
-  if(state.vip < 10){
-    state.vip++;
-    saveState();
-    renderVIP();
-  }else{
-    alert("وصلت لأعلى مستوى VIP");
-  }
-}
-
-/* =========================
-   SAFE START
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  renderHome();
-});
-
-setInterval(() => {
-  if(currentPage === "الرئيسية"){
-    renderHome();
-  }
-}, 1000);
 </script>
 
 </body>
-  </html>
+</html>
