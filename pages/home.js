@@ -1,6 +1,6 @@
 /* =========================================
-   WinHive – Home (Farm System v3)
-   Farm + VIP + Visual + Smart Tasks
+   WinHive – Home (Farm System v4)
+   Farm + Visual + Tasks + VIP Features
 ========================================= */
 
 const CROPS = [
@@ -13,9 +13,19 @@ const CROPS = [
 
 const TOTAL_PLOTS = 6;
 
+/* ===== VIP CONFIG ===== */
+function vipConfig(level) {
+  return {
+    plots: Math.min(1 + level, TOTAL_PLOTS),
+    speed: level * 0.05,          // تقليل وقت الزراعة
+    taskBonus: level * 0.10       // زيادة مكافأة المهام
+  };
+}
+
+/* ---------- الحالة ---------- */
 let state = {
   points: 0,
-  vip: 0,
+  vip: 0, // 0 → 5
   plots: [],
   task: null
 };
@@ -69,17 +79,14 @@ function updateTask(type, cropId = null) {
   const t = state.task;
   if (!t) return;
 
-  if (t.type === "harvest_any" && type === "harvest") {
-    t.progress++;
-  }
-
-  if (t.type === "plant_wheat" && type === "plant" && cropId === "wheat") {
-    t.progress++;
-  }
+  if (t.type === "harvest_any" && type === "harvest") t.progress++;
+  if (t.type === "plant_wheat" && type === "plant" && cropId === "wheat") t.progress++;
 
   if (t.progress >= t.target) {
-    state.points += t.reward;
-    alert(`🎉 أنجزت المهمة +${t.reward} نقاط`);
+    const bonus = vipConfig(state.vip).taskBonus;
+    const finalReward = Math.round(t.reward * (1 + bonus));
+    state.points += finalReward;
+    alert(`🎉 أنجزت المهمة +${finalReward} نقاط`);
     generateTask();
   }
 }
@@ -89,6 +96,7 @@ function renderHome() {
   saveState();
   const content = document.getElementById("content");
   const now = Date.now();
+  const vip = vipConfig(state.vip);
 
   let html = `
   <style>
@@ -105,10 +113,8 @@ function renderHome() {
     @keyframes grow{from{transform:scale(.95)}to{transform:scale(1.05)}}
     .locked{opacity:.6}
     .harvest-ready{box-shadow:0 0 12px rgba(106,211,106,.8)}
-    .task-box{
-      background:#111;padding:10px;border-radius:12px;
-      margin-bottom:10px;text-align:center;font-size:13px
-    }
+    .task-box{background:#111;padding:10px;border-radius:12px;
+      margin-bottom:10px;text-align:center;font-size:13px}
   </style>
 
   <div style="max-width:420px;margin:auto;padding:12px">
@@ -127,7 +133,7 @@ function renderHome() {
   `;
 
   state.plots.forEach((plot, index) => {
-    const unlocked = index < state.vip + 1;
+    const unlocked = index < vip.plots;
 
     if (!unlocked) {
       html += `<div class="plot locked"><div>🔒</div><small>VIP</small></div>`;
@@ -181,11 +187,12 @@ function openPlantMenu(index) {
   `;
 
   CROPS.forEach(c => {
+    const time = Math.max(1, Math.round(c.time * (1 - vipConfig(state.vip).speed)));
     menu += `
-      <button onclick="plant(${index},'${c.id}')"
+      <button onclick="plant(${index},'${c.id}',${time})"
         style="padding:8px 12px;border:none;border-radius:10px;
         background:#222;color:#fff;font-size:12px">
-        ${c.name}<br><small>${c.time}د</small>
+        ${c.name}<br><small>${time}د</small>
       </button>`;
   });
 
@@ -203,9 +210,8 @@ function closePlantMenu() {
   document.getElementById("plantMenu")?.remove();
 }
 
-function plant(index, cropId) {
-  const crop = CROPS.find(c => c.id === cropId);
-  state.plots[index] = { crop: crop.id, plantedAt: Date.now(), growTime: crop.time };
+function plant(index, cropId, time) {
+  state.plots[index] = { crop: cropId, plantedAt: Date.now(), growTime: time };
   updateTask("plant", cropId);
   closePlantMenu();
   renderHome();
@@ -219,4 +225,4 @@ function harvest(index) {
   state.plots[index] = { crop: null, plantedAt: 0, growTime: 0 };
   updateTask("harvest");
   renderHome();
-       }
+   }
