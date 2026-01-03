@@ -1,163 +1,82 @@
-// ===============================
-// صفحة الرئيسية (المزرعة)
-// ===============================
+function loadHome() {
+  const content = document.getElementById('content');
 
-if (!window.pages) window.pages = {};
+  if (!localStorage.points) localStorage.points = 0;
+  if (!localStorage.crop) localStorage.crop = '';
+  if (!localStorage.endTime) localStorage.endTime = 0;
 
-window.pages.home = function () {
-  const content = document.getElementById("content");
+  render();
+}
 
-  // حالة المزرعة (مؤقتة – بدون DB)
-  if (!window.farmState) {
-    window.farmState = {
-      points: 0,
-      vip: 0,
-      lands: [
-        { status: "empty", crop: null, end: 0 },
-        { status: "locked", crop: null, end: 0 },
-        { status: "locked", crop: null, end: 0 },
-        { status: "locked", crop: null, end: 0 },
-        { status: "locked", crop: null, end: 0 },
-        { status: "locked", crop: null, end: 0 }
-      ]
-    };
-  }
+function render() {
+  const content = document.getElementById('content');
+  const now = Date.now();
+  let html = `
+  <div style="background:#111;border-radius:18px;padding:15px;max-width:420px;margin:auto">
 
-  const crops = {
-    wheat:  { name: "قمح 🌾", time: 5, reward: 5 },
-    carrot: { name: "جزر 🥕", time: 10, reward: 10 },
-    pepper: { name: "فلفل 🌶️", time: 15, reward: 15 }
-  };
+    <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:10px">
+      <span>👑 VIP: 0</span>
+      <span>💰 النقاط: ${localStorage.points}</span>
+    </div>
 
-  let selectedLand = null;
+    <h2 style="text-align:center;margin:10px 0">🌾 WinHive</h2>
 
-  // ===== رسم الصفحة =====
-  function render() {
-    content.innerHTML = `
-      <div class="farm">
-        <div style="display:flex;justify-content:space-between;margin-bottom:10px">
-          <div>💰 النقاط: ${farmState.points}</div>
-          <div>👑 VIP: ${farmState.vip}</div>
-        </div>
+    <div style="text-align:center;font-size:60px">🌱</div>
+  `;
 
-        <div class="land-grid">
-          ${farmState.lands.map(renderLand).join("")}
-        </div>
+  if (!localStorage.crop) {
+    html += `
+    <p style="text-align:center;margin:10px 0">اختر المحصول:</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      ${cropBtn('قمح', 300)}
+      ${cropBtn('جزر', 600)}
+      ${cropBtn('فلفل', 900)}
+      ${cropBtn('عنب', 1200)}
+      ${cropBtn('جرجير', 1800)}
+    </div>
+    `;
+  } else if (now < localStorage.endTime) {
+    const left = Math.ceil((localStorage.endTime - now) / 1000);
+    html += `
+      <p style="text-align:center;margin:10px 0">🌱 الزراعة جارية (${localStorage.crop})</p>
+      <p style="text-align:center">⏳ متبقي ${left} ثانية</p>
+      <div style="height:8px;background:#333;border-radius:6px;overflow:hidden">
+        <div style="width:${100 - (left / (localStorage.duration) * 100)}%;background:#f5c400;height:100%"></div>
       </div>
-
-      <div id="cropMenu" style="
-        position:fixed;
-        bottom:110px;
-        left:0;right:0;
-        background:#111;
-        padding:15px;
-        border-radius:20px 20px 0 0;
-        display:none;
-        z-index:20;
-      ">
-        ${Object.keys(crops).map(c =>
-          `<div class="crop-btn" onclick="selectCrop('${c}')">
-            ${crops[c].name} (${crops[c].time} دقائق)
-          </div>`
-        ).join("")}
-        <div class="crop-btn" onclick="closeCropMenu()">إلغاء</div>
-      </div>
+    `;
+    setTimeout(render, 1000);
+  } else {
+    html += `
+      <p style="text-align:center;margin:10px 0">🌾 جاهز للحصاد (${localStorage.crop})</p>
+      <button onclick="harvest()" style="width:100%;padding:12px;border-radius:14px;background:#222;color:#fff;border:none">
+        🔪 احصد
+      </button>
     `;
   }
 
-  // ===== رسم قطعة أرض =====
-  function renderLand(land, index) {
-    if (land.status === "locked") {
-      return `<div class="land locked">🔒 VIP</div>`;
-    }
+  html += `</div>`;
+  content.innerHTML = html;
+}
 
-    if (land.status === "empty") {
-      return `
-        <div class="land" onclick="openCropMenu(${index})">
-          🌱
-          <div class="time">ازرع</div>
-        </div>
-      `;
-    }
+function cropBtn(name, time) {
+  return `
+    <button onclick="plant('${name}',${time})"
+      style="padding:10px 14px;border-radius:14px;border:none;background:#222;color:#fff">
+      ${name}
+    </button>
+  `;
+}
 
-    if (land.status === "planted") {
-      const left = Math.max(
-        0,
-        Math.ceil((land.end - Date.now()) / 1000)
-      );
-
-      if (left === 0) {
-        land.status = "ready";
-        return `
-          <div class="land ready" onclick="harvest(${index})">
-            🌾
-            <div class="time">احصد</div>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="land">
-          ⏳
-          <div class="time">${left}ث</div>
-        </div>
-      `;
-    }
-
-    if (land.status === "ready") {
-      return `
-        <div class="land ready" onclick="harvest(${index})">
-          🌾
-          <div class="time">احصد</div>
-        </div>
-      `;
-    }
-  }
-
-  // ===== فتح اختيار المحصول =====
-  window.openCropMenu = function (index) {
-    selectedLand = index;
-    document.getElementById("cropMenu").style.display = "block";
-  };
-
-  window.closeCropMenu = function () {
-    document.getElementById("cropMenu").style.display = "none";
-    selectedLand = null;
-  };
-
-  // ===== زرع =====
-  window.selectCrop = function (type) {
-    if (selectedLand === null) return;
-
-    const crop = crops[type];
-    farmState.lands[selectedLand] = {
-      status: "planted",
-      crop: type,
-      end: Date.now() + crop.time * 60000
-    };
-
-    closeCropMenu();
-    render();
-  };
-
-  // ===== حصاد =====
-  window.harvest = function (index) {
-    const land = farmState.lands[index];
-    const crop = crops[land.crop];
-
-    farmState.points += crop.reward;
-    farmState.lands[index] = { status: "empty", crop: null, end: 0 };
-
-    render();
-  };
-
-  // تحديث تلقائي للوقت
-  setInterval(() => {
-    if (document.querySelector(".nav-btn.active")?.dataset.page === "home") {
-      render();
-    }
-  }, 1000);
-
-  // بدء
+function plant(name, time) {
+  localStorage.crop = name;
+  localStorage.duration = time;
+  localStorage.endTime = Date.now() + time * 1000;
   render();
-};
+}
+
+function harvest() {
+  localStorage.points = parseInt(localStorage.points) + 5;
+  localStorage.crop = '';
+  localStorage.endTime = 0;
+  render();
+}
