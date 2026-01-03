@@ -11,75 +11,99 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
 body{background:#000;color:#fff;overflow:hidden}
 
-#app{
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-}
-
 #content{
-  flex:1;
+  height:calc(100vh - 110px);
+  overflow-y:auto;
   padding:15px;
-  overflow:auto;
 }
 
-/* ===== NAV ===== */
-.nav{
+/* ===== NAV BAR ===== */
+.nav-bar{
+  position:fixed;
+  bottom:0;
+  width:100%;
   height:110px;
-  background:#0f0f0f;
-  border-top:1px solid #222;
+  background:rgba(15,15,15,.96);
+  backdrop-filter:blur(12px);
   display:flex;
   justify-content:space-around;
   align-items:center;
+  border-top:1px solid #222;
 }
 
 .nav-btn{
-  width:56px;height:56px;
+  width:58px;height:58px;
   border-radius:50%;
   background:#141414;
-  color:#aaa;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
+  color:#aaa;
   font-size:11px;
+  transition:.25s;
 }
 
-.nav-btn span{font-size:18px}
+.nav-btn .icon{font-size:20px;margin-bottom:3px}
 
-.nav-btn.home{
+.home-btn{
   width:78px;height:78px;
   margin-top:-18px;
 }
 
-.nav-btn.home span{font-size:28px}
+.home-btn .icon{font-size:28px}
 
 .nav-btn.active{
   color:#fff;
-  box-shadow:0 0 16px rgba(255,200,0,.35);
+  box-shadow:
+    0 0 18px rgba(255,200,0,.35),
+    0 0 32px rgba(255,200,0,.15);
 }
+
+.nav-btn:active{transform:scale(.92)}
 </style>
 </head>
 
 <body>
 
-<div id="app">
-  <div id="content">
-    <!-- الصفحات تُحقن هنا -->
+<div id="content"></div>
+
+<div class="nav-bar">
+  <div class="nav-btn" onclick="go('logs',this)">
+    <div class="icon">🧾</div>السجلات
+  </div>
+  <div class="nav-btn" onclick="go('referral',this)">
+    <div class="icon">👥</div>الإحالة
+  </div>
+  <div class="nav-btn" onclick="go('tasks',this)">
+    <div class="icon">📋</div>المهام
   </div>
 
-  <div class="nav">
-    <div class="nav-btn" data-page="settings"><span>⚙️</span>الإعدادات</div>
-    <div class="nav-btn" data-page="vip"><span>⭐</span>VIP</div>
-    <div class="nav-btn" data-page="wallet"><span>💼</span>المحفظة</div>
-    <div class="nav-btn home active" data-page="home"><span>🏠</span>الرئيسية</div>
-    <div class="nav-btn" data-page="tasks"><span>📋</span>المهام</div>
-    <div class="nav-btn" data-page="referral"><span>👥</span>الإحالة</div>
-    <div class="nav-btn" data-page="logs"><span>🧾</span>السجلات</div>
+  <div class="nav-btn home-btn active" onclick="go('home',this)">
+    <div class="icon">🏠</div>الرئيسية
+  </div>
+
+  <div class="nav-btn" onclick="go('wallet',this)">
+    <div class="icon">💼</div>المحفظة
+  </div>
+  <div class="nav-btn" onclick="go('vip',this)">
+    <div class="icon">⭐</div>VIP
+  </div>
+  <div class="nav-btn" onclick="go('settings',this)">
+    <div class="icon">⚙️</div>الإعدادات
   </div>
 </div>
 
-<script src="core/navigation.js"></script>
-<script src="app.js"></script>
+<script src="main.js"></script>
+
+<!-- تحميل الصفحات -->
+<script src="pages/home.js"></script>
+<script src="pages/vip.js"></script>
+<script src="pages/tasks.js"></script>
+<script src="pages/referral.js"></script>
+<script src="pages/wallet.js"></script>
+<script src="pages/settings.js"></script>
+<script src="pages/logs.js"></script>
+
 </body>
 </html>
