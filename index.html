@@ -3,283 +3,146 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WinHive</title>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>WinHive Farm</title>
 
 <style>
-*{
-  box-sizing:border-box;
+body{
+  background:#2ecc71;
   margin:0;
-  padding:0;
   font-family:system-ui;
 }
 
-body{
-  background:#000;
-  color:#fff;
-  overflow:hidden;
-}
-
-/* ===== CONTENT ===== */
-#content{
-  height:calc(100vh - 110px);
-  padding:15px;
-  overflow:auto;
-}
-
-/* ===== NAV BAR ===== */
-.nav-bar{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  height:110px;
-  background:rgba(15,15,15,.97);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  border-top:1px solid #222;
-}
-
-/* ===== NAV BUTTON ===== */
-.nav-btn{
-  width:56px;
-  height:56px;
-  border-radius:50%;
-  background:#141414;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  color:#aaa;
-  font-size:11px;
-  transition:.25s;
-}
-
-.nav-btn .icon{
-  font-size:18px;
-}
-
-/* ===== HOME BUTTON ===== */
-.home-btn{
-  width:76px;
-  height:76px;
-  margin-top:-20px;
-}
-
-.home-btn .icon{
-  font-size:28px;
-}
-
-/* ===== ACTIVE ===== */
-.nav-btn.active{
-  color:#fff;
-  box-shadow:0 0 18px rgba(255,200,0,.35);
-}
-
-/* ===== UI CARDS ===== */
-.card{
-  background:#111;
-  border-radius:18px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 0 25px rgba(255,200,0,.12);
-}
-
-/* ===== FARM ===== */
+/* ===== FARM GRID ===== */
 .farm{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+  padding:20px;
 }
 
-.plot{
-  background:#1a1a1a;
-  border-radius:14px;
+/* ===== TILE ===== */
+.tile{
+  background:#8e5a2b;
+  border-radius:10px;
   height:90px;
+  position:relative;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:13px;
+  color:#fff;
+  font-size:14px;
   cursor:pointer;
-  position:relative;
 }
 
-.plot.locked{
-  opacity:.35;
+/* ===== PLANTED ===== */
+.tile.planted{
+  background:#6ab04c;
 }
 
-/* ===== PROGRESS ===== */
-.progress{
-  position:absolute;
+/* ===== READY ===== */
+.tile.ready{
+  background:#f1c40f;
+  color:#000;
+}
+
+/* ===== CROP MENU ===== */
+.crop-menu{
+  position:fixed;
   bottom:0;
   left:0;
-  height:6px;
-  background:#f1c40f;
-  border-radius:0 0 14px 14px;
+  right:0;
+  background:#111;
+  padding:15px;
+  display:none;
+  border-radius:20px 20px 0 0;
+}
+
+.crop{
+  background:#222;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:8px;
+  color:#fff;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div id="content"></div>
-<div class="nav-bar">
+<div class="farm" id="farm"></div>
 
-  <div class="nav-btn" onclick="goPage('الإعدادات',this)">
-    <div class="icon">⚙️</div>
-    الإعدادات
-  </div>
+<!-- اختيار المحصول -->
+<div class="crop-menu" id="cropMenu">
+  <div class="crop" onclick="plant('قمح',5)">🌾 قمح (5 دقائق)</div>
+  <div class="crop" onclick="plant('جزر',10)">🥕 جزر (10 دقائق)</div>
+  <div class="crop" onclick="plant('فلفل',15)">🌶️ فلفل (15 دقيقة)</div>
+</div>
 
-  <div class="nav-btn" onclick="goPage('VIP',this)">
-    <div class="icon">⭐</div>
-    VIP
-  </div>
+<script>
+const farm=document.getElementById("farm");
+const cropMenu=document.getElementById("cropMenu");
 
-  <div class="nav-btn" onclick="goPage('المحفظة',this)">
-    <div class="icon">💼</div>
-    المحفظة
-  </div>
+let tiles=[
+  {state:"empty", end:0},
+  {state:"empty", end:0},
+  {state:"empty", end:0},
+  {state:"empty", end:0},
+  {state:"empty", end:0},
+  {state:"empty", end:0},
+];
 
-  <div class="nav-btn home-btn active" onclick="goPage('الرئيسية',this)">
-    <div class="icon">🏠</div>
-    الرئيسية
-  </div>
+let selectedTile=null;
 
-  <div class="nav-btn" onclick="goPage('المهام',this)">
-    <div class="icon">📋</div>
-    المهام
-  </div>
-
-  <div class="nav-btn" onclick="goPage('الإحالة',this)">
-    <div class="icon">👥</div>
-    الإحالة
-  </div>
-
-  <div class="nav-btn" onclick="goPage('السجلات',this)">
-    <div class="icon">🧾</div>
-    السجلات
-  </div>
-
-    </div>
-    <script>
-Telegram.WebApp.ready();
-
-/* ===== STATE ===== */
-let state = JSON.parse(localStorage.getItem("winhive")) || {
-  points:0,
-  vip:0,
-  plots:[
-    {crop:null,end:0},
-    {crop:null,end:0},
-    {crop:null,end:0},
-    {crop:null,end:0},
-    {crop:null,end:0},
-    {crop:null,end:0},
-  ],
-  task:{type:"harvest",target:5,progress:0,reward:50}
-};
-
-/* ===== CROPS ===== */
-const crops={
-  wheat:{name:"قمح",time:300},
-  carrot:{name:"جزر",time:600},
-  pepper:{name:"فلفل",time:900},
-  grape:{name:"عنب",time:1200},
-  rocket:{name:"جرجير",time:1800},
-};
-    /* ===== PAGES ===== */
-function renderHome(){
-  let html=`
-  <div class="card">👑 VIP: ${state.vip} | 💰 النقاط: ${state.points}</div>
-
-  <div class="card">
-    <h3>🌾 المزرعة</h3>
-    <div class="farm" id="farm"></div>
-  </div>
-
-  <div class="card">
-    🎯 المهمة الحالية:<br>
-    احصد ${state.task.target} مرات<br>
-    التقدم: ${state.task.progress}/${state.task.target}<br>
-    المكافأة: ${state.task.reward} نقطة
-  </div>
-  `;
-  content.innerHTML=html;
-  initFarm();
-}
-
-function renderSimple(text){
-  content.innerHTML=`<div class="card">${text} (قيد التطوير)</div>`;
-}
-
-/* ===== NAV ===== */
-function goPage(name,el){
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  if(name==="الرئيسية") renderHome();
-  else renderSimple(name);
-}
-
-/* ===== FARM ===== */
-function initFarm(){
-  const farm=document.getElementById("farm");
-  if(!farm) return;
+function render(){
   farm.innerHTML="";
-  state.plots.forEach((p,i)=>{
-    const locked = i>0 && state.vip<i;
+  tiles.forEach((t,i)=>{
     const d=document.createElement("div");
-    d.className="plot"+(locked?" locked":"");
+    d.className="tile";
 
-    if(locked){
-      d.innerText="🔒 VIP";
-    }else if(!p.crop){
-      d.innerText="➕ ازرع قمح";
-      d.onclick=()=>plant(i,"wheat");
-    }else{
-      const left=p.end-Date.now();
+    if(t.state==="empty"){
+      d.innerText="أرض فارغة";
+      d.onclick=()=>{
+        selectedTile=i;
+        cropMenu.style.display="block";
+      };
+    }
+
+    if(t.state==="planted"){
+      const left=Math.ceil((t.end-Date.now())/1000);
       if(left<=0){
-        d.innerText="🌾 احصد";
-        d.onclick=()=>harvest(i);
+        t.state="ready";
       }else{
-        d.innerText=Math.ceil(left/1000)+"ث";
-        const pr=document.createElement("div");
-        pr.className="progress";
-        pr.style.width=((1-left/p.time)*100)+"%";
-        d.appendChild(pr);
+        d.classList.add("planted");
+        d.innerText="⏳ "+left+"ث";
       }
     }
+
+    if(t.state==="ready"){
+      d.classList.add("ready");
+      d.innerText="🌾 احصد";
+      d.onclick=()=>{
+        tiles[i]={state:"empty",end:0};
+        render();
+      };
+    }
+
     farm.appendChild(d);
   });
 }
 
-/* ===== ACTIONS ===== */
-function plant(i,c){
-  state.plots[i]={crop:c,end:Date.now()+crops[c].time*1000,time:crops[c].time*1000};
-  save();
+function plant(name,min){
+  tiles[selectedTile]={
+    state:"planted",
+    end:Date.now()+min*60*1000
+  };
+  cropMenu.style.display="none";
+  render();
 }
 
-function harvest(i){
-  state.plots[i]={crop:null,end:0};
-  state.points+=5;
-  state.task.progress++;
-
-  if(state.task.progress>=state.task.target){
-    state.points+=state.task.reward;
-    state.task={type:"harvest",target:10,progress:0,reward:100};
-  }
-  save();
-}
-
-function save(){
-  localStorage.setItem("winhive",JSON.stringify(state));
-  renderHome();
-}
-
-/* ===== START ===== */
-renderHome();
-setInterval(initFarm,1000);
+setInterval(render,1000);
+render();
 </script>
 
 </body>
-</html>  
+</html>
