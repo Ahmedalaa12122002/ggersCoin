@@ -3,145 +3,233 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WinHive Farm</title>
+<title>WinHive</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-body{
-  background:#2ecc71;
-  margin:0;
-  font-family:system-ui;
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#000;color:#fff;overflow:hidden}
+
+#content{
+ height:calc(100vh - 110px);
+ overflow-y:auto;
+ padding:15px;
+ transition:.3s
 }
 
-/* ===== FARM GRID ===== */
+/* ===== NAV BAR ===== */
+.nav-bar{
+ position:fixed;
+ bottom:0;
+ width:100%;
+ height:110px;
+ background:rgba(15,15,15,.97);
+ display:flex;
+ justify-content:space-around;
+ align-items:center;
+ border-top:1px solid #222;
+}
+.nav-btn{
+ width:58px;height:58px;border-radius:50%;
+ background:#141414;color:#aaa;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ font-size:11px;transition:.25s
+}
+.nav-btn .icon{font-size:20px}
+.nav-btn.active{
+ color:#fff;
+ box-shadow:0 0 18px rgba(255,200,0,.35)
+}
+.home-btn{width:80px;height:80px;margin-top:-18px}
+.home-btn .icon{font-size:30px}
+.nav-btn:active{transform:scale(.92)}
+
+/* ===== FARM ===== */
 .farm{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  gap:12px;
-  padding:20px;
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:12px;
+ margin-top:20px
+}
+.land{
+ background:#1a1a1a;
+ border-radius:14px;
+ height:100px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ text-align:center;
+ cursor:pointer;
+ position:relative
+}
+.locked{opacity:.3}
+.progress{
+ position:absolute;
+ bottom:6px;
+ width:80%;
+ height:6px;
+ background:#333;
+ border-radius:10px;
+ overflow:hidden
+}
+.progress div{
+ height:100%;
+ background:#f5b400;
+ width:0%
 }
 
-/* ===== TILE ===== */
-.tile{
-  background:#8e5a2b;
-  border-radius:10px;
-  height:90px;
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  font-size:14px;
-  cursor:pointer;
+/* ===== CARD ===== */
+.card{
+ background:#121212;
+ border-radius:18px;
+ padding:15px;
+ margin-top:15px;
+ box-shadow:0 0 25px rgba(255,200,0,.15)
 }
-
-/* ===== PLANTED ===== */
-.tile.planted{
-  background:#6ab04c;
+.btn{
+ background:#1c1c1c;
+ padding:12px;
+ border-radius:14px;
+ text-align:center;
+ margin-top:10px;
+ cursor:pointer
 }
-
-/* ===== READY ===== */
-.tile.ready{
-  background:#f1c40f;
-  color:#000;
-}
-
-/* ===== CROP MENU ===== */
-.crop-menu{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#111;
-  padding:15px;
-  display:none;
-  border-radius:20px 20px 0 0;
-}
-
-.crop{
-  background:#222;
-  padding:12px;
-  border-radius:12px;
-  margin-bottom:8px;
-  color:#fff;
-  cursor:pointer;
+.btn.glow{
+ box-shadow:0 0 18px rgba(255,200,0,.4)
 }
 </style>
 </head>
 
 <body>
 
-<div class="farm" id="farm"></div>
+<div id="content"></div>
 
-<!-- اختيار المحصول -->
-<div class="crop-menu" id="cropMenu">
-  <div class="crop" onclick="plant('قمح',5)">🌾 قمح (5 دقائق)</div>
-  <div class="crop" onclick="plant('جزر',10)">🥕 جزر (10 دقائق)</div>
-  <div class="crop" onclick="plant('فلفل',15)">🌶️ فلفل (15 دقيقة)</div>
+<div class="nav-bar">
+ <div class="nav-btn" onclick="go('السجلات',this)"><div class="icon">🧾</div>السجلات</div>
+ <div class="nav-btn" onclick="go('الإحالة',this)"><div class="icon">👥</div>الإحالة</div>
+ <div class="nav-btn" onclick="go('المهام',this)"><div class="icon">📋</div>المهام</div>
+ <div class="nav-btn home-btn active" onclick="go('الرئيسية',this)"><div class="icon">🏠</div>الرئيسية</div>
+ <div class="nav-btn" onclick="go('المحفظة',this)"><div class="icon">💼</div>المحفظة</div>
+ <div class="nav-btn" onclick="go('VIP',this)"><div class="icon">⭐</div>VIP</div>
+ <div class="nav-btn" onclick="go('الإعدادات',this)"><div class="icon">⚙️</div>الإعدادات</div>
 </div>
 
 <script>
-const farm=document.getElementById("farm");
-const cropMenu=document.getElementById("cropMenu");
+Telegram.WebApp.ready();
 
-let tiles=[
-  {state:"empty", end:0},
-  {state:"empty", end:0},
-  {state:"empty", end:0},
-  {state:"empty", end:0},
-  {state:"empty", end:0},
-  {state:"empty", end:0},
-];
+/* ===== DATA ===== */
+let points = 0;
+let vip = 0;
+let task = {type:"harvest", target:3, progress:0, reward:50};
 
-let selectedTile=null;
+const crops = {
+ wheat:{name:"قمح 🌾",time:5},
+ carrot:{name:"جزر 🥕",time:10},
+ pepper:{name:"فلفل 🌶️",time:15}
+};
 
-function render(){
-  farm.innerHTML="";
-  tiles.forEach((t,i)=>{
-    const d=document.createElement("div");
-    d.className="tile";
+let lands = Array(6).fill().map((_,i)=>({
+ state: i===0 ? "empty":"locked",
+ crop:null,
+ end:0
+}));
 
-    if(t.state==="empty"){
-      d.innerText="أرض فارغة";
-      d.onclick=()=>{
-        selectedTile=i;
-        cropMenu.style.display="block";
-      };
-    }
-
-    if(t.state==="planted"){
-      const left=Math.ceil((t.end-Date.now())/1000);
-      if(left<=0){
-        t.state="ready";
-      }else{
-        d.classList.add("planted");
-        d.innerText="⏳ "+left+"ث";
-      }
-    }
-
-    if(t.state==="ready"){
-      d.classList.add("ready");
-      d.innerText="🌾 احصد";
-      d.onclick=()=>{
-        tiles[i]={state:"empty",end:0};
-        render();
-      };
-    }
-
-    farm.appendChild(d);
-  });
+function vipData(){
+ return {lands:1+vip, speed:1-(vip*0.02)};
 }
 
-function plant(name,min){
-  tiles[selectedTile]={
-    state:"planted",
-    end:Date.now()+min*60*1000
-  };
-  cropMenu.style.display="none";
-  render();
+/* ===== HOME ===== */
+function home(){
+ let html = `
+ <div class="card">
+ <div style="display:flex;justify-content:space-between">
+ <div>👑 VIP: ${vip}</div>
+ <div>💰 النقاط: ${points}</div>
+ </div>
+ <h2 style="text-align:center;margin:10px 0">WinHive 🌾</h2>
+ </div>
+
+ <div class="card">
+ <b>🎯 المهمة الحالية:</b><br>
+ ${task.type==="harvest"?"احصد":"ازرع"} ${task.target} مرات<br>
+ التقدم: ${task.progress}/${task.target}<br>
+ المكافأة: ${task.reward} نقطة
+ </div>
+
+ <div class="farm">
+ `;
+
+ lands.forEach((l,i)=>{
+  if(i>=vipData().lands) html+=`<div class="land locked">🔒</div>`;
+  else if(l.state==="empty") html+=`<div class="land" onclick="openPlant(${i})">🌱<br>ازرع</div>`;
+  else if(l.state==="planted"){
+   let p = Math.min(100,((Date.now()-(l.end-60000))/(60000))*100);
+   html+=`
+   <div class="land">
+    ${l.crop.name}
+    <div class="progress"><div style="width:${p}%"></div></div>
+   </div>`;
+  }else html+=`<div class="land" onclick="harvest(${i})">🌾<br>احصد</div>`;
+ });
+
+ html+="</div>";
+ return html;
 }
 
-setInterval(render,1000);
-render();
+/* ===== ACTIONS ===== */
+function openPlant(i){
+ let menu = "<div class='card'><b>اختر محصول:</b>";
+ Object.keys(crops).forEach(c=>{
+  menu+=`<div class='btn' onclick="plant(${i},'${c}')">${crops[c].name}</div>`;
+ });
+ menu+="</div>";
+ content.innerHTML = home()+menu;
+}
+
+function plant(i,c){
+ let t = crops[c].time*60000*vipData().speed;
+ lands[i]={state:"planted",crop:crops[c],end:Date.now()+t};
+ taskProgress("plant");
+ content.innerHTML=home();
+ setTimeout(()=>{
+  if(lands[i].state==="planted") lands[i].state="ready";
+  content.innerHTML=home();
+ },t);
+}
+
+function harvest(i){
+ lands[i]={state:"empty",crop:null,end:0};
+ points+=5;
+ taskProgress("harvest");
+ content.innerHTML=home();
+}
+
+/* ===== TASK ===== */
+function taskProgress(type){
+ if(task.type!==type) return;
+ task.progress++;
+ if(task.progress>=task.target){
+  points+=task.reward;
+  task={type:"harvest",target:5,progress:0,reward:80};
+ }
+}
+
+/* ===== NAV ===== */
+function go(name,el){
+ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+ el.classList.add('active');
+ if(name==="الرئيسية") content.innerHTML=home();
+ else if(name==="VIP") content.innerHTML=`<div class="card">
+ <h3>⭐ VIP</h3>
+ مستواك: ${vip}<br>
+ <div class="btn glow" onclick="vip++">ترقية VIP (تجربة)</div>
+ </div>`;
+ else content.innerHTML=`<div class="card">${name}</div>`;
+}
+
+/* START */
+content.innerHTML = home();
 </script>
 
 </body>
