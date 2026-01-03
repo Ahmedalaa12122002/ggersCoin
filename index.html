@@ -8,70 +8,52 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:system-ui;
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#000;color:#fff;overflow:hidden}
+
+#app{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
 }
 
-body{
-  background:#000;
-  color:#fff;
-  overflow:hidden;
-}
-
-/* ===== CONTENT ===== */
 #content{
-  height:calc(100vh - 110px);
+  flex:1;
   padding:15px;
   overflow:auto;
 }
 
-/* ===== NAV BAR ===== */
-.nav-bar{
-  position:fixed;
-  bottom:0;
-  width:100%;
+/* ===== NAV ===== */
+.nav{
   height:110px;
-  background:rgba(15,15,15,.96);
+  background:#0f0f0f;
+  border-top:1px solid #222;
   display:flex;
   justify-content:space-around;
   align-items:center;
-  border-top:1px solid #222;
 }
 
-/* ===== NAV BUTTON ===== */
 .nav-btn{
-  width:56px;
-  height:56px;
+  width:56px;height:56px;
   border-radius:50%;
   background:#141414;
+  color:#aaa;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  color:#aaa;
   font-size:11px;
-  transition:.25s;
 }
 
-.nav-btn span{
-  font-size:18px;
-}
+.nav-btn span{font-size:18px}
 
-/* ===== HOME BUTTON ===== */
 .nav-btn.home{
-  width:78px;
-  height:78px;
+  width:78px;height:78px;
   margin-top:-18px;
 }
 
-.nav-btn.home span{
-  font-size:28px;
-}
+.nav-btn.home span{font-size:28px}
 
-/* ===== ACTIVE ===== */
 .nav-btn.active{
   color:#fff;
   box-shadow:0 0 16px rgba(255,200,0,.35);
@@ -81,306 +63,23 @@ body{
 
 <body>
 
-<!-- ===== MAIN CONTENT ===== -->
-<div id="content"></div>
-
-<!-- ===== NAV BAR ===== -->
-<div class="nav-bar">
-
-  <div class="nav-btn" onclick="goPage('settings',this)">
-    <span>⚙️</span>
-    الإعدادات
+<div id="app">
+  <div id="content">
+    <!-- الصفحات تُحقن هنا -->
   </div>
 
-  <div class="nav-btn" onclick="goPage('vip',this)">
-    <span>⭐</span>
-    VIP
+  <div class="nav">
+    <div class="nav-btn" data-page="settings"><span>⚙️</span>الإعدادات</div>
+    <div class="nav-btn" data-page="vip"><span>⭐</span>VIP</div>
+    <div class="nav-btn" data-page="wallet"><span>💼</span>المحفظة</div>
+    <div class="nav-btn home active" data-page="home"><span>🏠</span>الرئيسية</div>
+    <div class="nav-btn" data-page="tasks"><span>📋</span>المهام</div>
+    <div class="nav-btn" data-page="referral"><span>👥</span>الإحالة</div>
+    <div class="nav-btn" data-page="logs"><span>🧾</span>السجلات</div>
   </div>
-
-  <div class="nav-btn" onclick="goPage('wallet',this)">
-    <span>💼</span>
-    المحفظة
-  </div>
-
-  <div class="nav-btn home active" onclick="goPage('home',this)">
-    <span>🏠</span>
-    الرئيسية
-  </div>
-
-  <div class="nav-btn" onclick="goPage('tasks',this)">
-    <span>📋</span>
-    المهام
-  </div>
-
-  <div class="nav-btn" onclick="goPage('ref',this)">
-    <span>👥</span>
-    الإحالة
-  </div>
-
-  <div class="nav-btn" onclick="goPage('logs',this)">
-    <span>🧾</span>
-    السجلات
-  </div>
-
-</div>
-<style>
-/* ===== FARM UI ===== */
-.farm{
-  background:#0f0f0f;
-  border-radius:18px;
-  padding:15px;
-  box-shadow:0 0 22px rgba(255,200,0,.15);
-}
-
-.farm-header{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:10px;
-  font-size:14px;
-}
-
-.land-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-
-.land{
-  background:#3b2a1a;
-  border-radius:14px;
-  height:95px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  position:relative;
-}
-
-.land.locked{
-  background:#1a1a1a;
-  opacity:.5;
-}
-
-.land.ready{
-  background:#f1c40f;
-  color:#000;
-}
-
-.land .time{
-  font-size:11px;
-  margin-top:4px;
-  opacity:.8;
-}
-
-/* ===== CROP MENU ===== */
-#cropMenu{
-  position:fixed;
-  bottom:110px;
-  left:0; right:0;
-  background:#111;
-  padding:15px;
-  border-radius:20px 20px 0 0;
-  display:none;
-  z-index:20;
-}
-
-.crop-btn{
-  background:#1c1c1c;
-  padding:12px;
-  border-radius:14px;
-  margin-bottom:8px;
-  text-align:center;
-  cursor:pointer;
-}
-</style>
-
-<!-- ===== HOME PAGE CONTENT ===== -->
-<div id="homePage" style="display:block">
-
-  <div class="farm">
-    <div class="farm-header">
-      <div>👑 VIP: <span id="vipLevel">0</span></div>
-      <div>💰 النقاط: <span id="points">0</span></div>
-    </div>
-
-    <div class="land-grid" id="landGrid">
-      <!-- الأراضي سيتم توليدها بالـ JS -->
-    </div>
-  </div>
-
 </div>
 
-<!-- ===== CROP MENU ===== -->
-<div id="cropMenu">
-  <div class="crop-btn" onclick="selectCrop('wheat')">🌾 قمح (5 دقائق)</div>
-  <div class="crop-btn" onclick="selectCrop('carrot')">🥕 جزر (10 دقائق)</div>
-  <div class="crop-btn" onclick="selectCrop('pepper')">🌶️ فلفل (15 دقيقة)</div>
-  <div class="crop-btn" onclick="closeCropMenu()">إلغاء</div>
-  </div>
-  <script>
-/* =========================
-   TELEGRAM INIT
-========================= */
-if (window.Telegram && Telegram.WebApp) {
-  Telegram.WebApp.ready();
-}
-
-/* =========================
-   PAGE STATE
-========================= */
-let currentPage = "home";
-
-/* =========================
-   PLAYER STATE
-========================= */
-let state = JSON.parse(localStorage.getItem("winhive")) || {
-  points: 0,
-  vip: 0,
-  lands: [
-    {state:"empty", crop:null, end:0},
-    {state:"locked", crop:null, end:0},
-    {state:"locked", crop:null, end:0},
-    {state:"locked", crop:null, end:0},
-    {state:"locked", crop:null, end:0},
-    {state:"locked", crop:null, end:0}
-  ]
-};
-
-const crops = {
-  wheat:  {name:"قمح 🌾", time:5, reward:5},
-  carrot: {name:"جزر 🥕", time:10, reward:10},
-  pepper: {name:"فلفل 🌶️", time:15, reward:15}
-};
-
-let selectedLand = null;
-
-/* =========================
-   SAVE
-========================= */
-function save(){
-  localStorage.setItem("winhive", JSON.stringify(state));
-}
-
-/* =========================
-   NAVIGATION
-========================= */
-function goPage(page, el){
-  currentPage = page;
-
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-
-  document.getElementById("content").innerHTML = "";
-
-  if(page === "home"){
-    document.getElementById("homePage").style.display = "block";
-    renderFarm();
-  }else{
-    document.getElementById("homePage").style.display = "none";
-    document.getElementById("content").innerHTML =
-      `<div style="padding:20px">${page} — قيد التطوير</div>`;
-  }
-}
-
-/* =========================
-   FARM RENDER
-========================= */
-function renderFarm(){
-  if(currentPage !== "home") return;
-
-  document.getElementById("points").innerText = state.points;
-  document.getElementById("vipLevel").innerText = state.vip;
-
-  const grid = document.getElementById("landGrid");
-  grid.innerHTML = "";
-
-  state.lands.forEach((land,i)=>{
-    const div = document.createElement("div");
-    div.className = "land";
-
-    if(i > state.vip){
-      div.classList.add("locked");
-      div.innerText = "🔒 VIP";
-      grid.appendChild(div);
-      return;
-    }
-
-    if(land.state === "empty"){
-      div.innerHTML = "🌱<div class='time'>ازرع</div>";
-      div.onclick = ()=>openCropMenu(i);
-    }
-    else if(land.state === "planted"){
-      const left = Math.ceil((land.end - Date.now())/1000);
-      if(left <= 0){
-        land.state = "ready";
-        div.classList.add("ready");
-        div.innerHTML = "🌾<div class='time'>احصد</div>";
-        div.onclick = ()=>harvest(i);
-      }else{
-        div.innerHTML = "⏳<div class='time'>"+left+"ث</div>";
-      }
-    }
-    else if(land.state === "ready"){
-      div.classList.add("ready");
-      div.innerHTML = "🌾<div class='time'>احصد</div>";
-      div.onclick = ()=>harvest(i);
-    }
-
-    grid.appendChild(div);
-  });
-}
-
-/* =========================
-   CROP MENU
-========================= */
-function openCropMenu(i){
-  selectedLand = i;
-  document.getElementById("cropMenu").style.display = "block";
-}
-
-function closeCropMenu(){
-  document.getElementById("cropMenu").style.display = "none";
-  selectedLand = null;
-}
-
-function selectCrop(type){
-  if(selectedLand === null) return;
-
-  const crop = crops[type];
-  state.lands[selectedLand] = {
-    state:"planted",
-    crop:type,
-    end: Date.now() + crop.time*60000
-  };
-
-  closeCropMenu();
-  save();
-  renderFarm();
-}
-
-/* =========================
-   HARVEST
-========================= */
-function harvest(i){
-  const crop = crops[state.lands[i].crop];
-  state.points += crop.reward;
-  state.lands[i] = {state:"empty", crop:null, end:0};
-  save();
-  renderFarm();
-}
-
-/* =========================
-   AUTO UPDATE
-========================= */
-setInterval(renderFarm,1000);
-
-/* =========================
-   START
-========================= */
-renderFarm();
-</script>
-
+<script src="core/navigation.js"></script>
+<script src="app.js"></script>
 </body>
-  </html>
-  
+</html>
