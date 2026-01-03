@@ -3,7 +3,7 @@
 ============================== */
 
 // ضع رابط إعلان Adsterra هنا
-const AD_URL = "https://your-adsterra-link.com";
+const AD_URL = "https://pawsdefenseneigh.com/xa6hxitj8?key=c397b45c85287f66ee0e7d20c596ecea";
 
 // حالة المزرعة (مؤقتة بدون قاعدة بيانات)
 let farmState = {
