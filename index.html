@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WinHive</title>
-
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
@@ -26,7 +25,6 @@ body{
   height:calc(100vh - 110px);
   padding:15px;
   overflow:auto;
-  transition:opacity .3s ease;
 }
 
 /* ===== NAV BAR ===== */
@@ -79,7 +77,7 @@ body{
   box-shadow:0 0 18px rgba(255,200,0,.35);
 }
 
-/* ===== CARDS ===== */
+/* ===== CARD ===== */
 .card{
   background:#111;
   border-radius:18px;
@@ -96,8 +94,9 @@ body{
   margin-top:15px;
 }
 
+/* ===== LAND (IMPROVED) ===== */
 .land{
-  background:#1a1a1a;
+  background:linear-gradient(#6d4c2f, #4b2e1a);
   border-radius:14px;
   height:100px;
   display:flex;
@@ -106,10 +105,23 @@ body{
   text-align:center;
   cursor:pointer;
   position:relative;
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,.1),
+    inset 0 -4px 6px rgba(0,0,0,.4);
 }
 
 .land.locked{
-  opacity:.35;
+  background:linear-gradient(#2a2a2a,#111);
+  opacity:.5;
+}
+
+.land.planted{
+  background:linear-gradient(#5fbf65,#3c8d40);
+}
+
+.land.ready{
+  background:linear-gradient(#f1c40f,#d4a30a);
+  color:#000;
 }
 
 /* ===== PROGRESS ===== */
@@ -138,16 +150,11 @@ body{
   margin-top:10px;
   cursor:pointer;
 }
-
-.btn.glow{
-  box-shadow:0 0 18px rgba(255,200,0,.4);
-}
 </style>
 </head>
 
 <body>
 
-<!-- ===== MAIN CONTENT ===== -->
 <div id="content"></div>
 
 <!-- ===== NAV BAR ===== -->
@@ -189,10 +196,16 @@ body{
   </div>
 
 </div>
-<!-- ===== FARM UI (HOME PAGE) ===== -->
-<!-- سيتم التحكم فيها بالـ JS في الجزء 3 -->
+<!-- =========================
+     HOME PAGE HTML (STATIC)
+========================= -->
 
-<!-- ===== CROP SELECTION MENU ===== -->
+<!-- سيتم ملؤه ديناميكيًا بالـ JS -->
+<!-- content container موجود بالفعل -->
+
+<!-- =========================
+     CROP SELECTION MENU
+========================= -->
 <div id="cropMenu" style="
   position:fixed;
   bottom:110px;
@@ -225,13 +238,16 @@ body{
     </div>
   </div>
 </div>
-
-<!-- ===== END OF HTML BODY ===== -->
- <script>
-Telegram.WebApp.ready();
+<script>
+/* =========================
+   TELEGRAM INIT
+========================= */
+if (window.Telegram && Telegram.WebApp) {
+  Telegram.WebApp.ready();
+}
 
 /* =========================
-   GLOBAL STATE
+   STATE
 ========================= */
 let state = JSON.parse(localStorage.getItem("winhive")) || {
   points: 0,
@@ -256,12 +272,12 @@ const crops = {
 let selectedLand = null;
 
 /* =========================
-   VIP DATA
+   VIP INFO
 ========================= */
 function vipInfo(){
   return {
     lands: 1 + state.vip,
-    speed: 1 - (state.vip * 0.02)
+    speed: Math.max(0.7, 1 - (state.vip * 0.02))
   };
 }
 
@@ -270,10 +286,15 @@ function vipInfo(){
 ========================= */
 function goPage(page, el){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
+  if (el) el.classList.add('active');
 
-  if(page === "الرئيسية") renderHome();
-  else renderSimple(page);
+  if(page === "الرئيسية"){
+    renderHome();
+  } else if(page === "VIP"){
+    renderVIP();
+  } else {
+    renderSimple(page);
+  }
 }
 
 function renderSimple(name){
@@ -310,23 +331,34 @@ function renderHome(){
   state.lands.forEach((l,i)=>{
     if(i >= vipInfo().lands){
       html += `<div class="land locked">🔒 VIP</div>`;
-    }else if(l.state === "empty"){
+      return;
+    }
+
+    if(l.state === "empty"){
       html += `<div class="land" onclick="openCropMenu(${i})">🌱<br>ازرع</div>`;
-    }else if(l.state === "planted"){
+      return;
+    }
+
+    if(l.state === "planted"){
+      const total = crops[l.crop].time * 60;
       const left = Math.ceil((l.end - Date.now()) / 1000);
       if(left <= 0){
         state.lands[i].state = "ready";
         html += `<div class="land ready" onclick="harvest(${i})">🌾<br>احصد</div>`;
-      }else{
-        const percent = Math.min(100, 100 - (left / (crops[l.crop].time*60)) * 100);
+      } else {
+        const done = Math.max(0, total - left);
+        const percent = Math.min(100, (done / total) * 100);
         html += `
-          <div class="land">
-            ${crops[l.crop].name}<br>${left}ث
+          <div class="land planted">
+            🌱 ${crops[l.crop].name}<br>${left}ث
             <div class="progress"><div style="width:${percent}%"></div></div>
           </div>
         `;
       }
-    }else if(l.state === "ready"){
+      return;
+    }
+
+    if(l.state === "ready"){
       html += `<div class="land ready" onclick="harvest(${i})">🌾<br>احصد</div>`;
     }
   });
@@ -372,6 +404,12 @@ function selectCrop(type){
 function harvest(index){
   state.lands[index] = {state:"empty", crop:null, end:0};
   state.points += 5;
+
+  // تأثير بسيط
+  const c = document.getElementById("content");
+  c.style.transform = "scale(0.98)";
+  setTimeout(()=>c.style.transform="scale(1)",120);
+
   progressTask("harvest");
   saveState();
   renderHome();
@@ -396,6 +434,25 @@ function progressTask(type){
 }
 
 /* =========================
+   VIP PAGE
+========================= */
+function renderVIP(){
+  document.getElementById("content").innerHTML = `
+    <div class="card">
+      <h2>⭐ VIP</h2>
+      <p>مستواك الحالي: VIP ${state.vip}</p>
+      <div class="btn glow" onclick="upgradeVIP()">ترقية VIP (تجربة)</div>
+    </div>
+  `;
+}
+
+function upgradeVIP(){
+  state.vip = Math.min(10, state.vip + 1);
+  saveState();
+  renderVIP();
+}
+
+/* =========================
    SAVE
 ========================= */
 function saveState(){
@@ -403,15 +460,36 @@ function saveState(){
 }
 
 /* =========================
-   AUTO UPDATE
+   SAFE START & REFRESH
 ========================= */
-setInterval(renderHome, 1000);
+document.addEventListener("DOMContentLoaded", () => {
+  renderHome();
+});
 
-/* =========================
-   START
-========================= */
-renderHome();
+setInterval(() => {
+  const homeBtn = document.querySelector(".nav-btn.home-btn.active");
+  if(homeBtn){
+    renderHome();
+  }
+}, 1000);
 </script>
 
 </body>
- </html>
+  </html>
+  <style>
+/* ===== CROP ICONS ===== */
+.crop{
+  font-size:26px;
+  line-height:1;
+}
+
+/* حالات النبات */
+.crop.seed { opacity:.6; }
+.crop.grow { transform:scale(1.05); }
+.crop.ready { transform:scale(1.1); }
+
+/* ألوان خفيفة حسب المحصول */
+.land.wheat  { box-shadow: inset 0 -6px 10px rgba(241,196,15,.25); }
+.land.carrot { box-shadow: inset 0 -6px 10px rgba(230,126,34,.25); }
+.land.pepper { box-shadow: inset 0 -6px 10px rgba(231,76,60,.25); }
+              </style>
