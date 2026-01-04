@@ -9,18 +9,8 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:system-ui;
-}
-
-body{
-  background:#000;
-  color:#fff;
-  overflow:hidden;
-}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#000;color:#fff;overflow:hidden}
 
 /* ===== CONTENT ===== */
 #content{
@@ -31,100 +21,55 @@ body{
 
 /* ===== BOTTOM NAV ===== */
 .bottom-nav{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  height:110px;
+  position:fixed;bottom:0;left:0;width:100%;height:110px;
   background:rgba(15,15,15,.96);
   backdrop-filter:blur(14px);
   border-top:1px solid #222;
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
+  display:flex;justify-content:space-around;align-items:center;
   z-index:999;
 }
 
 .nav-btn{
-  width:58px;
-  height:58px;
-  border-radius:50%;
-  background:#141414;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  color:#aaa;
-  font-size:11px;
-  transition:all .25s ease;
-  position:relative;
-  overflow:hidden;
+  width:58px;height:58px;border-radius:50%;
+  background:#141414;color:#aaa;font-size:11px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:all .25s ease;position:relative;overflow:hidden;
 }
+.nav-btn .icon{font-size:20px;margin-bottom:3px}
 
-.nav-btn .icon{
-  font-size:20px;
-  margin-bottom:3px;
-}
+/* Home أكبر */
+.nav-btn.home{width:80px;height:80px;margin-top:-18px}
+.nav-btn.home .icon{font-size:30px}
 
-/* ===== HOME BUTTON ===== */
-.nav-btn.home{
-  width:80px;
-  height:80px;
-  margin-top:-18px;
-}
-
-.nav-btn.home .icon{
-  font-size:30px;
-}
-
-/* ===== ACTIVE ===== */
+/* Active */
 .nav-btn.active{
   color:#fff;
-  box-shadow:
-    0 0 16px rgba(255,200,0,.45),
-    0 0 32px rgba(255,200,0,.2);
+  box-shadow:0 0 16px rgba(255,200,0,.45), 0 0 32px rgba(255,200,0,.2);
 }
 
-/* ===== PRESS ===== */
-.nav-btn:active{
-  transform:scale(.92);
-}
+/* Press */
+.nav-btn:active{transform:scale(.92)}
 
-/* ===== RIPPLE ===== */
+/* Ripple */
 .nav-btn::after{
-  content:"";
-  position:absolute;
-  inset:0;
+  content:"";position:absolute;inset:0;opacity:0;transition:.3s;
   background:radial-gradient(circle,
     rgba(255,220,120,.35) 0%,
     rgba(255,220,120,.15) 35%,
     transparent 60%);
-  opacity:0;
-  transition:.3s;
 }
+.nav-btn:active::after{opacity:1}
 
-.nav-btn:active::after{
-  opacity:1;
-}
-
-/* ===== PAGE TRANSITIONS ===== */
-.page-exit{
-  opacity:0;
-  transform:translateY(10px);
-}
-
-.page-enter{
-  opacity:1;
-  transform:translateY(0);
-}
+/* Page transitions */
+.page-exit{opacity:0;transform:translateY(10px)}
+.page-enter{opacity:1;transform:translateY(0)}
 </style>
 </head>
 
 <body>
 
-<!-- ===== CONTENT ===== -->
 <div id="content"></div>
 
-<!-- ===== NAV ===== -->
 <div class="bottom-nav">
   <div class="nav-btn"><div class="icon">⚙️</div>الإعدادات</div>
   <div class="nav-btn"><div class="icon">⭐</div>VIP</div>
@@ -135,8 +80,9 @@ body{
   <div class="nav-btn"><div class="icon">🧾</div>السجلات</div>
 </div>
 
-<!-- ===== GAME ===== -->
+<!-- تحميل منطق الصفحة الرئيسية -->
 <script src="pages/home.js"></script>
+<!-- مدير التنقل -->
 <script src="main.js"></script>
 
 <script>
