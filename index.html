@@ -152,3 +152,82 @@
 
 </body>
     </html>
+<!-- =====================================================
+     PART 7 — NAVIGATION EFFECTS (VISUAL ONLY)
+     (NO LOGIC — NO FUNCTION REDEFINITION)
+===================================================== -->
+<style>
+  /* انتقال ناعم لمحتوى الصفحات */
+  #content{
+    transition: opacity .35s ease, transform .35s ease;
+  }
+
+  /* زر القوائم */
+  .nav-btn{
+    position:relative;
+    overflow:hidden;
+    transition:
+      transform .2s ease,
+      box-shadow .25s ease,
+      background .25s ease;
+  }
+
+  /* توهج الزر النشط (ثابت) */
+  .nav-btn.active{
+    background:#141414;
+    box-shadow:
+      0 0 14px rgba(255,200,0,.45),
+      0 0 28px rgba(255,200,0,.20);
+  }
+
+  /* تأثير الضغط */
+  .nav-btn:active{
+    transform:scale(.92);
+  }
+
+  /* Ripple Effect */
+  .nav-btn::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(
+      circle,
+      rgba(255,220,120,.35) 0%,
+      rgba(255,220,120,.15) 30%,
+      transparent 60%
+    );
+    opacity:0;
+    transition:opacity .3s ease;
+    pointer-events:none;
+  }
+
+  .nav-btn:active::after{
+    opacity:1;
+  }
+
+  /* زر الرئيسية توهج أقوى */
+  .nav-btn.home.active{
+    box-shadow:
+      0 0 20px rgba(255,200,0,.6),
+      0 0 40px rgba(255,200,0,.25);
+  }
+</style>
+
+<script>
+/* انتقال بصري عند تبديل الصفحات */
+(function pageTransition(){
+  const content = document.getElementById("content");
+  if(!content) return;
+
+  const observer = new MutationObserver(()=>{
+    content.style.opacity = "0";
+    content.style.transform = "translateY(6px)";
+    requestAnimationFrame(()=>{
+      content.style.opacity = "1";
+      content.style.transform = "translateY(0)";
+    });
+  });
+
+  observer.observe(content, { childList:true });
+})();
+</script>
