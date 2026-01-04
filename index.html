@@ -6,125 +6,103 @@
 <title>WinHive</title>
 
 <style>
-body{
+*{
+  box-sizing:border-box;
   margin:0;
+  padding:0;
+  font-family: system-ui, -apple-system;
+}
+
+body{
   background:#000;
   color:#fff;
-  font-family:Arial;
+  overflow:hidden;
 }
 
+/* ===== Main Content ===== */
 #content{
-  min-height:80vh;
+  min-height:calc(100vh - 80px);
   padding:16px;
+  transition:opacity .25s ease, transform .25s ease;
 }
 
-/* ===== NAV BAR (RESPONSIVE FIXED) ===== */
-.nav{
+/* Page animation */
+.page-exit{
+  opacity:0;
+  transform:translateY(12px);
+}
+.page-enter{
+  opacity:0;
+  transform:translateY(-12px);
+}
+
+/* ===== Bottom Nav ===== */
+.navbar{
   position:fixed;
   bottom:0;
   left:0;
   right:0;
-  background:#0b0b0b;
+  height:80px;
+  background:#0a0a0a;
   display:flex;
-  justify-content:space-between;
+  justify-content:space-around;
   align-items:center;
-  padding:8px 6px;
   border-top:1px solid #222;
 }
 
-/* كل زر ياخد نفس العرض */
-.nav button{
+.nav-btn{
   flex:1;
-  background:none;
-  border:none;
+  text-align:center;
+  font-size:.8rem;
   color:#aaa;
-  cursor:pointer;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:4px;
-  padding:6px 0;
-  transition:all .25s ease;
-  min-width:0; /* مهم جدًا */
+  transition:.2s;
 }
 
-/* الأيقونة */
-.nav button .icon{
-  font-size:clamp(18px, 5vw, 22px);
-  line-height:1;
+.nav-btn span{
+  display:block;
+  font-size:1.6rem;
 }
 
-/* النص */
-.nav button .label{
-  font-size:clamp(10px, 2.5vw, 12px);
-  white-space:nowrap;
+.nav-btn.active{
+  color:#ffd54a;
+  text-shadow:0 0 8px rgba(255,213,74,.6);
 }
 
-/* الزر النشط */
-.nav button.active{
-  color:#ffd54f;
-  text-shadow:
-    0 0 6px rgba(255,213,79,.7),
-    0 0 12px rgba(255,213,79,.4);
+.nav-btn:active{
+  transform:scale(.92);
 }
 
-/* زر الرئيسية أكبر لكن بدون كسر التصميم */
-.nav button[data-page="home"].active{
-  transform:scale(1.15) translateY(-4px);
+/* Home bigger */
+.nav-btn.home span{
+  font-size:2.2rem;
 }
 
-/* تأثير ضغط */
-.nav button:active{
-  transform:scale(.9);
+/* ===== Simple Pages ===== */
+.page-box{
+  background:#111;
+  border-radius:14px;
+  padding:20px;
+  text-align:center;
+  margin-top:30px;
+  box-shadow:0 0 20px rgba(0,0,0,.5);
 }
 </style>
 </head>
 
 <body>
 
-<div id="content">⌛ جاري التحميل...</div>
+<div id="content"></div>
 
-<div class="nav">
-  <button data-page="settings" onclick="goPage('settings')">
-    <div class="icon">⚙️</div>
-    <div class="label">الإعدادات</div>
-  </button>
-
-  <button data-page="vip" onclick="goPage('vip')">
-    <div class="icon">👑</div>
-    <div class="label">VIP</div>
-  </button>
-
-  <button data-page="wallet" onclick="goPage('wallet')">
-    <div class="icon">💼</div>
-    <div class="label">المحفظة</div>
-  </button>
-
-  <button data-page="home" class="active" onclick="goPage('home')">
-    <div class="icon">🏠</div>
-    <div class="label">الرئيسية</div>
-  </button>
-
-  <button data-page="tasks" onclick="goPage('tasks')">
-    <div class="icon">📋</div>
-    <div class="label">المهام</div>
-  </button>
-
-  <button data-page="ref" onclick="goPage('ref')">
-    <div class="icon">👥</div>
-    <div class="label">الإحالة</div>
-  </button>
-
-  <button data-page="logs" onclick="goPage('logs')">
-    <div class="icon">🧾</div>
-    <div class="label">السجلات</div>
-  </button>
+<div class="navbar">
+  <div class="nav-btn" onclick="goPage('settings')"><span>⚙️</span>الإعدادات</div>
+  <div class="nav-btn" onclick="goPage('vip')"><span>👑</span>VIP</div>
+  <div class="nav-btn" onclick="goPage('wallet')"><span>💼</span>المحفظة</div>
+  <div class="nav-btn home active" onclick="goPage('home')"><span>🏠</span>الرئيسية</div>
+  <div class="nav-btn" onclick="goPage('tasks')"><span>📋</span>المهام</div>
+  <div class="nav-btn" onclick="goPage('ref')"><span>👥</span>الإحالة</div>
+  <div class="nav-btn" onclick="goPage('logs')"><span>📜</span>السجلات</div>
 </div>
 
-<script src="core/navigation.js"></script>
-<script src="core/timer.js"></script>
-<script src="pages/home.page.js"></script>
 <script src="main.js"></script>
-
 </body>
 </html>
