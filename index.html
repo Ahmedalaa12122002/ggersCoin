@@ -1,213 +1,110 @@
-/* =====================================================
-   WinHive — Home Page (Farm Game)
-   File: pages/home.page.js
-   STABLE VERSION — NO CONFLICTS
-===================================================== */
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>WinHive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-/* ================== CONSTANTS ================== */
-const FARM_STORAGE_KEY = "winhive_farm_state_v2";
-const TOTAL_PLOTS = 6;
-
-/* ================== CROPS ================== */
-const CROPS = [
-  { id: "wheat",  name: "قمح",   time: 300, reward: 1, icon: "🌱" },
-  { id: "carrot", name: "جزر",   time: 600, reward: 2, icon: "🥕" },
-  { id: "pepper", name: "فلفل",  time: 900, reward: 3, icon: "🌶️" },
-  { id: "grape",  name: "عنب",   time: 1200,reward: 4, icon: "🍇" },
-  { id: "rocket", name: "جرجير", time: 1800,reward: 5, icon: "🥬" }
-];
-
-/* ================== STATE ================== */
-let farmState = {
-  points: 0,
-  vip: 0,
-  plots: [],
-};
-
-/* ================== TIME ================== */
-function now() {
-  return Math.floor(Date.now() / 1000);
-}
-
-/* ================== STORAGE ================== */
-function saveFarm() {
-  localStorage.setItem(FARM_STORAGE_KEY, JSON.stringify(farmState));
-}
-
-function loadFarm() {
-  const raw = localStorage.getItem(FARM_STORAGE_KEY);
-  if (!raw) return false;
-  try {
-    const data = JSON.parse(raw);
-    if (!Array.isArray(data.plots)) return false;
-    farmState = data;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/* ================== INIT ================== */
-function initFarm() {
-  if (!loadFarm()) {
-    farmState.plots = [];
-    for (let i = 0; i < TOTAL_PLOTS; i++) {
-      farmState.plots.push({
-        cropId: null,
-        plantedAt: 0,
-        growTime: 0,
-      });
+  <!-- ====== Global Style ====== -->
+  <style>
+    body{
+      margin:0;
+      font-family:Tahoma, Arial, sans-serif;
+      background:#000;
+      color:#fff;
     }
-    saveFarm();
-  }
-}
 
-/* ================== VIP ================== */
-function isPlotUnlocked(index) {
-  return index < (1 + farmState.vip);
-}
+    #content{
+      min-height:calc(100vh - 90px);
+      padding:10px;
+      box-sizing:border-box;
+    }
 
-/* ================== GAME LOGIC ================== */
-function plant(plotIndex, crop) {
-  const plot = farmState.plots[plotIndex];
-  if (!plot || plot.cropId) return;
-  plot.cropId = crop.id;
-  plot.plantedAt = now();
-  plot.growTime = crop.time;
-  saveFarm();
-  renderHome();
-}
+    /* ====== Bottom Navigation ====== */
+    .nav-bar{
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      height:90px;
+      background:#0b0b0b;
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      border-top:1px solid #222;
+      z-index:999;
+    }
 
-function harvest(plotIndex) {
-  const plot = farmState.plots[plotIndex];
-  if (!plot || !plot.cropId) return;
+    .nav-btn{
+      text-align:center;
+      font-size:12px;
+      color:#aaa;
+      cursor:pointer;
+      transition:all .25s ease;
+    }
 
-  const elapsed = now() - plot.plantedAt;
-  if (elapsed < plot.growTime) return;
+    .nav-btn span{
+      display:block;
+      font-size:24px;
+      margin-bottom:4px;
+    }
 
-  const crop = CROPS.find(c => c.id === plot.cropId);
-  if (crop) farmState.points += crop.reward;
+    .nav-btn.active{
+      color:#ffd54f;
+      transform:translateY(-4px);
+    }
 
-  plot.cropId = null;
-  plot.plantedAt = 0;
-  plot.growTime = 0;
+    .nav-btn.active span{
+      filter:drop-shadow(0 0 6px #ffd54f);
+    }
 
-  saveFarm();
-  renderHome();
-}
+    .nav-btn:active{
+      transform:scale(.92);
+    }
 
-/* ================== UI ================== */
-function openPlantMenu(index) {
-  let html = `
-  <div id="plantMenu" style="
-    position:fixed;inset:0;
-    background:rgba(0,0,0,.85);
-    display:flex;justify-content:center;align-items:center;
-    z-index:9999">
-    <div style="background:#111;padding:16px;border-radius:14px;color:#fff">
-      <h3>اختر محصول</h3>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-  `;
+    /* ====== Simple Page Placeholder ====== */
+    .page-box{
+      background:#111;
+      padding:20px;
+      border-radius:14px;
+      text-align:center;
+      margin-top:20px;
+    }
+  </style>
+</head>
 
-  CROPS.forEach(c => {
-    html += `
-      <button onclick="plant(${index}, CROPS.find(x=>x.id==='${c.id}'))"
-        style="padding:8px;border-radius:10px;border:none;background:#222;color:#fff">
-        ${c.icon} ${c.name}<br>${Math.floor(c.time/60)} دقيقة
-      </button>
-    `;
-  });
+<body>
 
-  html += `
-      </div>
-      <button onclick="closePlantMenu()" style="margin-top:10px;background:none;border:none;color:#aaa">
-        إلغاء
-      </button>
+  <!-- ====== Main Content ====== -->
+  <div id="content">
+    <div class="page-box">⏳ يتم تحميل اللعبة...</div>
+  </div>
+
+  <!-- ====== Bottom Menu ====== -->
+  <div class="nav-bar">
+    <div class="nav-btn active" onclick="goHome()">
+      <span>🏡</span>الرئيسية
+    </div>
+    <div class="nav-btn" onclick="goTasks()">
+      <span>📋</span>المهام
+    </div>
+    <div class="nav-btn" onclick="goWallet()">
+      <span>💼</span>المحفظة
+    </div>
+    <div class="nav-btn" onclick="goVip()">
+      <span>👑</span>VIP
+    </div>
+    <div class="nav-btn" onclick="goSettings()">
+      <span>⚙️</span>الإعدادات
     </div>
   </div>
-  `;
 
-  document.body.insertAdjacentHTML("beforeend", html);
-}
+  <!-- ====== Game Pages ====== -->
+  <!-- ملف المزرعة (يرسم فقط) -->
+  <script src="pages/home.page.js"></script>
 
-function closePlantMenu() {
-  document.getElementById("plantMenu")?.remove();
-}
+  <!-- ملف التنقل والتحكم -->
+  <script src="main.js"></script>
 
-/* ================== RENDER ================== */
-function renderHome() {
-  const content = document.getElementById("content");
-  if (!content) return;
-
-  let html = `
-  <style>
-    .farm{max-width:420px;margin:auto}
-    .top{display:flex;justify-content:space-between;margin-bottom:10px}
-    .board{background:#4e8f3a;border-radius:20px;padding:12px;position:relative;height:420px}
-    .plot{
-      position:absolute;width:90px;height:80px;border-radius:14px;
-      background:#3e2a15;color:#fff;display:flex;align-items:center;justify-content:center;
-      box-shadow:inset 0 2px 4px rgba(255,255,255,.1),0 4px 8px rgba(0,0,0,.4);
-    }
-    .plot.locked{background:#333;opacity:.6}
-    .timer{position:absolute;top:-18px;background:#000;padding:2px 6px;border-radius:8px;font-size:11px}
-    .p0{top:30px;left:30px}
-    .p1{top:30px;right:30px}
-    .p2{top:170px;left:160px}
-    .p3{bottom:170px;left:30px}
-    .p4{bottom:170px;right:30px}
-    .p5{bottom:30px;left:160px}
-  </style>
-
-  <div class="farm">
-    <div class="top">
-      <div>💰 ${farmState.points}</div>
-      <div>👑 VIP ${farmState.vip}</div>
-    </div>
-    <div class="board">
-  `;
-
-  farmState.plots.forEach((plot, i) => {
-    if (!isPlotUnlocked(i)) {
-      html += `<div class="plot locked p${i}">🔒</div>`;
-      return;
-    }
-
-    if (!plot.cropId) {
-      html += `<div class="plot p${i}" onclick="openPlantMenu(${i})">🟫</div>`;
-      return;
-    }
-
-    const elapsed = now() - plot.plantedAt;
-    const remaining = plot.growTime - elapsed;
-
-    if (remaining > 0) {
-      html += `
-        <div class="plot p${i}">
-          <div class="timer">${remaining}s</div>
-          🌱
-        </div>`;
-    } else {
-      html += `
-        <div class="plot p${i}" onclick="harvest(${i})">
-          🌾
-        </div>`;
-    }
-  });
-
-  html += `</div></div>`;
-  content.innerHTML = html;
-
-  if (farmState.plots.some(p => p.cropId)) {
-    setTimeout(renderHome, 1000);
-  }
-}
-
-/* ================== BOOTSTRAP ================== */
-(function startHome(){
-  initFarm();
-  renderHome();
-})();
-
-/* ================== EXPORT ================== */
-window.renderHome = renderHome;
+</body>
+</html>
