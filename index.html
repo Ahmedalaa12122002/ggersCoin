@@ -3,107 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <title>WinHive</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- ====== Global Style ====== -->
   <style>
-    body{
-      margin:0;
-      font-family:Tahoma, Arial, sans-serif;
-      background:#000;
-      color:#fff;
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
     }
 
-    #content{
-      min-height:calc(100vh - 90px);
-      padding:10px;
-      box-sizing:border-box;
+    #content {
+      min-height: calc(100vh - 70px);
+      padding: 15px;
+      box-sizing: border-box;
     }
 
-    /* ====== Bottom Navigation ====== */
-    .nav-bar{
-      position:fixed;
-      bottom:0;
-      left:0;
-      right:0;
-      height:90px;
-      background:#0b0b0b;
-      display:flex;
-      justify-content:space-around;
-      align-items:center;
-      border-top:1px solid #222;
-      z-index:999;
+    /* Bottom Nav */
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: #0e0e0e;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid #222;
     }
 
-    .nav-btn{
-      text-align:center;
-      font-size:12px;
-      color:#aaa;
-      cursor:pointer;
-      transition:all .25s ease;
+    .nav-btn {
+      text-align: center;
+      font-size: 12px;
+      color: #aaa;
+      cursor: pointer;
+      transition: 0.2s;
     }
 
-    .nav-btn span{
-      display:block;
-      font-size:24px;
-      margin-bottom:4px;
+    .nav-btn.active {
+      color: #ffd54a;
+      text-shadow: 0 0 8px #ffd54a;
+      transform: scale(1.1);
     }
 
-    .nav-btn.active{
-      color:#ffd54f;
-      transform:translateY(-4px);
-    }
-
-    .nav-btn.active span{
-      filter:drop-shadow(0 0 6px #ffd54f);
-    }
-
-    .nav-btn:active{
-      transform:scale(.92);
-    }
-
-    /* ====== Simple Page Placeholder ====== */
-    .page-box{
-      background:#111;
-      padding:20px;
-      border-radius:14px;
-      text-align:center;
-      margin-top:20px;
+    .page-box {
+      background: #111;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 20px;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- ====== Main Content ====== -->
   <div id="content">
-    <div class="page-box">⏳ يتم تحميل اللعبة...</div>
+    ⏳ يتم تحميل اللعبة...
   </div>
 
-  <!-- ====== Bottom Menu ====== -->
-  <div class="nav-bar">
-    <div class="nav-btn active" onclick="goHome()">
-      <span>🏡</span>الرئيسية
-    </div>
-    <div class="nav-btn" onclick="goTasks()">
-      <span>📋</span>المهام
-    </div>
-    <div class="nav-btn" onclick="goWallet()">
-      <span>💼</span>المحفظة
-    </div>
-    <div class="nav-btn" onclick="goVip()">
-      <span>👑</span>VIP
-    </div>
-    <div class="nav-btn" onclick="goSettings()">
-      <span>⚙️</span>الإعدادات
-    </div>
+  <div class="nav">
+    <div class="nav-btn active" onclick="goHome()">🏠<br>الرئيسية</div>
+    <div class="nav-btn" onclick="goTasks()">📋<br>المهام</div>
+    <div class="nav-btn" onclick="goWallet()">💼<br>المحفظة</div>
+    <div class="nav-btn" onclick="goVip()">👑<br>VIP</div>
+    <div class="nav-btn" onclick="goSettings()">⚙️<br>الإعدادات</div>
   </div>
 
-  <!-- ====== Game Pages ====== -->
-  <!-- ملف المزرعة (يرسم فقط) -->
-  <script src="pages/home.page.js"></script>
-
-  <!-- ملف التنقل والتحكم -->
+  <!-- ⚠️ الترتيب مهم جدًا -->
+  <script src="home.page.js"></script>
   <script src="main.js"></script>
 
 </body>
