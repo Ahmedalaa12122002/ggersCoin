@@ -1,208 +1,213 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WinHive</title>
+/* =====================================================
+   WinHive — Home Page (Farm Game)
+   File: pages/home.page.js
+   STABLE VERSION — NO CONFLICTS
+===================================================== */
 
-<!-- Telegram Mini App -->
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+/* ================== CONSTANTS ================== */
+const FARM_STORAGE_KEY = "winhive_farm_state_v2";
+const TOTAL_PLOTS = 6;
 
-<style>
-/* =========================
-   GLOBAL RESET
-========================= */
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:system-ui,-apple-system;
+/* ================== CROPS ================== */
+const CROPS = [
+  { id: "wheat",  name: "قمح",   time: 300, reward: 1, icon: "🌱" },
+  { id: "carrot", name: "جزر",   time: 600, reward: 2, icon: "🥕" },
+  { id: "pepper", name: "فلفل",  time: 900, reward: 3, icon: "🌶️" },
+  { id: "grape",  name: "عنب",   time: 1200,reward: 4, icon: "🍇" },
+  { id: "rocket", name: "جرجير", time: 1800,reward: 5, icon: "🥬" }
+];
+
+/* ================== STATE ================== */
+let farmState = {
+  points: 0,
+  vip: 0,
+  plots: [],
+};
+
+/* ================== TIME ================== */
+function now() {
+  return Math.floor(Date.now() / 1000);
 }
 
-body{
-  background:#000;
-  color:#fff;
-  overflow:hidden;
+/* ================== STORAGE ================== */
+function saveFarm() {
+  localStorage.setItem(FARM_STORAGE_KEY, JSON.stringify(farmState));
 }
 
-/* =========================
-   CONTENT AREA
-========================= */
-#content{
-  position:relative;
-  height:calc(100vh - 100px);
-  overflow-y:auto;
-  z-index:1;
-  transition:opacity .25s ease, transform .25s ease;
-}
-
-#content.fade-out{
-  opacity:0;
-  transform:translateY(8px);
-}
-
-/* =========================
-   BOTTOM NAV BAR
-========================= */
-.nav-bar{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  height:100px;
-  background:rgba(15,15,15,.96);
-  backdrop-filter:blur(12px);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  border-top:1px solid #222;
-  z-index:99999;
-}
-
-/* =========================
-   NAV BUTTON
-========================= */
-.nav-btn{
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  background:#141414;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  color:#aaa;
-  font-size:11px;
-  cursor:pointer;
-  transition:all .25s ease;
-}
-
-.nav-btn .icon{
-  font-size:20px;
-  margin-bottom:3px;
-}
-
-/* =========================
-   HOME BUTTON (BIGGER)
-========================= */
-.nav-btn.home{
-  width:82px;
-  height:82px;
-  margin-top:-22px;
-}
-
-.nav-btn.home .icon{
-  font-size:30px;
-}
-
-/* =========================
-   ACTIVE EFFECT
-========================= */
-.nav-btn.active{
-  color:#fff;
-  box-shadow:
-    0 0 14px rgba(255,200,0,.6),
-    0 0 28px rgba(255,200,0,.2);
-  transform:scale(1.08);
-}
-
-/* =========================
-   PRESS EFFECT
-========================= */
-.nav-btn:active{
-  transform:scale(.92);
-}
-
-/* =========================
-   PAGE FADE
-========================= */
-.page{
-  animation:fadeIn .25s ease;
-}
-
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(8px)}
-  to{opacity:1;transform:none}
-}
-</style>
-</head>
-
-<body>
-
-<!-- =========================
-     CONTENT
-========================= -->
-<div id="content"></div>
-
-<!-- =========================
-     BOTTOM NAVIGATION
-========================= -->
-<div class="nav-bar">
-
-  <div class="nav-btn" data-page="settings">
-    <div class="icon">⚙️</div>
-    الإعدادات
-  </div>
-
-  <div class="nav-btn" data-page="vip">
-    <div class="icon">👑</div>
-    VIP
-  </div>
-
-  <div class="nav-btn" data-page="wallet">
-    <div class="icon">💼</div>
-    المحفظة
-  </div>
-
-  <div class="nav-btn home" data-page="home">
-    <div class="icon">🏠</div>
-    الرئيسية
-  </div>
-
-  <div class="nav-btn" data-page="tasks">
-    <div class="icon">📋</div>
-    المهام
-  </div>
-
-  <div class="nav-btn" data-page="referral">
-    <div class="icon">👥</div>
-    الإحالة
-  </div>
-
-  <div class="nav-btn" data-page="logs">
-    <div class="icon">🧾</div>
-    السجلات
-  </div>
-
-</div>
-
-<!-- =========================
-     SCRIPTS (ORDER IS CRITICAL)
-========================= -->
-
-<script>
-Telegram.WebApp.ready();
-Telegram.WebApp.expand();
-</script>
-
-<!-- ⚠️ مهم: home.page.js أولاً -->
-<script src="home.page.js"></script>
-
-<!-- ثم main.js -->
-<script src="main.js"></script>
-
-<!-- ✅ BOOT GUARANTEE -->
-<script>
-/*
-  ضمان تشغيل الصفحة الرئيسية بعد تحميل كل شيء
-  حتى لو فشل أي استدعاء سابق
-*/
-window.addEventListener("load", () => {
-  if (typeof navigateTo === "function") {
-    navigateTo("home");
+function loadFarm() {
+  const raw = localStorage.getItem(FARM_STORAGE_KEY);
+  if (!raw) return false;
+  try {
+    const data = JSON.parse(raw);
+    if (!Array.isArray(data.plots)) return false;
+    farmState = data;
+    return true;
+  } catch {
+    return false;
   }
-});
-</script>
+}
 
-</body>
-</html>
+/* ================== INIT ================== */
+function initFarm() {
+  if (!loadFarm()) {
+    farmState.plots = [];
+    for (let i = 0; i < TOTAL_PLOTS; i++) {
+      farmState.plots.push({
+        cropId: null,
+        plantedAt: 0,
+        growTime: 0,
+      });
+    }
+    saveFarm();
+  }
+}
+
+/* ================== VIP ================== */
+function isPlotUnlocked(index) {
+  return index < (1 + farmState.vip);
+}
+
+/* ================== GAME LOGIC ================== */
+function plant(plotIndex, crop) {
+  const plot = farmState.plots[plotIndex];
+  if (!plot || plot.cropId) return;
+  plot.cropId = crop.id;
+  plot.plantedAt = now();
+  plot.growTime = crop.time;
+  saveFarm();
+  renderHome();
+}
+
+function harvest(plotIndex) {
+  const plot = farmState.plots[plotIndex];
+  if (!plot || !plot.cropId) return;
+
+  const elapsed = now() - plot.plantedAt;
+  if (elapsed < plot.growTime) return;
+
+  const crop = CROPS.find(c => c.id === plot.cropId);
+  if (crop) farmState.points += crop.reward;
+
+  plot.cropId = null;
+  plot.plantedAt = 0;
+  plot.growTime = 0;
+
+  saveFarm();
+  renderHome();
+}
+
+/* ================== UI ================== */
+function openPlantMenu(index) {
+  let html = `
+  <div id="plantMenu" style="
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.85);
+    display:flex;justify-content:center;align-items:center;
+    z-index:9999">
+    <div style="background:#111;padding:16px;border-radius:14px;color:#fff">
+      <h3>اختر محصول</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+  `;
+
+  CROPS.forEach(c => {
+    html += `
+      <button onclick="plant(${index}, CROPS.find(x=>x.id==='${c.id}'))"
+        style="padding:8px;border-radius:10px;border:none;background:#222;color:#fff">
+        ${c.icon} ${c.name}<br>${Math.floor(c.time/60)} دقيقة
+      </button>
+    `;
+  });
+
+  html += `
+      </div>
+      <button onclick="closePlantMenu()" style="margin-top:10px;background:none;border:none;color:#aaa">
+        إلغاء
+      </button>
+    </div>
+  </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", html);
+}
+
+function closePlantMenu() {
+  document.getElementById("plantMenu")?.remove();
+}
+
+/* ================== RENDER ================== */
+function renderHome() {
+  const content = document.getElementById("content");
+  if (!content) return;
+
+  let html = `
+  <style>
+    .farm{max-width:420px;margin:auto}
+    .top{display:flex;justify-content:space-between;margin-bottom:10px}
+    .board{background:#4e8f3a;border-radius:20px;padding:12px;position:relative;height:420px}
+    .plot{
+      position:absolute;width:90px;height:80px;border-radius:14px;
+      background:#3e2a15;color:#fff;display:flex;align-items:center;justify-content:center;
+      box-shadow:inset 0 2px 4px rgba(255,255,255,.1),0 4px 8px rgba(0,0,0,.4);
+    }
+    .plot.locked{background:#333;opacity:.6}
+    .timer{position:absolute;top:-18px;background:#000;padding:2px 6px;border-radius:8px;font-size:11px}
+    .p0{top:30px;left:30px}
+    .p1{top:30px;right:30px}
+    .p2{top:170px;left:160px}
+    .p3{bottom:170px;left:30px}
+    .p4{bottom:170px;right:30px}
+    .p5{bottom:30px;left:160px}
+  </style>
+
+  <div class="farm">
+    <div class="top">
+      <div>💰 ${farmState.points}</div>
+      <div>👑 VIP ${farmState.vip}</div>
+    </div>
+    <div class="board">
+  `;
+
+  farmState.plots.forEach((plot, i) => {
+    if (!isPlotUnlocked(i)) {
+      html += `<div class="plot locked p${i}">🔒</div>`;
+      return;
+    }
+
+    if (!plot.cropId) {
+      html += `<div class="plot p${i}" onclick="openPlantMenu(${i})">🟫</div>`;
+      return;
+    }
+
+    const elapsed = now() - plot.plantedAt;
+    const remaining = plot.growTime - elapsed;
+
+    if (remaining > 0) {
+      html += `
+        <div class="plot p${i}">
+          <div class="timer">${remaining}s</div>
+          🌱
+        </div>`;
+    } else {
+      html += `
+        <div class="plot p${i}" onclick="harvest(${i})">
+          🌾
+        </div>`;
+    }
+  });
+
+  html += `</div></div>`;
+  content.innerHTML = html;
+
+  if (farmState.plots.some(p => p.cropId)) {
+    setTimeout(renderHome, 1000);
+  }
+}
+
+/* ================== BOOTSTRAP ================== */
+(function startHome(){
+  initFarm();
+  renderHome();
+})();
+
+/* ================== EXPORT ================== */
+window.renderHome = renderHome;
