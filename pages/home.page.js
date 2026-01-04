@@ -1,14 +1,10 @@
-/* =========================
-   HOME FARM GAME
-========================= */
-
 const TOTAL_PLOTS = 6;
 const STORAGE_KEY = "winhive_farm_v1";
 
 const CROPS = [
-  {id:"wheat", name:"قمح", time:10, icon:"🌾"},
-  {id:"carrot", name:"جزر", time:20, icon:"🥕"},
-  {id:"pepper", name:"فلفل", time:30, icon:"🌶️"}
+  {id:"wheat", name:"قمح", time:15, icon:"🌾"},
+  {id:"carrot", name:"جزر", time:30, icon:"🥕"},
+  {id:"pepper", name:"فلفل", time:45, icon:"🌶️"}
 ];
 
 let farmState = {
@@ -42,14 +38,14 @@ function renderHome(){
 
   let html = `<div class="fade">
     <h3 style="text-align:center">🌱 المزرعة</h3>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">`;
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">`;
 
   farmState.plots.forEach((p,i)=>{
     const unlocked = i === 0 || farmState.vip > 0;
 
     if(!unlocked){
       html += `
-        <div style="background:#222;padding:20px;text-align:center;border-radius:12px">
+        <div style="background:#222;padding:22px;text-align:center;border-radius:14px">
           🔒 VIP
         </div>`;
       return;
@@ -58,7 +54,7 @@ function renderHome(){
     if(!p.crop){
       html += `
         <button onclick="openPlant(${i})"
-        style="background:#3a2;padding:20px;border-radius:12px;border:none;color:#fff">
+        style="background:#3a2;padding:22px;border-radius:14px;border:none;color:#fff">
           🟫 ازرع
         </button>`;
     }else{
@@ -69,13 +65,13 @@ function renderHome(){
 
       if(remain > 0){
         html += `
-          <div style="background:#2a3;padding:20px;border-radius:12px;text-align:center">
+          <div style="background:#2a3;padding:22px;border-radius:14px;text-align:center">
             ${p.crop.icon}<br>${remain}s
           </div>`;
       }else{
         html += `
           <button onclick="harvest(${i})"
-          style="background:#6a4;padding:20px;border-radius:12px;border:none">
+          style="background:#6a4;padding:22px;border-radius:14px;border:none">
             🌾 احصد
           </button>`;
       }
@@ -104,7 +100,7 @@ function openPlant(i){
   CROPS.forEach(c=>{
     html += `
       <button onclick="plant(${i},'${c.id}')"
-      style="margin:6px;padding:10px">
+      style="margin:6px;padding:12px">
         ${c.icon} ${c.name}
       </button>`;
   });
@@ -137,4 +133,4 @@ function harvest(i){
   farmState.plots[i] = {crop:null,planted:0};
   saveFarm();
   renderHome();
-        }
+}
