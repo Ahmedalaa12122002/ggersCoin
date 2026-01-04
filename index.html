@@ -1,233 +1,150 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>WinHive</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>WinHive</title>
 
-  <!-- Telegram Mini App SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Telegram SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <style>
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-      font-family:system-ui, -apple-system, BlinkMacSystemFont;
-    }
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:system-ui;
+}
 
-    body{
-      background:#000;
-      color:#fff;
-      min-height:100vh;
-      overflow:hidden;
-    }
+body{
+  background:#000;
+  color:#fff;
+  overflow:hidden;
+}
 
-    /* ===== MAIN CONTENT ===== */
-    #content{
-      width:100%;
-      min-height:100vh;
-      overflow-y:auto;
-      padding-bottom:110px; /* مساحة القوائم */
-    }
+/* ===== CONTENT ===== */
+#content{
+  min-height:100vh;
+  padding-bottom:120px;
+  transition:opacity .35s ease, transform .35s ease;
+}
 
-    /* ===== BOTTOM NAV ===== */
-    .bottom-nav{
-      position:fixed;
-      bottom:0;
-      left:0;
-      width:100%;
-      height:100px;
-      background:rgba(15,15,15,.96);
-      backdrop-filter:blur(12px);
-      border-top:1px solid #222;
-      display:flex;
-      justify-content:space-around;
-      align-items:center;
-      z-index:999;
-    }
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  height:110px;
+  background:rgba(15,15,15,.96);
+  backdrop-filter:blur(14px);
+  border-top:1px solid #222;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  z-index:999;
+}
 
-    .nav-btn{
-      width:56px;
-      height:56px;
-      border-radius:50%;
-      background:#141414;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      color:#aaa;
-      font-size:11px;
-      transition:.2s ease;
-    }
+.nav-btn{
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  background:#141414;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#aaa;
+  font-size:11px;
+  transition:all .25s ease;
+  position:relative;
+  overflow:hidden;
+}
 
-    .nav-btn .icon{
-      font-size:20px;
-      margin-bottom:3px;
-    }
+.nav-btn .icon{
+  font-size:20px;
+  margin-bottom:3px;
+}
 
-    /* زر الرئيسية أكبر */
-    .nav-btn.home{
-      width:78px;
-      height:78px;
-      margin-top:-18px;
-      font-size:12px;
-    }
+/* ===== HOME BUTTON ===== */
+.nav-btn.home{
+  width:80px;
+  height:80px;
+  margin-top:-18px;
+}
 
-    .nav-btn.home .icon{
-      font-size:30px;
-    }
+.nav-btn.home .icon{
+  font-size:30px;
+}
 
-    /* الزر النشط */
-    .nav-btn.active{
-      color:#fff;
-      box-shadow:
-        0 0 18px rgba(255,200,0,.35),
-        0 0 32px rgba(255,200,0,.15);
-    }
+/* ===== ACTIVE ===== */
+.nav-btn.active{
+  color:#fff;
+  box-shadow:
+    0 0 16px rgba(255,200,0,.45),
+    0 0 32px rgba(255,200,0,.2);
+}
 
-    .nav-btn:active{
-      transform:scale(.93);
-    }
-  </style>
+/* ===== PRESS ===== */
+.nav-btn:active{
+  transform:scale(.92);
+}
+
+/* ===== RIPPLE ===== */
+.nav-btn::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle,
+    rgba(255,220,120,.35) 0%,
+    rgba(255,220,120,.15) 35%,
+    transparent 60%);
+  opacity:0;
+  transition:.3s;
+}
+
+.nav-btn:active::after{
+  opacity:1;
+}
+
+/* ===== PAGE TRANSITIONS ===== */
+.page-exit{
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.page-enter{
+  opacity:1;
+  transform:translateY(0);
+}
+</style>
 </head>
 
 <body>
 
-  <!-- ================= CONTENT ================= -->
-  <div id="content"></div>
+<!-- ===== CONTENT ===== -->
+<div id="content"></div>
 
-  <!-- ================= BOTTOM NAV ================= -->
-  <div class="bottom-nav">
+<!-- ===== NAV ===== -->
+<div class="bottom-nav">
+  <div class="nav-btn"><div class="icon">⚙️</div>الإعدادات</div>
+  <div class="nav-btn"><div class="icon">⭐</div>VIP</div>
+  <div class="nav-btn"><div class="icon">💼</div>المحفظة</div>
+  <div class="nav-btn home active"><div class="icon">🏠</div>الرئيسية</div>
+  <div class="nav-btn"><div class="icon">📋</div>المهام</div>
+  <div class="nav-btn"><div class="icon">👥</div>الإحالة</div>
+  <div class="nav-btn"><div class="icon">🧾</div>السجلات</div>
+</div>
 
-    <div class="nav-btn">
-      <div class="icon">⚙️</div>
-      الإعدادات
-    </div>
-
-    <div class="nav-btn">
-      <div class="icon">⭐</div>
-      VIP
-    </div>
-
-    <div class="nav-btn">
-      <div class="icon">💼</div>
-      المحفظة
-    </div>
-
-    <div class="nav-btn home active">
-      <div class="icon">🏠</div>
-      الرئيسية
-    </div>
-
-    <div class="nav-btn">
-      <div class="icon">📋</div>
-      المهام
-    </div>
-
-    <div class="nav-btn">
-      <div class="icon">👥</div>
-      الإحالة
-    </div>
-
-    <div class="nav-btn">
-      <div class="icon">🧾</div>
-      السجلات
-    </div>
-
-  </div>
-
-  <!-- ================= GAME LOGIC ================= -->
-  <script src="pages/home.js"></script>
-
-  <!-- ================= TELEGRAM INIT ================= -->
-  <script>
-    (function(){
-      if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-      }
-    })();
-  </script>
-
-</body>
-    </html>
-<!-- =====================================================
-     PART 7 — NAVIGATION EFFECTS (VISUAL ONLY)
-     (NO LOGIC — NO FUNCTION REDEFINITION)
-===================================================== -->
-<style>
-  /* انتقال ناعم لمحتوى الصفحات */
-  #content{
-    transition: opacity .35s ease, transform .35s ease;
-  }
-
-  /* زر القوائم */
-  .nav-btn{
-    position:relative;
-    overflow:hidden;
-    transition:
-      transform .2s ease,
-      box-shadow .25s ease,
-      background .25s ease;
-  }
-
-  /* توهج الزر النشط (ثابت) */
-  .nav-btn.active{
-    background:#141414;
-    box-shadow:
-      0 0 14px rgba(255,200,0,.45),
-      0 0 28px rgba(255,200,0,.20);
-  }
-
-  /* تأثير الضغط */
-  .nav-btn:active{
-    transform:scale(.92);
-  }
-
-  /* Ripple Effect */
-  .nav-btn::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:radial-gradient(
-      circle,
-      rgba(255,220,120,.35) 0%,
-      rgba(255,220,120,.15) 30%,
-      transparent 60%
-    );
-    opacity:0;
-    transition:opacity .3s ease;
-    pointer-events:none;
-  }
-
-  .nav-btn:active::after{
-    opacity:1;
-  }
-
-  /* زر الرئيسية توهج أقوى */
-  .nav-btn.home.active{
-    box-shadow:
-      0 0 20px rgba(255,200,0,.6),
-      0 0 40px rgba(255,200,0,.25);
-  }
-</style>
+<!-- ===== GAME ===== -->
+<script src="pages/home.js"></script>
+<script src="main.js"></script>
 
 <script>
-/* انتقال بصري عند تبديل الصفحات */
-(function pageTransition(){
-  const content = document.getElementById("content");
-  if(!content) return;
-
-  const observer = new MutationObserver(()=>{
-    content.style.opacity = "0";
-    content.style.transform = "translateY(6px)";
-    requestAnimationFrame(()=>{
-      content.style.opacity = "1";
-      content.style.transform = "translateY(0)";
-    });
-  });
-
-  observer.observe(content, { childList:true });
-})();
+if (window.Telegram?.WebApp){
+  Telegram.WebApp.ready();
+  Telegram.WebApp.expand();
+}
 </script>
+
+</body>
+</html>
