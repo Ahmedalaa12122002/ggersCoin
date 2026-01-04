@@ -1,6 +1,6 @@
 /* =====================================================
    MAIN NAVIGATION SYSTEM — WinHive
-   Fixes Home Page Rendering Bug
+   FINAL SAFE VERSION
 ===================================================== */
 
 const content = document.getElementById("content");
@@ -16,7 +16,6 @@ function setActiveButton(page){
 function navigateTo(page){
   if (!content) return;
 
-  // تأثير انتقال
   content.classList.add("fade-out");
 
   setTimeout(() => {
@@ -27,51 +26,56 @@ function navigateTo(page){
     setActiveButton(page);
 
     /* ===============================
-       HOME (CRITICAL FIX)
+       HOME — SAFE RENDER
     =============================== */
     if (page === "home") {
-      if (typeof renderHome === "function") {
-        renderHome();   // ✅ إعادة بناء المزرعة دائمًا
+      if (typeof window.renderHome === "function") {
+        window.renderHome();
       } else {
-        content.innerHTML = "<p>خطأ: لم يتم تحميل صفحة الرئيسية</p>";
+        content.innerHTML = `
+          <div style="text-align:center;padding:20px;color:#ccc">
+            ⏳ يتم تحميل اللعبة...
+          </div>`;
+        waitForHome();
       }
       return;
     }
 
     /* ===============================
-       OTHER PAGES (STATIC)
+       OTHER PAGES
     =============================== */
     switch(page){
-
       case "wallet":
-        content.innerHTML = "<h3>💼 المحفظة</h3><p>قريبًا...</p>";
+        content.innerHTML = "<h3>💼 المحفظة</h3>";
         break;
-
       case "tasks":
-        content.innerHTML = "<h3>📋 المهام</h3><p>قريبًا...</p>";
+        content.innerHTML = "<h3>📋 المهام</h3>";
         break;
-
       case "vip":
-        content.innerHTML = "<h3>👑 VIP</h3><p>قريبًا...</p>";
+        content.innerHTML = "<h3>👑 VIP</h3>";
         break;
-
       case "settings":
-        content.innerHTML = "<h3>⚙️ الإعدادات</h3><p>قريبًا...</p>";
+        content.innerHTML = "<h3>⚙️ الإعدادات</h3>";
         break;
-
       case "referral":
-        content.innerHTML = "<h3>👥 الإحالة</h3><p>قريبًا...</p>";
+        content.innerHTML = "<h3>👥 الإحالة</h3>";
         break;
-
       case "logs":
-        content.innerHTML = "<h3>🧾 السجلات</h3><p>قريبًا...</p>";
+        content.innerHTML = "<h3>🧾 السجلات</h3>";
         break;
-
-      default:
-        content.innerHTML = "<p>صفحة غير موجودة</p>";
     }
 
   }, 180);
+}
+
+/* ---------- Wait for Home Loader ---------- */
+function waitForHome(){
+  const interval = setInterval(()=>{
+    if (typeof window.renderHome === "function") {
+      clearInterval(interval);
+      navigateTo("home");
+    }
+  }, 100);
 }
 
 /* ---------- Nav Buttons ---------- */
@@ -82,6 +86,6 @@ document.querySelectorAll(".nav-btn").forEach(btn=>{
 });
 
 /* ---------- Initial Load ---------- */
-window.addEventListener("load", ()=>{
-  navigateTo("home"); // ✅ إجبار فتح المزرعة عند التشغيل
+window.addEventListener("DOMContentLoaded", ()=>{
+  navigateTo("home");
 });
