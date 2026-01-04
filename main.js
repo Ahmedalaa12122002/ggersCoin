@@ -1,91 +1,124 @@
 /* =====================================================
-   MAIN NAVIGATION SYSTEM — WinHive
-   FINAL SAFE VERSION
+   WinHive - Main Navigation Controller
+   مسؤول فقط عن:
+   - التنقل بين القوائم
+   - التحكم في الصفحة النشطة
+   - استدعاء المزرعة من home.page.js
 ===================================================== */
 
+/* ---------- Helpers ---------- */
 const content = document.getElementById("content");
+const navButtons = document.querySelectorAll(".nav-btn");
 
-/* ---------- Active Button ---------- */
-function setActiveButton(page){
-  document.querySelectorAll(".nav-btn").forEach(btn=>{
-    btn.classList.toggle("active", btn.dataset.page === page);
+/* ---------- UI Reset ---------- */
+function clearContent() {
+  // مسح أي محتوى قديم (يمنع التداخل)
+  content.innerHTML = "";
+}
+
+/* ---------- Nav Highlight ---------- */
+function setActiveNav(index) {
+  navButtons.forEach((btn, i) => {
+    if (i === index) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
   });
 }
 
-/* ---------- Navigation ---------- */
-function navigateTo(page){
-  if (!content) return;
+/* =====================================================
+   PAGES
+===================================================== */
 
-  content.classList.add("fade-out");
+/* ---------- HOME (Farm) ---------- */
+function goHome() {
+  clearContent();
+  setActiveNav(0);
 
-  setTimeout(() => {
-    content.classList.remove("fade-out");
-    content.innerHTML = "";
-    content.className = "page";
+  // تأكيد أن renderHome موجود
+  if (typeof renderHome !== "function") {
+    content.innerHTML = `
+      <div class="page-box">
+        ❌ خطأ: لم يتم تحميل المزرعة
+      </div>`;
+    return;
+  }
 
-    setActiveButton(page);
-
-    /* ===============================
-       HOME — SAFE RENDER
-    =============================== */
-    if (page === "home") {
-      if (typeof window.renderHome === "function") {
-        window.renderHome();
-      } else {
-        content.innerHTML = `
-          <div style="text-align:center;padding:20px;color:#ccc">
-            ⏳ يتم تحميل اللعبة...
-          </div>`;
-        waitForHome();
-      }
-      return;
-    }
-
-    /* ===============================
-       OTHER PAGES
-    =============================== */
-    switch(page){
-      case "wallet":
-        content.innerHTML = "<h3>💼 المحفظة</h3>";
-        break;
-      case "tasks":
-        content.innerHTML = "<h3>📋 المهام</h3>";
-        break;
-      case "vip":
-        content.innerHTML = "<h3>👑 VIP</h3>";
-        break;
-      case "settings":
-        content.innerHTML = "<h3>⚙️ الإعدادات</h3>";
-        break;
-      case "referral":
-        content.innerHTML = "<h3>👥 الإحالة</h3>";
-        break;
-      case "logs":
-        content.innerHTML = "<h3>🧾 السجلات</h3>";
-        break;
-    }
-
-  }, 180);
+  // رسم المزرعة
+  renderHome();
 }
 
-/* ---------- Wait for Home Loader ---------- */
-function waitForHome(){
-  const interval = setInterval(()=>{
-    if (typeof window.renderHome === "function") {
-      clearInterval(interval);
-      navigateTo("home");
-    }
-  }, 100);
+/* ---------- TASKS ---------- */
+function goTasks() {
+  clearContent();
+  setActiveNav(1);
+
+  content.innerHTML = `
+    <div class="page-box">
+      📋 <b>المهام</b><br><br>
+      قريبًا سيتم إضافة مهام تفاعلية مرتبطة بالمزرعة 🌱
+    </div>`;
 }
 
-/* ---------- Nav Buttons ---------- */
-document.querySelectorAll(".nav-btn").forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    navigateTo(btn.dataset.page);
-  });
-});
+/* ---------- WALLET ---------- */
+function goWallet() {
+  clearContent();
+  setActiveNav(2);
 
-/* ---------- Initial Load ---------- */
-window.addEventListener("DOMContentLoaded", ()=>{
-  navigateTo("home");
-});
+  content.innerHTML = `
+    <div class="page-box">
+      💼 <b>المحفظة</b><br><br>
+      النقاط الحالية: <b>${window.state ? state.points : 0}</b>
+    </div>`;
+}
+
+/* ---------- VIP ---------- */
+function goVip() {
+  clearContent();
+  setActiveNav(3);
+
+  content.innerHTML = `
+    <div class="page-box">
+      👑 <b>نظام VIP</b><br><br>
+      المستوى الحالي: <b>${window.state ? state.vipLevel : 0}</b><br><br>
+      فتح مزارع إضافية ⛏️<br>
+      تقليل وقت الزراعة ⏱️<br>
+      زيادة المكافآت 🎁
+    </div>`;
+}
+
+/* ---------- SETTINGS ---------- */
+function goSettings() {
+  clearContent();
+  setActiveNav(4);
+
+  content.innerHTML = `
+    <div class="page-box">
+      ⚙️ <b>الإعدادات</b><br><br>
+      سيتم إضافة:
+      <ul style="text-align:right">
+        <li>اللغة</li>
+        <li>الصوت</li>
+        <li>الدعم</li>
+      </ul>
+    </div>`;
+}
+
+/* =====================================================
+   SAFE START
+===================================================== */
+
+(function startApp(){
+  try {
+    // افتح الرئيسية تلقائيًا
+    goHome();
+    console.log("✅ main.js loaded successfully");
+  } catch (e) {
+    console.error("❌ main.js error", e);
+    content.innerHTML = `
+      <div class="page-box">
+        ❌ حدث خطأ أثناء تشغيل التطبيق
+      </div>`;
+  }
+})();
