@@ -1,23 +1,27 @@
 /* =====================================================
-   main.js — Navigation + Transitions
+   main.js — Navigation + Transitions + Page Guard
 ===================================================== */
 
 (function(){
+
+// الحالة النشطة عالميًا (لحماية عدم التداخل)
+window.__ACTIVE_PAGE__ = "home";
 
 let currentPage = "home";
 const content = document.getElementById("content");
 const buttons = document.querySelectorAll(".nav-btn");
 
+// ربط الأزرار
 buttons.forEach(btn=>{
   btn.addEventListener("click",()=>{
     const page = getPage(btn);
     if(!page || page === currentPage) return;
-
     setActive(btn);
     switchPage(page);
   });
 });
 
+// تحديد الصفحة من نص الزر
 function getPage(btn){
   const t = btn.textContent;
   if(t.includes("الرئيسية")) return "home";
@@ -30,12 +34,15 @@ function getPage(btn){
   return null;
 }
 
+// تفعيل زر
 function setActive(active){
   buttons.forEach(b=>b.classList.remove("active"));
   active.classList.add("active");
 }
 
+// التنقّل مع انتقالات + تحديث الحالة
 function switchPage(page){
+  window.__ACTIVE_PAGE__ = page; // 🔒 الحارس
   currentPage = page;
 
   content.classList.add("page-exit");
@@ -47,10 +54,7 @@ function switchPage(page){
       renderHome();
     }else{
       content.innerHTML = `
-        <div style="
-          padding:40px;
-          text-align:center;
-          color:#aaa">
+        <div style="padding:40px;text-align:center;color:#aaa">
           🚧 هذه الصفحة قيد التطوير
         </div>`;
     }
@@ -61,8 +65,9 @@ function switchPage(page){
   },180);
 }
 
-/* فتح الرئيسية أول مرة */
+// فتح الرئيسية أول مرة
 document.addEventListener("DOMContentLoaded",()=>{
+  window.__ACTIVE_PAGE__ = "home";
   if(typeof renderHome === "function"){
     renderHome();
   }
