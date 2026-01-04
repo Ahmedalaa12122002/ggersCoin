@@ -1,22 +1,19 @@
-let currentPage = "home";
+window.currentPage = "home";
 
-function goPage(page) {
-  currentPage = page;
+function goPage(page){
+  window.currentPage = page;
 
-  document.querySelectorAll(".nav button").forEach(btn => {
+  document.querySelectorAll(".nav button").forEach(btn=>{
     btn.classList.remove("active");
-  });
-
-  document.querySelectorAll(".nav button").forEach(btn => {
-    if (btn.getAttribute("onclick")?.includes(page)) {
+    if(btn.dataset.page === page){
       btn.classList.add("active");
     }
   });
 
-  if (page === "home") {
+  if(page === "home"){
     renderHome();
-  } else {
+  }else{
     document.getElementById("content").innerHTML =
-      `<div style="padding:20px;text-align:center">📄 ${page} (قيد التطوير)</div>`;
+      `<div class="fade">📄 ${page} (قيد التطوير)</div>`;
   }
 }
