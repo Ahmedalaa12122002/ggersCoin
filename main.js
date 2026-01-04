@@ -1,124 +1,70 @@
 /* =====================================================
-   WinHive - Main Navigation Controller
-   مسؤول فقط عن:
-   - التنقل بين القوائم
-   - التحكم في الصفحة النشطة
-   - استدعاء المزرعة من home.page.js
+   Navigation Core – ثابت ولا يتغير
 ===================================================== */
 
-/* ---------- Helpers ---------- */
 const content = document.getElementById("content");
-const navButtons = document.querySelectorAll(".nav-btn");
+const buttons = document.querySelectorAll(".nav-btn");
 
-/* ---------- UI Reset ---------- */
-function clearContent() {
-  // مسح أي محتوى قديم (يمنع التداخل)
-  content.innerHTML = "";
-}
-
-/* ---------- Nav Highlight ---------- */
-function setActiveNav(index) {
-  navButtons.forEach((btn, i) => {
-    if (i === index) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
+/* تغيير الزر النشط */
+function setActive(page){
+  buttons.forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.page === page);
   });
 }
 
-/* =====================================================
-   PAGES
-===================================================== */
-
-/* ---------- HOME (Farm) ---------- */
-function goHome() {
-  clearContent();
-  setActiveNav(0);
-
-  // تأكيد أن renderHome موجود
-  if (typeof renderHome !== "function") {
-    content.innerHTML = `
-      <div class="page-box">
-        ❌ خطأ: لم يتم تحميل المزرعة
-      </div>`;
-    return;
-  }
-
-  // رسم المزرعة
-  renderHome();
+/* مسح المحتوى */
+function clearContent(){
+  content.innerHTML = "";
 }
 
-/* ---------- TASKS ---------- */
-function goTasks() {
-  clearContent();
-  setActiveNav(1);
+/* فتح صفحة */
+function openPage(page){
+  content.classList.add("fade");
 
-  content.innerHTML = `
-    <div class="page-box">
-      📋 <b>المهام</b><br><br>
-      قريبًا سيتم إضافة مهام تفاعلية مرتبطة بالمزرعة 🌱
-    </div>`;
+  setTimeout(()=>{
+    content.classList.remove("fade");
+    clearContent();
+    setActive(page);
+
+    // صفحات مؤقتة (Placeholder)
+    switch(page){
+      case "home":
+        content.innerHTML = `<div class="page-box">🏠 الصفحة الرئيسية</div>`;
+        break;
+
+      case "tasks":
+        content.innerHTML = `<div class="page-box">📋 صفحة المهام</div>`;
+        break;
+
+      case "referral":
+        content.innerHTML = `<div class="page-box">👥 صفحة الإحالة</div>`;
+        break;
+
+      case "wallet":
+        content.innerHTML = `<div class="page-box">💼 صفحة المحفظة</div>`;
+        break;
+
+      case "vip":
+        content.innerHTML = `<div class="page-box">👑 صفحة VIP</div>`;
+        break;
+
+      case "settings":
+        content.innerHTML = `<div class="page-box">⚙️ صفحة الإعدادات</div>`;
+        break;
+
+      case "logs":
+        content.innerHTML = `<div class="page-box">🧾 صفحة السجلات</div>`;
+        break;
+    }
+  },180);
 }
 
-/* ---------- WALLET ---------- */
-function goWallet() {
-  clearContent();
-  setActiveNav(2);
+/* ربط الأزرار */
+buttons.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    openPage(btn.dataset.page);
+  });
+});
 
-  content.innerHTML = `
-    <div class="page-box">
-      💼 <b>المحفظة</b><br><br>
-      النقاط الحالية: <b>${window.state ? state.points : 0}</b>
-    </div>`;
-}
-
-/* ---------- VIP ---------- */
-function goVip() {
-  clearContent();
-  setActiveNav(3);
-
-  content.innerHTML = `
-    <div class="page-box">
-      👑 <b>نظام VIP</b><br><br>
-      المستوى الحالي: <b>${window.state ? state.vipLevel : 0}</b><br><br>
-      فتح مزارع إضافية ⛏️<br>
-      تقليل وقت الزراعة ⏱️<br>
-      زيادة المكافآت 🎁
-    </div>`;
-}
-
-/* ---------- SETTINGS ---------- */
-function goSettings() {
-  clearContent();
-  setActiveNav(4);
-
-  content.innerHTML = `
-    <div class="page-box">
-      ⚙️ <b>الإعدادات</b><br><br>
-      سيتم إضافة:
-      <ul style="text-align:right">
-        <li>اللغة</li>
-        <li>الصوت</li>
-        <li>الدعم</li>
-      </ul>
-    </div>`;
-}
-
-/* =====================================================
-   SAFE START
-===================================================== */
-
-(function startApp(){
-  try {
-    // افتح الرئيسية تلقائيًا
-    goHome();
-    console.log("✅ main.js loaded successfully");
-  } catch (e) {
-    console.error("❌ main.js error", e);
-    content.innerHTML = `
-      <div class="page-box">
-        ❌ حدث خطأ أثناء تشغيل التطبيق
-      </div>`;
-  }
-})();
+/* تشغيل افتراضي */
+openPage("home");
