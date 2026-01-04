@@ -1,112 +1,90 @@
-/* =========================
-   HOME FARM GAME
-========================= */
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinHive</title>
 
-const TOTAL_PLOTS = 6;
-const STORAGE_KEY = "winhive_farm_v1";
-
-const CROPS = [
-  {id:"wheat", name:"قمح", time:10, icon:"🌾"},
-  {id:"carrot", name:"جزر", time:20, icon:"🥕"},
-  {id:"pepper", name:"فلفل", time:30, icon:"🌶️"}
-];
-
-let farmState = {
-  vip:0,
-  plots:[]
-};
-
-/* ===== INIT ===== */
-function initFarm(){
-  if(!localStorage.getItem(STORAGE_KEY)){
-    farmState.plots = [];
-    for(let i=0;i<TOTAL_PLOTS;i++){
-      farmState.plots.push({crop:null, planted:0});
-    }
-    saveFarm();
-  }else{
-    farmState = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  }
+<style>
+body{
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:Arial;
 }
 
-function saveFarm(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(farmState));
+#content{
+  min-height:80vh;
+  padding:20px;
 }
 
-/* ===== RENDER ===== */
-function renderHome(){
-  if(window.currentPage !== "home") return;
-
-  initFarm();
-
-  let html = `<div class="fade">
-    <h3 style="text-align:center">🌱 المزرعة</h3>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">`;
-
-  farmState.plots.forEach((p,i)=>{
-    const unlocked = i === 0 || farmState.vip > 0;
-    if(!unlocked){
-      html += `<div style="background:#222;padding:20px;text-align:center;border-radius:12px">🔒 VIP</div>`;
-      return;
-    }
-
-    if(!p.crop){
-      html += `<button onclick="openPlant(${i})"
-        style="background:#3a2;padding:20px;border-radius:12px;border:none;color:#fff">🟫 ازرع</button>`;
-    }else{
-      const remain = Math.max(0, p.crop.time - Math.floor(Date.now()/1000 - p.planted));
-      if(remain > 0){
-        html += `<div style="background:#2a3;padding:20px;border-radius:12px;text-align:center">
-          ${p.crop.icon}<br>${remain}s
-        </div>`;
-      }else{
-        html += `<button onclick="harvest(${i})"
-          style="background:#6a4;padding:20px;border-radius:12px;border:none">🌾 احصد</button>`;
-      }
-    }
-  });
-
-  html += `</div></div>`;
-  document.getElementById("content").innerHTML = html;
-
-  setTimeout(()=>{
-    if(window.currentPage === "home") renderHome();
-  },1000);
+/* ===== NAV BAR ===== */
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#0b0b0b;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+  border-top:1px solid #222;
 }
 
-/* ===== ACTIONS ===== */
-function openPlant(i){
-  let html = `<div style="
-    position:fixed;inset:0;background:rgba(0,0,0,.85);
-    display:flex;justify-content:center;align-items:center">
-    <div style="background:#111;padding:20px;border-radius:14px">`;
-
-  CROPS.forEach(c=>{
-    html += `<button onclick="plant(${i},'${c.id}')"
-      style="margin:6px;padding:10px">${c.icon} ${c.name}</button>`;
-  });
-
-  html += `<br><button onclick="closePlant()">إلغاء</button></div></div>`;
-  document.body.insertAdjacentHTML("beforeend", html);
+.nav button{
+  background:none;
+  border:none;
+  color:#aaa;
+  font-size:14px;
+  padding:6px 10px;
+  min-width:52px;
+  cursor:pointer;
+  transition:all .25s ease;
 }
 
-function closePlant(){
-  document.body.lastChild.remove();
+.nav button.active{
+  color:#ffd54f;
+  text-shadow:
+    0 0 6px rgba(255,213,79,.8),
+    0 0 12px rgba(255,213,79,.6);
+  transform:translateY(-4px);
+  font-size:15px;
 }
 
-function plant(i,id){
-  const crop = CROPS.find(c=>c.id===id);
-  farmState.plots[i] = {
-    crop,
-    planted:Math.floor(Date.now()/1000)
-  };
-  saveFarm();
-  closePlant();
-  renderHome();
+.nav button:active{
+  transform:scale(.9);
+  filter:brightness(1.2);
 }
 
-function harvest(i){
-  farmState.plots[i] = {crop:null,planted:0};
-  saveFarm();
-  renderHome();
+/* ===== PAGE FADE ===== */
+.fade{
+  animation:fade .25s ease;
 }
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+</style>
+</head>
+
+<body>
+
+<div id="content">⌛ جاري التحميل...</div>
+
+<div class="nav">
+  <button data-page="settings" onclick="goPage('settings')">⚙️<br>الإعدادات</button>
+  <button data-page="vip" onclick="goPage('vip')">👑<br>VIP</button>
+  <button data-page="wallet" onclick="goPage('wallet')">💼<br>المحفظة</button>
+  <button data-page="home" class="active" onclick="goPage('home')">🏠<br>الرئيسية</button>
+  <button data-page="tasks" onclick="goPage('tasks')">📋<br>المهام</button>
+  <button data-page="ref" onclick="goPage('ref')">👥<br>الإحالة</button>
+  <button data-page="logs" onclick="goPage('logs')">🧾<br>السجلات</button>
+</div>
+
+<script src="core/navigation.js"></script>
+<script src="main.js"></script>
+<script src="pages/home.page.js"></script>
+
+</body>
+</html>
