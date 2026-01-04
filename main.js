@@ -1,79 +1,57 @@
 /* =====================================================
    MAIN PAGE MANAGER
-   WinHive Mini App
+   WinHive Mini App (FIXED NAVIGATION)
 ===================================================== */
 
 /* ---------- Global Active Page ---------- */
-// الصفحة النشطة حاليًا
 window.ACTIVE_PAGE = null;
 
 /* ---------- DOM ---------- */
 const content = document.getElementById("content");
 
 /* ---------- Page Registry ---------- */
-/*
-  كل صفحة لها:
-  - onEnter(): ماذا يحدث عند الدخول
-  - onExit(): ماذا يحدث عند الخروج
-*/
 const Pages = {
   home: {
     onEnter: () => {
-      if (typeof onEnterHome === "function") {
-        onEnterHome();
-      }
+      if (typeof onEnterHome === "function") onEnterHome();
     },
     onExit: () => {
-      if (typeof onExitHome === "function") {
-        onExitHome();
-      }
+      if (typeof onExitHome === "function") onExitHome();
     }
   },
 
   vip: {
-    onEnter: () => {
-      renderSimplePage("👑 VIP", "نظام VIP سيتم إضافته لاحقًا");
-    },
+    onEnter: () => renderSimplePage("👑 VIP", "نظام VIP سيتم إضافته لاحقًا"),
     onExit: () => {}
   },
 
   tasks: {
-    onEnter: () => {
-      renderSimplePage("📋 المهام", "قائمة المهام");
-    },
+    onEnter: () => renderSimplePage("📋 المهام", "قائمة المهام"),
     onExit: () => {}
   },
 
   wallet: {
-    onEnter: () => {
-      renderSimplePage("💼 المحفظة", "السحب والإيداع");
-    },
+    onEnter: () => renderSimplePage("💼 المحفظة", "السحب والإيداع"),
     onExit: () => {}
   },
 
   referral: {
-    onEnter: () => {
-      renderSimplePage("👥 الإحالة", "نظام الإحالات");
-    },
+    onEnter: () => renderSimplePage("👥 الإحالة", "نظام الإحالات"),
     onExit: () => {}
   },
 
   settings: {
-    onEnter: () => {
-      renderSimplePage("⚙️ الإعدادات", "الإعدادات العامة");
-    },
+    onEnter: () => renderSimplePage("⚙️ الإعدادات", "الإعدادات العامة"),
     onExit: () => {}
   },
 
   logs: {
-    onEnter: () => {
-      renderSimplePage("🧾 السجلات", "سجل العمليات");
-    },
+    onEnter: () => renderSimplePage("🧾 السجلات", "سجل العمليات"),
     onExit: () => {}
   }
 };
 
-/* ---------- Navigation ---------- */
+/* ---------- Navigation Core ---------- */
 function navigateTo(pageName) {
   if (window.ACTIVE_PAGE === pageName) return;
 
@@ -82,7 +60,6 @@ function navigateTo(pageName) {
     Pages[window.ACTIVE_PAGE].onExit();
   }
 
-  // تعيين الصفحة الجديدة
   window.ACTIVE_PAGE = pageName;
 
   // دخول الصفحة الجديدة
@@ -117,13 +94,25 @@ function updateActiveNav(pageName) {
     `.nav-btn[data-page="${pageName}"]`
   );
 
-  if (activeBtn) {
-    activeBtn.classList.add("active");
-  }
+  if (activeBtn) activeBtn.classList.add("active");
 }
+
+/* =====================================================
+   🔥 NAV BUTTON FIX (IMPORTANT PART)
+   Event Delegation — No onclick needed
+===================================================== */
+
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest(".nav-btn");
+  if (!btn) return;
+
+  const page = btn.getAttribute("data-page");
+  if (!page) return;
+
+  navigateTo(page);
+});
 
 /* ---------- Safe Bootstrap ---------- */
 document.addEventListener("DOMContentLoaded", () => {
-  // الدخول الافتراضي على الرئيسية
   navigateTo("home");
 });
