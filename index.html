@@ -1,69 +1,84 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>WinHive</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinHive</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: Arial, sans-serif;
-    }
+<style>
+body{
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:Arial;
+}
 
-    #content {
-      min-height: calc(100vh - 70px);
-      padding: 12px;
-    }
+#content{
+  min-height:80vh;
+  padding:20px;
+}
 
-    .nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 70px;
-      background: #0b0b0b;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      border-top: 1px solid #222;
-    }
+/* ======= NAV BAR ======= */
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#0b0b0b;
+  display:flex;
+  justify-content:space-around;
+  padding:8px 0;
+  border-top:1px solid #222;
+}
 
-    .nav button {
-      background: none;
-      border: none;
-      color: #aaa;
-      font-size: 13px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+.nav button{
+  background:none;
+  border:none;
+  color:#888;
+  font-size:12px;
+  cursor:pointer;
+  transition:0.3s;
+}
 
-    .nav button.active {
-      color: #ffd54f;
-      text-shadow: 0 0 8px #ffd54f;
-    }
-  </style>
+.nav button.active{
+  color:#ffd54f;
+  text-shadow:0 0 8px rgba(255,213,79,.8);
+  transform:translateY(-4px);
+}
+
+.nav button:active{
+  transform:scale(.9);
+}
+
+/* ======= PAGE FADE ======= */
+.fade{
+  animation:fade .25s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+</style>
 </head>
+
 <body>
 
-  <div id="content">جاري التحميل...</div>
+<div id="content">⌛ جاري التحميل...</div>
 
-  <div class="nav">
-    <button onclick="goPage('settings')">الإعدادات</button>
-    <button onclick="goPage('vip')">VIP</button>
-    <button onclick="goPage('wallet')">المحفظة</button>
-    <button class="active" onclick="goPage('home')">الرئيسية</button>
-    <button onclick="goPage('tasks')">المهام</button>
-    <button onclick="goPage('ref')">الإحالة</button>
-    <button onclick="goPage('logs')">السجلات</button>
-  </div>
+<div class="nav">
+  <button data-page="settings" onclick="goPage('settings')">⚙️<br>الإعدادات</button>
+  <button data-page="vip" onclick="goPage('vip')">👑<br>VIP</button>
+  <button data-page="wallet" onclick="goPage('wallet')">💼<br>المحفظة</button>
+  <button data-page="home" class="active" onclick="goPage('home')">🏠<br>الرئيسية</button>
+  <button data-page="tasks" onclick="goPage('tasks')">📋<br>المهام</button>
+  <button data-page="ref" onclick="goPage('ref')">👥<br>الإحالة</button>
+  <button data-page="logs" onclick="goPage('logs')">🧾<br>السجلات</button>
+</div>
 
-  <!-- ترتيب التحميل مهم جدًا -->
-  <script src="core/navigation.js"></script>
-  <script src="pages/home.page.js"></script>
-  <script src="main.js"></script>
+<script src="core/navigation.js"></script>
+<script src="main.js"></script>
+<script src="pages/home.page.js"></script>
 
 </body>
 </html>
