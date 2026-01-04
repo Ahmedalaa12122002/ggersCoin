@@ -1,120 +1,71 @@
 /* =====================================================
-   main.js — Navigation Controller
-   Responsibility: Page switching only
+   main.js — Navigation + Transitions
 ===================================================== */
 
-(function navigationController(){
+(function(){
 
-  // حفظ الصفحة الحالية
-  let currentPage = "home";
+let currentPage = "home";
+const content = document.getElementById("content");
+const buttons = document.querySelectorAll(".nav-btn");
 
-  // تشغيل بعد تحميل الصفحة
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initNavigation);
-  } else {
-    initNavigation();
-  }
+buttons.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const page = getPage(btn);
+    if(!page || page === currentPage) return;
 
-  function initNavigation() {
-    const navButtons = document.querySelectorAll(".nav-btn");
-    if (!navButtons.length) {
-      console.warn("⚠️ No navigation buttons found");
-      return;
-    }
-
-    navButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const page = getPageFromButton(btn);
-        if (!page) return;
-
-        switchPage(page);
-        setActiveButton(btn);
-      });
-    });
-
-    // الصفحة الافتراضية
-    switchPage("home");
-  }
-
-  /* ---------- Page Resolver ---------- */
-  function getPageFromButton(button) {
-    const text = button.textContent.trim();
-
-    if (text.includes("الرئيسية")) return "home";
-    if (text.includes("VIP")) return "vip";
-    if (text.includes("المهام")) return "tasks";
-    if (text.includes("المحفظة")) return "wallet";
-    if (text.includes("الإحالة")) return "referral";
-    if (text.includes("الإعدادات")) return "settings";
-    if (text.includes("السجلات")) return "logs";
-
-    return null;
-  }
-
-  /* ---------- Switch Page ---------- */
-  function switchPage(page) {
-    if (page === currentPage) return;
-    currentPage = page;
-
-    const content = document.getElementById("content");
-    if (!content) return;
-
-    // حاليًا صفحة واحدة فقط
-    if (page === "home") {
-      if (typeof renderHome === "function") {
-        renderHome();
-      } else {
-        content.innerHTML = "<p style='padding:20px'>الصفحة غير جاهزة</p>";
-      }
-      return;
-    }
-
-    // الصفحات غير الجاهزة بعد
-    content.innerHTML = `
-      <div style="
-        padding:40px;
-        text-align:center;
-        color:#aaa;
-        font-size:14px">
-        🚧 هذه الصفحة قيد التطوير
-      </div>
-    `;
-  }
-
-  /* ---------- Active Button ---------- */
-  function setActiveButton(activeBtn) {
-    document.querySelectorAll(".nav-btn")
-      .forEach(btn => btn.classList.remove("active"));
-    activeBtn.classList.add("active");
-  }
-
-})();
-/* =====================================================
-   PART 8 — PAGE TRANSITION FIX
-   (NO FUNCTION REDEFINITION)
-===================================================== */
-
-(function enablePageTransitions(){
-
-  const content = document.getElementById("content");
-  if (!content) return;
-
-  // نراقب الضغط على أزرار القوائم
-  document.querySelectorAll(".nav-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      // خروج الصفحة الحالية
-      content.classList.add("page-exit");
-
-      setTimeout(()=>{
-        content.classList.remove("page-exit");
-        content.classList.add("page-enter");
-
-        setTimeout(()=>{
-          content.classList.remove("page-enter");
-        }, 300);
-
-      }, 150);
-    });
+    setActive(btn);
+    switchPage(page);
   });
+});
+
+function getPage(btn){
+  const t = btn.textContent;
+  if(t.includes("الرئيسية")) return "home";
+  if(t.includes("VIP")) return "vip";
+  if(t.includes("المهام")) return "tasks";
+  if(t.includes("المحفظة")) return "wallet";
+  if(t.includes("الإحالة")) return "referral";
+  if(t.includes("الإعدادات")) return "settings";
+  if(t.includes("السجلات")) return "logs";
+  return null;
+}
+
+function setActive(active){
+  buttons.forEach(b=>b.classList.remove("active"));
+  active.classList.add("active");
+}
+
+function switchPage(page){
+  currentPage = page;
+
+  content.classList.add("page-exit");
+
+  setTimeout(()=>{
+    content.classList.remove("page-exit");
+
+    if(page === "home" && typeof renderHome === "function"){
+      renderHome();
+    }else{
+      content.innerHTML = `
+        <div style="
+          padding:40px;
+          text-align:center;
+          color:#aaa">
+          🚧 هذه الصفحة قيد التطوير
+        </div>`;
+    }
+
+    content.classList.add("page-enter");
+    setTimeout(()=>content.classList.remove("page-enter"),300);
+
+  },180);
+}
+
+/* فتح الرئيسية أول مرة */
+document.addEventListener("DOMContentLoaded",()=>{
+  if(typeof renderHome === "function"){
+    renderHome();
+  }
+});
 
 })();
