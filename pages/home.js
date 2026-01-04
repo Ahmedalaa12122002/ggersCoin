@@ -533,3 +533,71 @@ function uiHarvest(plotIndex) {
     renderHome();
   }
 }
+/* =====================================================
+   SECTION F — VISUAL ENHANCEMENTS (CSS ONLY)
+   (ADD BELOW SECTION E — DO NOT DUPLICATE)
+===================================================== */
+
+/* نحقن CSS إضافي بدون لمس renderHome */
+(function injectFarmVisuals(){
+  const style = document.createElement("style");
+  style.innerHTML = `
+    /* تحسين أرض المزرعة */
+    .farm-board{
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.05), transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(0,0,0,.15), transparent 45%),
+        linear-gradient(#6fbf55,#4e8f3a);
+    }
+
+    /* تحسين التربة */
+    .plot{
+      background:
+        linear-gradient(180deg, #6a4a2f 0%, #4a321d 60%, #3a2716 100%);
+    }
+
+    .plot::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:14px;
+      box-shadow:
+        inset 0 2px 3px rgba(255,255,255,.08),
+        inset 0 -3px 6px rgba(0,0,0,.4);
+      pointer-events:none;
+    }
+
+    /* حركة نمو النبات */
+    .plant{
+      animation: plantGrow 2.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes plantGrow{
+      from{ transform:scale(.96); }
+      to{ transform:scale(1.06); }
+    }
+
+    /* الأرض الجاهزة للحصاد */
+    .plot:not(.locked) .plant:contains("🌾"){
+      filter: drop-shadow(0 0 6px rgba(255,215,0,.6));
+    }
+
+    /* تحسين العداد */
+    .timer{
+      box-shadow:0 2px 6px rgba(0,0,0,.6);
+    }
+
+    /* تحسين نافذة اختيار المحصول */
+    #plantMenu h3{
+      margin-bottom:10px;
+    }
+    #plantMenu button{
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+    #plantMenu button:hover{
+      transform:scale(1.05);
+      box-shadow:0 0 10px rgba(255,200,0,.4);
+    }
+  `;
+  document.head.appendChild(style);
+})();
