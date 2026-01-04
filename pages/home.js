@@ -1,13 +1,13 @@
 /* =====================================================
-   SECTION A — CONSTANTS + STATE + INIT
-   (DO NOT DUPLICATE — DO NOT MODIFY LATER)
+   PART 1 — BASE SYSTEM (CONSTANTS + STATE + INIT)
+   WinHive Farm Game
 ===================================================== */
 
 /* ---------- Constants ---------- */
 const STORAGE_KEY = "winhive_game_state_v1";
 const TOTAL_PLOTS = 6;
 
-/* ---------- Crops Definition ---------- */
+/* ---------- Crops ---------- */
 const CROPS = [
   { id: "wheat",  name: "قمح",   baseTime: 5,  baseReward: 1 },
   { id: "carrot", name: "جزر",   baseTime: 10, baseReward: 2 },
@@ -19,12 +19,17 @@ const CROPS = [
 /* ---------- Global State ---------- */
 let state = {
   points: 0,
-  vipLevel: 0,          // 0 → 5
-  plots: [],            // سيتم تهيئتها
-  task: null            // للمهام لاحقًا
+  vipLevel: 0,
+  plots: [],
+  task: null
 };
 
-/* ---------- Initialize Plots ---------- */
+/* ---------- Time Helper ---------- */
+function nowSeconds() {
+  return Math.floor(Date.now() / 1000);
+}
+
+/* ---------- Init Plots ---------- */
 function initPlots() {
   state.plots = [];
   for (let i = 0; i < TOTAL_PLOTS; i++) {
@@ -36,56 +41,51 @@ function initPlots() {
   }
 }
 
-/* ---------- Storage Helpers ---------- */
+/* ---------- Storage ---------- */
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return false;
   try {
-    state = JSON.parse(raw);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.plots)) return false;
+    state = parsed;
     return true;
   } catch (e) {
-    console.error("State load failed, resetting.", e);
+    console.warn("Storage corrupted, resetting");
+    localStorage.removeItem(STORAGE_KEY);
     return false;
   }
 }
 
-/* ---------- App Init ---------- */
+/* ---------- Game Init ---------- */
 function initGame() {
   const loaded = loadState();
-  if (!loaded || !Array.isArray(state.plots) || state.plots.length !== TOTAL_PLOTS) {
+  if (!loaded || state.plots.length !== TOTAL_PLOTS) {
     initPlots();
     saveState();
   }
-                     }
+}
 /* =====================================================
-   SECTION B — GAME LOGIC (PLANT / GROW / HARVEST)
-   (ADD BELOW SECTION A — DO NOT DUPLICATE)
+   PART 2 — GAME LOGIC (PLANT / GROW / HARVEST)
 ===================================================== */
 
-/* ---------- Helpers ---------- */
+/* ---------- Crop Helper ---------- */
 function getCropById(cropId) {
   return CROPS.find(c => c.id === cropId) || null;
 }
 
-function nowSeconds() {
-  return Math.floor(Date.now() / 1000);
-}
-
-/* ---------- Planting ---------- */
+/* ---------- Plant Crop ---------- */
 /**
  * يزرع محصولًا في أرض محددة
- * @param {number} plotIndex
- * @param {string} cropId
- * @param {number} growTimeSeconds (محسوب لاحقًا مع VIP)
  */
 function plantCrop(plotIndex, cropId, growTimeSeconds) {
   const plot = state.plots[plotIndex];
   if (!plot) return false;
-  if (plot.cropId !== null) return false; // الأرض مش فاضية
+  if (plot.cropId !== null) return false; // الأرض غير فارغة
 
   plot.cropId = cropId;
   plot.plantedAt = nowSeconds();
@@ -97,8 +97,7 @@ function plantCrop(plotIndex, cropId, growTimeSeconds) {
 
 /* ---------- Growth Status ---------- */
 /**
- * يحسب حالة النمو للأرض
- * @returns {object} { status, elapsed, remaining, progress }
+ * حالة نمو الأرض
  */
 function getPlotGrowthStatus(plotIndex) {
   const plot = state.plots[plotIndex];
@@ -129,8 +128,7 @@ function getPlotGrowthStatus(plotIndex) {
 
 /* ---------- Harvest ---------- */
 /**
- * يحصد الأرض لو جاهزة
- * @returns {number} النقاط المكتسبة أو 0
+ * يحصد الأرض الجاهزة
  */
 function harvestPlot(plotIndex) {
   const plot = state.plots[plotIndex];
@@ -145,49 +143,43 @@ function harvestPlot(plotIndex) {
   // إضافة النقاط
   state.points += reward;
 
-  // تفريغ الأرض
+  // إعادة ضبط الأرض
   plot.cropId = null;
   plot.plantedAt = 0;
   plot.growTime = 0;
 
   saveState();
   return reward;
-     }
+   }
 /* =====================================================
-   SECTION C — VIP SYSTEM (LOGIC ONLY)
-   (ADD BELOW SECTION B — DO NOT DUPLICATE)
+   PART 3 — VIP SYSTEM (UNLOCK PLOTS + SPEED BONUS)
 ===================================================== */
 
-/* ---------- VIP Helpers ---------- */
-
+/* ---------- VIP Config ---------- */
 /**
  * يعيد إعدادات VIP حسب المستوى
- * @param {number} level
- * @returns {object}
  */
 function getVipConfig(level) {
   return {
     level,
-    unlockedPlots: Math.min(1 + level, TOTAL_PLOTS), // أرض واحدة + كل VIP
-    speedReduction: level * 0.05, // 5% لكل مستوى
+    unlockedPlots: Math.min(1 + level, TOTAL_PLOTS), // أرض واحدة + كل مستوى
+    speedReduction: level * 0.05, // 5% تقليل وقت لكل VIP
     taskBonus: level * 0.10       // سيُستخدم لاحقًا
   };
 }
 
+/* ---------- Plot Access ---------- */
 /**
- * هل الأرض مفتوحة للمستخدم حسب VIP؟
- * @param {number} plotIndex
- * @returns {boolean}
+ * هل الأرض مفتوحة حسب VIP؟
  */
 function isPlotUnlocked(plotIndex) {
   const vip = getVipConfig(state.vipLevel);
   return plotIndex < vip.unlockedPlots;
 }
 
+/* ---------- Grow Time Calculator ---------- */
 /**
  * يحسب وقت الزراعة بعد خصم VIP
- * @param {number} baseTimeSeconds
- * @returns {number}
  */
 function calculateGrowTime(baseTimeSeconds) {
   const vip = getVipConfig(state.vipLevel);
@@ -196,15 +188,12 @@ function calculateGrowTime(baseTimeSeconds) {
 }
 
 /* ---------- VIP Mutations ---------- */
-
 /**
- * يغيّر مستوى VIP (للاختبار الآن)
- * لاحقًا سيتم ربطه بالشراء
- * @param {number} newLevel
+ * تعيين مستوى VIP (للاختبار الآن)
  */
-function setVipLevel(newLevel) {
-  const level = Math.max(0, Math.min(5, newLevel));
-  state.vipLevel = level;
+function setVipLevel(level) {
+  const newLevel = Math.max(0, Math.min(10, level)); // VIP من 0 إلى 10
+  state.vipLevel = newLevel;
   saveState();
 }
 
@@ -212,28 +201,26 @@ function setVipLevel(newLevel) {
  * ترقية VIP بمستوى واحد
  */
 function upgradeVip() {
-  if (state.vipLevel < 5) {
+  if (state.vipLevel < 10) {
     state.vipLevel += 1;
     saveState();
   }
 }
 /* =====================================================
-   SECTION D — TASK SYSTEM (LOGIC ONLY)
-   (ADD BELOW SECTION C — DO NOT DUPLICATE)
+   PART 4 — TASK SYSTEM (FARM TASKS + VIP BONUS)
 ===================================================== */
 
-/* ---------- Task Definitions ---------- */
+/* ---------- Task Pool ---------- */
 const TASK_POOL = [
   { id: "harvest_any_5", type: "harvest_any", target: 5, baseReward: 5 },
   { id: "harvest_any_10", type: "harvest_any", target: 10, baseReward: 8 },
-  { id: "plant_wheat_3", type: "plant_crop", cropId: "wheat", target: 3, baseReward: 3 },
-  { id: "plant_carrot_2", type: "plant_crop", cropId: "carrot", target: 2, baseReward: 4 }
+  { id: "plant_wheat_3", type: "plant_crop", cropId: "wheat", target: 3, baseReward: 4 },
+  { id: "plant_carrot_2", type: "plant_crop", cropId: "carrot", target: 2, baseReward: 6 }
 ];
 
-/* ---------- Task Helpers ---------- */
-
+/* ---------- Task Generator ---------- */
 /**
- * يولّد مهمة عشوائية جديدة
+ * يولّد مهمة جديدة عشوائية
  */
 function generateNewTask() {
   const t = TASK_POOL[Math.floor(Math.random() * TASK_POOL.length)];
@@ -248,9 +235,9 @@ function generateNewTask() {
   saveState();
 }
 
+/* ---------- Task Text ---------- */
 /**
- * يعيد نص المهمة الحالي
- * (يُستخدم لاحقًا في الواجهة)
+ * نص المهمة (للاستخدام في الواجهة لاحقًا)
  */
 function getTaskText() {
   const t = state.task;
@@ -268,10 +255,9 @@ function getTaskText() {
   return "";
 }
 
-/* ---------- Task Progress ---------- */
-
+/* ---------- Task Progress Hooks ---------- */
 /**
- * يتم استدعاؤه بعد أي زرع
+ * يُستدعى بعد أي عملية زرع
  */
 function onPlantForTask(cropId) {
   const t = state.task;
@@ -284,7 +270,7 @@ function onPlantForTask(cropId) {
 }
 
 /**
- * يتم استدعاؤه بعد أي حصاد
+ * يُستدعى بعد أي عملية حصاد
  */
 function onHarvestForTask() {
   const t = state.task;
@@ -307,15 +293,14 @@ function checkTaskCompletion() {
 
     state.points += finalReward;
 
-    // توليد مهمة جديدة
+    // توليد مهمة جديدة مباشرة
     generateNewTask();
   }
 
   saveState();
-}
+   }
 /* =====================================================
-   SECTION E — RENDER + UI
-   (ADD BELOW SECTION D — DO NOT DUPLICATE)
+   PART 5 — RENDER + UI (FARM INTERFACE)
 ===================================================== */
 
 /* ---------- Render Home ---------- */
@@ -323,8 +308,10 @@ function renderHome() {
   const content = document.getElementById("content");
   if (!content) return;
 
-  const now = nowSeconds();
-  const vip = getVipConfig(state.vipLevel);
+  // تأكد من وجود مهمة
+  if (!state.task) {
+    generateNewTask();
+  }
 
   let html = `
   <style>
@@ -358,21 +345,20 @@ function renderHome() {
     }
     .plot{
       position:absolute;
-      width:100px;
-      height:90px;
+      width:96px;
+      height:86px;
       border-radius:14px;
       background:linear-gradient(#5a3b1e,#3e2a15);
-      box-shadow:inset 0 3px 6px rgba(0,0,0,.4);
       display:flex;
       justify-content:center;
       align-items:center;
       color:#fff;
-      font-size:26px;
+      font-size:24px;
       cursor:pointer;
     }
     .plot.locked{
-      background:linear-gradient(#444,#222);
-      opacity:.8;
+      background:#333;
+      opacity:.7;
       cursor:not-allowed;
     }
     .soil{
@@ -384,7 +370,7 @@ function renderHome() {
       border-radius:0 0 14px 14px;
     }
     .plant{
-      font-size:28px;
+      font-size:26px;
       z-index:2;
     }
     .timer{
@@ -394,16 +380,15 @@ function renderHome() {
       padding:2px 6px;
       border-radius:8px;
       font-size:11px;
-      z-index:3;
     }
 
     /* توزيع الأراضي */
-    .p0{ top:40px;  left:40px; }
-    .p1{ top:40px;  right:40px; }
+    .p0{ top:40px; left:40px; }
+    .p1{ top:40px; right:40px; }
     .p2{ top:160px; left:160px; }
     .p3{ bottom:160px; left:40px; }
     .p4{ bottom:160px; right:40px; }
-    .p5{ bottom:40px;  left:160px; }
+    .p5{ bottom:40px; left:160px; }
   </style>
 
   <div class="farm-wrapper">
@@ -462,7 +447,7 @@ function renderHome() {
 
   content.innerHTML = html;
 
-  // تحديث تلقائي أثناء النمو
+  // إعادة الرسم أثناء النمو
   if (state.plots.some((p, i) => p.cropId && getPlotGrowthStatus(i).status === "growing")) {
     setTimeout(renderHome, 1000);
   }
@@ -534,70 +519,82 @@ function uiHarvest(plotIndex) {
   }
 }
 /* =====================================================
-   SECTION F — VISUAL ENHANCEMENTS (CSS ONLY)
-   (ADD BELOW SECTION E — DO NOT DUPLICATE)
+   PART 6 — VISUAL ENHANCEMENTS + SAFE BOOTSTRAP
+   (FINAL PART — DO NOT DUPLICATE ANYTHING)
 ===================================================== */
 
-/* نحقن CSS إضافي بدون لمس renderHome */
-(function injectFarmVisuals(){
+/* ---------- Visual Enhancements (Safe CSS) ---------- */
+(function injectSafeVisuals(){
   const style = document.createElement("style");
   style.innerHTML = `
-    /* تحسين أرض المزرعة */
+    /* إحساس أرض أكثر واقعية */
     .farm-board{
       background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,.05), transparent 40%),
-        radial-gradient(circle at 80% 30%, rgba(0,0,0,.15), transparent 45%),
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.06), transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(0,0,0,.18), transparent 45%),
         linear-gradient(#6fbf55,#4e8f3a);
     }
 
-    /* تحسين التربة */
+    /* تحسين شكل الأرض */
     .plot{
-      background:
-        linear-gradient(180deg, #6a4a2f 0%, #4a321d 60%, #3a2716 100%);
-    }
-
-    .plot::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:14px;
       box-shadow:
         inset 0 2px 3px rgba(255,255,255,.08),
-        inset 0 -3px 6px rgba(0,0,0,.4);
-      pointer-events:none;
+        inset 0 -3px 6px rgba(0,0,0,.45),
+        0 4px 10px rgba(0,0,0,.35);
+      transition:transform .15s ease;
     }
 
-    /* حركة نمو النبات */
+    .plot:not(.locked):active{
+      transform:scale(.95);
+    }
+
+    /* حركة النبات */
     .plant{
-      animation: plantGrow 2.5s ease-in-out infinite alternate;
+      animation: plantPulse 2.5s ease-in-out infinite alternate;
     }
 
-    @keyframes plantGrow{
+    @keyframes plantPulse{
       from{ transform:scale(.96); }
-      to{ transform:scale(1.06); }
-    }
-
-    /* الأرض الجاهزة للحصاد */
-    .plot:not(.locked) .plant:contains("🌾"){
-      filter: drop-shadow(0 0 6px rgba(255,215,0,.6));
+      to{ transform:scale(1.05); }
     }
 
     /* تحسين العداد */
     .timer{
       box-shadow:0 2px 6px rgba(0,0,0,.6);
     }
-
-    /* تحسين نافذة اختيار المحصول */
-    #plantMenu h3{
-      margin-bottom:10px;
-    }
-    #plantMenu button{
-      transition:transform .15s ease, box-shadow .15s ease;
-    }
-    #plantMenu button:hover{
-      transform:scale(1.05);
-      box-shadow:0 0 10px rgba(255,200,0,.4);
-    }
   `;
   document.head.appendChild(style);
+})();
+
+/* ---------- Safe Bootstrap (Guaranteed Start) ---------- */
+(function safeStart(){
+  function start(){
+    try {
+      if (!document.getElementById("content")) {
+        console.error("❌ عنصر #content غير موجود");
+        return;
+      }
+
+      // تهيئة اللعبة
+      initGame();
+
+      // تأكيد وجود مهمة
+      if (!state.task) {
+        generateNewTask();
+      }
+
+      // أول رسم
+      renderHome();
+
+      console.log("✅ WinHive Farm started successfully");
+    } catch (e) {
+      console.error("❌ Game failed to start", e);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
 })();
