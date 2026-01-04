@@ -1,497 +1,535 @@
-/* =========================================
-   WinHive – Home (Farm System v5)
-   PART 1 / 3
-   Game Board + Realistic Farm Layout
-========================================= */
+/* =====================================================
+   SECTION A — CONSTANTS + STATE + INIT
+   (DO NOT DUPLICATE — DO NOT MODIFY LATER)
+===================================================== */
 
-/* ---------- بيانات أساسية ---------- */
+/* ---------- Constants ---------- */
+const STORAGE_KEY = "winhive_game_state_v1";
 const TOTAL_PLOTS = 6;
 
-/* ---------- الحالة ---------- */
+/* ---------- Crops Definition ---------- */
+const CROPS = [
+  { id: "wheat",  name: "قمح",   baseTime: 5,  baseReward: 1 },
+  { id: "carrot", name: "جزر",   baseTime: 10, baseReward: 2 },
+  { id: "pepper", name: "فلفل",  baseTime: 15, baseReward: 2 },
+  { id: "grape",  name: "عنب",   baseTime: 20, baseReward: 3 },
+  { id: "rocket", name: "جرجير", baseTime: 30, baseReward: 3 }
+];
+
+/* ---------- Global State ---------- */
 let state = {
   points: 0,
-  vip: 0,        // من 0 إلى 5
-  plots: []      // سيتم ملؤها لاحقًا
+  vipLevel: 0,          // 0 → 5
+  plots: [],            // سيتم تهيئتها
+  task: null            // للمهام لاحقًا
 };
 
-/* ---------- تحميل الصفحة ---------- */
-function loadHome() {
-  const saved = localStorage.getItem("winhive_farm_v5");
-  if (saved) {
-    state = JSON.parse(saved);
-  } else {
-    initPlots();
-    saveState();
-  }
-  renderHome();
-}
-
-/* ---------- تهيئة الأراضي ---------- */
+/* ---------- Initialize Plots ---------- */
 function initPlots() {
   state.plots = [];
   for (let i = 0; i < TOTAL_PLOTS; i++) {
     state.plots.push({
-      crop: null,
+      cropId: null,
       plantedAt: 0,
       growTime: 0
     });
   }
 }
 
-/* ---------- حفظ ---------- */
+/* ---------- Storage Helpers ---------- */
 function saveState() {
-  localStorage.setItem("winhive_farm_v5", JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-/* ---------- رسم الواجهة ---------- */
-function renderHome() {
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return false;
+  try {
+    state = JSON.parse(raw);
+    return true;
+  } catch (e) {
+    console.error("State load failed, resetting.", e);
+    return false;
+  }
+}
+
+/* ---------- App Init ---------- */
+function initGame() {
+  const loaded = loadState();
+  if (!loaded || !Array.isArray(state.plots) || state.plots.length !== TOTAL_PLOTS) {
+    initPlots();
+    saveState();
+  }
+                     }
+/* =====================================================
+   SECTION B — GAME LOGIC (PLANT / GROW / HARVEST)
+   (ADD BELOW SECTION A — DO NOT DUPLICATE)
+===================================================== */
+
+/* ---------- Helpers ---------- */
+function getCropById(cropId) {
+  return CROPS.find(c => c.id === cropId) || null;
+}
+
+function nowSeconds() {
+  return Math.floor(Date.now() / 1000);
+}
+
+/* ---------- Planting ---------- */
+/**
+ * يزرع محصولًا في أرض محددة
+ * @param {number} plotIndex
+ * @param {string} cropId
+ * @param {number} growTimeSeconds (محسوب لاحقًا مع VIP)
+ */
+function plantCrop(plotIndex, cropId, growTimeSeconds) {
+  const plot = state.plots[plotIndex];
+  if (!plot) return false;
+  if (plot.cropId !== null) return false; // الأرض مش فاضية
+
+  plot.cropId = cropId;
+  plot.plantedAt = nowSeconds();
+  plot.growTime = growTimeSeconds;
+
   saveState();
+  return true;
+}
+
+/* ---------- Growth Status ---------- */
+/**
+ * يحسب حالة النمو للأرض
+ * @returns {object} { status, elapsed, remaining, progress }
+ */
+function getPlotGrowthStatus(plotIndex) {
+  const plot = state.plots[plotIndex];
+  if (!plot || !plot.cropId) {
+    return { status: "empty" };
+  }
+
+  const elapsed = nowSeconds() - plot.plantedAt;
+  const remaining = Math.max(0, plot.growTime - elapsed);
+  const progress = Math.min(1, elapsed / plot.growTime);
+
+  if (elapsed >= plot.growTime) {
+    return {
+      status: "ready",
+      elapsed,
+      remaining: 0,
+      progress: 1
+    };
+  }
+
+  return {
+    status: "growing",
+    elapsed,
+    remaining,
+    progress
+  };
+}
+
+/* ---------- Harvest ---------- */
+/**
+ * يحصد الأرض لو جاهزة
+ * @returns {number} النقاط المكتسبة أو 0
+ */
+function harvestPlot(plotIndex) {
+  const plot = state.plots[plotIndex];
+  if (!plot || !plot.cropId) return 0;
+
+  const status = getPlotGrowthStatus(plotIndex);
+  if (status.status !== "ready") return 0;
+
+  const crop = getCropById(plot.cropId);
+  const reward = crop ? crop.baseReward : 0;
+
+  // إضافة النقاط
+  state.points += reward;
+
+  // تفريغ الأرض
+  plot.cropId = null;
+  plot.plantedAt = 0;
+  plot.growTime = 0;
+
+  saveState();
+  return reward;
+     }
+/* =====================================================
+   SECTION C — VIP SYSTEM (LOGIC ONLY)
+   (ADD BELOW SECTION B — DO NOT DUPLICATE)
+===================================================== */
+
+/* ---------- VIP Helpers ---------- */
+
+/**
+ * يعيد إعدادات VIP حسب المستوى
+ * @param {number} level
+ * @returns {object}
+ */
+function getVipConfig(level) {
+  return {
+    level,
+    unlockedPlots: Math.min(1 + level, TOTAL_PLOTS), // أرض واحدة + كل VIP
+    speedReduction: level * 0.05, // 5% لكل مستوى
+    taskBonus: level * 0.10       // سيُستخدم لاحقًا
+  };
+}
+
+/**
+ * هل الأرض مفتوحة للمستخدم حسب VIP؟
+ * @param {number} plotIndex
+ * @returns {boolean}
+ */
+function isPlotUnlocked(plotIndex) {
+  const vip = getVipConfig(state.vipLevel);
+  return plotIndex < vip.unlockedPlots;
+}
+
+/**
+ * يحسب وقت الزراعة بعد خصم VIP
+ * @param {number} baseTimeSeconds
+ * @returns {number}
+ */
+function calculateGrowTime(baseTimeSeconds) {
+  const vip = getVipConfig(state.vipLevel);
+  const reduced = baseTimeSeconds * (1 - vip.speedReduction);
+  return Math.max(1, Math.round(reduced));
+}
+
+/* ---------- VIP Mutations ---------- */
+
+/**
+ * يغيّر مستوى VIP (للاختبار الآن)
+ * لاحقًا سيتم ربطه بالشراء
+ * @param {number} newLevel
+ */
+function setVipLevel(newLevel) {
+  const level = Math.max(0, Math.min(5, newLevel));
+  state.vipLevel = level;
+  saveState();
+}
+
+/**
+ * ترقية VIP بمستوى واحد
+ */
+function upgradeVip() {
+  if (state.vipLevel < 5) {
+    state.vipLevel += 1;
+    saveState();
+  }
+}
+/* =====================================================
+   SECTION D — TASK SYSTEM (LOGIC ONLY)
+   (ADD BELOW SECTION C — DO NOT DUPLICATE)
+===================================================== */
+
+/* ---------- Task Definitions ---------- */
+const TASK_POOL = [
+  { id: "harvest_any_5", type: "harvest_any", target: 5, baseReward: 5 },
+  { id: "harvest_any_10", type: "harvest_any", target: 10, baseReward: 8 },
+  { id: "plant_wheat_3", type: "plant_crop", cropId: "wheat", target: 3, baseReward: 3 },
+  { id: "plant_carrot_2", type: "plant_crop", cropId: "carrot", target: 2, baseReward: 4 }
+];
+
+/* ---------- Task Helpers ---------- */
+
+/**
+ * يولّد مهمة عشوائية جديدة
+ */
+function generateNewTask() {
+  const t = TASK_POOL[Math.floor(Math.random() * TASK_POOL.length)];
+  state.task = {
+    id: t.id,
+    type: t.type,
+    cropId: t.cropId || null,
+    target: t.target,
+    progress: 0,
+    baseReward: t.baseReward
+  };
+  saveState();
+}
+
+/**
+ * يعيد نص المهمة الحالي
+ * (يُستخدم لاحقًا في الواجهة)
+ */
+function getTaskText() {
+  const t = state.task;
+  if (!t) return "";
+
+  if (t.type === "harvest_any") {
+    return `🌾 احصد ${t.target} مرات (${t.progress}/${t.target})`;
+  }
+
+  if (t.type === "plant_crop") {
+    const crop = getCropById(t.cropId);
+    return `🌱 ازرع ${crop ? crop.name : ""} ${t.target} مرات (${t.progress}/${t.target})`;
+  }
+
+  return "";
+}
+
+/* ---------- Task Progress ---------- */
+
+/**
+ * يتم استدعاؤه بعد أي زرع
+ */
+function onPlantForTask(cropId) {
+  const t = state.task;
+  if (!t) return;
+
+  if (t.type === "plant_crop" && t.cropId === cropId) {
+    t.progress += 1;
+    checkTaskCompletion();
+  }
+}
+
+/**
+ * يتم استدعاؤه بعد أي حصاد
+ */
+function onHarvestForTask() {
+  const t = state.task;
+  if (!t) return;
+
+  if (t.type === "harvest_any") {
+    t.progress += 1;
+    checkTaskCompletion();
+  }
+}
+
+/* ---------- Completion ---------- */
+function checkTaskCompletion() {
+  const t = state.task;
+  if (!t) return;
+
+  if (t.progress >= t.target) {
+    const vip = getVipConfig(state.vipLevel);
+    const finalReward = Math.round(t.baseReward * (1 + vip.taskBonus));
+
+    state.points += finalReward;
+
+    // توليد مهمة جديدة
+    generateNewTask();
+  }
+
+  saveState();
+}
+/* =====================================================
+   SECTION E — RENDER + UI
+   (ADD BELOW SECTION D — DO NOT DUPLICATE)
+===================================================== */
+
+/* ---------- Render Home ---------- */
+function renderHome() {
   const content = document.getElementById("content");
+  if (!content) return;
+
+  const now = nowSeconds();
+  const vip = getVipConfig(state.vipLevel);
 
   let html = `
   <style>
-    /* ===== Game Board ===== */
+    .farm-wrapper{
+      max-width:440px;
+      margin:0 auto;
+      padding:10px;
+    }
+    .top-bar{
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:8px;
+      font-size:14px;
+    }
+    .task-box{
+      background:#111;
+      color:#fff;
+      padding:8px;
+      border-radius:12px;
+      text-align:center;
+      margin-bottom:10px;
+      font-size:13px;
+    }
     .farm-board{
+      position:relative;
       width:100%;
-      max-width:420px;
       height:420px;
-      margin:20px auto;
       background:linear-gradient(#6dbb4f,#4e8f3a);
       border-radius:20px;
-      padding:16px;
       box-shadow:inset 0 0 30px rgba(0,0,0,.4);
-      position:relative;
     }
-
-    /* ===== Soil Plots ===== */
     .plot{
+      position:absolute;
       width:100px;
       height:90px;
-      background:linear-gradient(#5a3b1e,#3e2a15);
       border-radius:14px;
-      box-shadow:inset 0 3px 5px rgba(0,0,0,.4);
-      position:absolute;
+      background:linear-gradient(#5a3b1e,#3e2a15);
+      box-shadow:inset 0 3px 6px rgba(0,0,0,.4);
       display:flex;
       justify-content:center;
       align-items:center;
       color:#fff;
       font-size:26px;
+      cursor:pointer;
+    }
+    .plot.locked{
+      background:linear-gradient(#444,#222);
+      opacity:.8;
+      cursor:not-allowed;
+    }
+    .soil{
+      position:absolute;
+      bottom:0;
+      width:100%;
+      height:35%;
+      background:linear-gradient(#3e2a15,#2a1c0f);
+      border-radius:0 0 14px 14px;
+    }
+    .plant{
+      font-size:28px;
+      z-index:2;
+    }
+    .timer{
+      position:absolute;
+      top:-18px;
+      background:rgba(0,0,0,.75);
+      padding:2px 6px;
+      border-radius:8px;
+      font-size:11px;
+      z-index:3;
     }
 
-    /* توزيع طبيعي للأراضي */
+    /* توزيع الأراضي */
     .p0{ top:40px;  left:40px; }
     .p1{ top:40px;  right:40px; }
     .p2{ top:160px; left:160px; }
-
     .p3{ bottom:160px; left:40px; }
     .p4{ bottom:160px; right:40px; }
     .p5{ bottom:40px;  left:160px; }
-
-    /* أرض مقفولة */
-    .locked{
-      background:linear-gradient(#444,#222);
-      opacity:.8;
-    }
   </style>
 
-  <div style="max-width:420px;margin:auto;padding:10px">
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+  <div class="farm-wrapper">
+    <div class="top-bar">
       <div>💰 ${state.points}</div>
-      <div>👑 VIP ${state.vip}</div>
+      <div>👑 VIP ${state.vipLevel}</div>
+    </div>
+
+    <div class="task-box">
+      <strong>📌 المهمة الحالية</strong><br>
+      ${getTaskText()}
     </div>
 
     <div class="farm-board">
   `;
 
   state.plots.forEach((plot, index) => {
-    const unlocked = index < state.vip + 1;
-
-    if (!unlocked) {
-      html += `
-        <div class="plot locked p${index}">
-          🔒
-        </div>
-      `;
-    } else {
-      html += `
-        <div class="plot p${index}">
-          🟫
-        </div>
-      `;
-    }
-  });
-
-  html += `
-    </div>
-  </div>
-  `;
-
-  content.innerHTML = html;
-     }
-/* =========================================
-   WinHive – Home (Farm System v5)
-   PART 2 / 3
-   Planting + Growth Stages + Timer Overlay
-========================================= */
-
-/* ---------- المحاصيل ---------- */
-const CROPS = [
-  { id:"wheat",  name:"قمح",  time:5 },
-  { id:"carrot", name:"جزر",  time:10 },
-  { id:"pepper", name:"فلفل", time:15 },
-  { id:"grape",  name:"عنب",  time:20 },
-  { id:"rocket", name:"جرجير",time:30 }
-];
-
-/* ---------- رسم المزرعة (تحديث) ---------- */
-function renderHome(){
-  saveState();
-  const content = document.getElementById("content");
-  const now = Date.now();
-
-  let html = `
-  <style>
-    .farm-board{
-      width:100%;max-width:420px;height:420px;
-      margin:20px auto;
-      background:linear-gradient(#6dbb4f,#4e8f3a);
-      border-radius:20px;padding:16px;
-      box-shadow:inset 0 0 30px rgba(0,0,0,.4);
-      position:relative;
-    }
-    .plot{
-      width:100px;height:90px;
-      background:linear-gradient(#5a3b1e,#3e2a15);
-      border-radius:14px;
-      position:absolute;
-      display:flex;justify-content:center;align-items:center;
-      font-size:26px;color:#fff;
-    }
-    .timer{
-      position:absolute;top:-18px;
-      background:rgba(0,0,0,.7);
-      padding:2px 6px;
-      border-radius:8px;
-      font-size:11px;
-    }
-    .plant{font-size:28px;}
-    .locked{background:linear-gradient(#444,#222);opacity:.8;}
-
-    .p0{ top:40px;  left:40px; }
-    .p1{ top:40px;  right:40px; }
-    .p2{ top:160px; left:160px; }
-    .p3{ bottom:160px; left:40px; }
-    .p4{ bottom:160px; right:40px; }
-    .p5{ bottom:40px;  left:160px; }
-  </style>
-
-  <div style="max-width:420px;margin:auto;padding:10px">
-    <div style="display:flex;justify-content:space-between">
-      <div>💰 ${state.points}</div>
-      <div>👑 VIP ${state.vip}</div>
-    </div>
-
-    <div class="farm-board">
-  `;
-
-  state.plots.forEach((plot,index)=>{
-    const unlocked = index < state.vip + 1;
-
-    if(!unlocked){
+    if (!isPlotUnlocked(index)) {
       html += `<div class="plot locked p${index}">🔒</div>`;
       return;
     }
 
-    if(!plot.crop){
+    if (!plot.cropId) {
       html += `
-        <div class="plot p${index}" onclick="openPlantMenu(${index})">
-          🟫
-        </div>`;
-      return;
-    }
-
-    const elapsed = (now - plot.plantedAt)/1000;
-    const left = Math.ceil(plot.growTime - elapsed);
-
-    if(elapsed < plot.growTime){
-      let stage = "🌱";
-      if(elapsed > plot.growTime*0.5) stage = "🌿";
-
-      html += `
-        <div class="plot p${index}">
-          <div class="timer">${left}s</div>
-          <div class="plant">${stage}</div>
-        </div>`;
-    }else{
-      html += `
-        <div class="plot p${index}" onclick="harvest(${index})">
-          <div class="plant">🌾</div>
-        </div>`;
-    }
-  });
-
-  html += `
-    </div>
-  </div>
-  `;
-
-  content.innerHTML = html;
-
-  if(state.plots.some(p=>p.crop && (Date.now()-p.plantedAt)/1000 < p.growTime)){
-    setTimeout(renderHome,1000);
-  }
-}
-
-/* ---------- زرع ---------- */
-function openPlantMenu(index){
-  let menu = `
-  <div id="plantMenu" style="
-    position:fixed;inset:0;
-    background:rgba(0,0,0,.85);
-    display:flex;justify-content:center;align-items:center;z-index:9999">
-    <div style="background:#111;padding:14px;border-radius:14px;color:#fff;text-align:center">
-      <h3>اختر محصول</h3>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
-  `;
-
-  CROPS.forEach(c=>{
-    menu+=`
-      <button onclick="plant(${index},'${c.id}',${c.time})"
-        style="padding:8px 12px;border:none;border-radius:10px;background:#222;color:#fff">
-        ${c.name}<br><small>${c.time}د</small>
-      </button>`;
-  });
-
-  menu+=`
-      </div>
-      <button onclick="closePlantMenu()" style="margin-top:10px;background:none;border:none;color:#aaa">إلغاء</button>
-    </div>
-  </div>`;
-
-  document.body.insertAdjacentHTML("beforeend",menu);
-}
-
-function closePlantMenu(){
-  document.getElementById("plantMenu")?.remove();
-}
-
-function plant(index,cropId,time){
-  state.plots[index]={
-    crop:cropId,
-    plantedAt:Date.now(),
-    growTime:time
-  };
-  closePlantMenu();
-  renderHome();
-}
-
-/* ---------- حصاد ---------- */
-function harvest(index){
-  state.points+=1;
-  state.plots[index]={crop:null,plantedAt:0,growTime:0};
-  renderHome();
-   }
-/* =========================================
-   WinHive – Home (Farm System v5 FINAL)
-   Real Farm + Game Board + Growth + VIP
-========================================= */
-
-/* ---------- المحاصيل ---------- */
-const CROPS = [
-  { id:"wheat",  name:"قمح",  time:5 },
-  { id:"carrot", name:"جزر",  time:10 },
-  { id:"pepper", name:"فلفل", time:15 },
-  { id:"grape",  name:"عنب",  time:20 },
-  { id:"rocket", name:"جرجير",time:30 }
-];
-
-const TOTAL_PLOTS = 6;
-
-/* ---------- VIP ---------- */
-function vipConfig(level){
-  return {
-    plots: Math.min(1 + level, TOTAL_PLOTS),
-    speed: level * 0.05 // تقليل وقت الزراعة
-  };
-}
-
-/* ---------- الحالة ---------- */
-let state = {
-  points: 0,
-  vip: 0,
-  plots: []
-};
-
-/* ---------- تحميل ---------- */
-function loadHome(){
-  const saved = localStorage.getItem("winhive_farm_v5");
-  if(saved){
-    state = JSON.parse(saved);
-  }else{
-    initPlots();
-    saveState();
-  }
-  renderHome();
-}
-
-/* ---------- تهيئة ---------- */
-function initPlots(){
-  state.plots=[];
-  for(let i=0;i<TOTAL_PLOTS;i++){
-    state.plots.push({crop:null,plantedAt:0,growTime:0});
-  }
-}
-
-/* ---------- حفظ ---------- */
-function saveState(){
-  localStorage.setItem("winhive_farm_v5",JSON.stringify(state));
-}
-
-/* ---------- رسم ---------- */
-function renderHome(){
-  saveState();
-  const content=document.getElementById("content");
-  const now=Date.now();
-  const vip=vipConfig(state.vip);
-
-  let html=`
-  <style>
-    .farm-board{
-      width:100%;max-width:420px;height:420px;
-      margin:20px auto;
-      background:linear-gradient(#6dbb4f,#4e8f3a);
-      border-radius:20px;padding:16px;
-      box-shadow:inset 0 0 30px rgba(0,0,0,.4);
-      position:relative;
-    }
-    .plot{
-      width:100px;height:90px;
-      background:linear-gradient(#5a3b1e,#3e2a15);
-      border-radius:14px;
-      position:absolute;
-      display:flex;justify-content:center;align-items:center;
-      color:#fff;font-size:26px;
-    }
-    .soil{
-      position:absolute;bottom:0;width:100%;height:35%;
-      background:linear-gradient(#3e2a15,#2a1c0f);
-      border-radius:0 0 14px 14px;
-    }
-    .timer{
-      position:absolute;top:-18px;
-      background:rgba(0,0,0,.75);
-      padding:2px 6px;border-radius:8px;
-      font-size:11px;
-    }
-    .plant{font-size:28px;}
-    .locked{background:linear-gradient(#444,#222);opacity:.8;}
-    .p0{top:40px;left:40px;}
-    .p1{top:40px;right:40px;}
-    .p2{top:160px;left:160px;}
-    .p3{bottom:160px;left:40px;}
-    .p4{bottom:160px;right:40px;}
-    .p5{bottom:40px;left:160px;}
-  </style>
-
-  <div style="max-width:420px;margin:auto;padding:10px">
-    <div style="display:flex;justify-content:space-between">
-      <div>💰 ${state.points}</div>
-      <div>👑 VIP ${state.vip}</div>
-    </div>
-
-    <div class="farm-board">
-  `;
-
-  state.plots.forEach((plot,index)=>{
-    const unlocked=index<vip.plots;
-
-    if(!unlocked){
-      html+=`<div class="plot locked p${index}">🔒</div>`;
-      return;
-    }
-
-    if(!plot.crop){
-      html+=`
-        <div class="plot p${index}" onclick="openPlantMenu(${index})">
+        <div class="plot p${index}" onclick="uiOpenPlantMenu(${index})">
           <div class="soil"></div>🟫
         </div>`;
       return;
     }
 
-    const elapsed=(now-plot.plantedAt)/1000;
-    const left=Math.ceil(plot.growTime-elapsed);
+    const status = getPlotGrowthStatus(index);
 
-    if(elapsed<plot.growTime){
-      let stage="🌱";
-      if(elapsed>plot.growTime*0.5) stage="🌿";
-      html+=`
+    if (status.status === "growing") {
+      const stage = status.progress > 0.5 ? "🌿" : "🌱";
+      html += `
         <div class="plot p${index}">
-          <div class="timer">${left}s</div>
+          <div class="timer">${status.remaining}s</div>
           <div class="soil"></div>
           <div class="plant">${stage}</div>
         </div>`;
-    }else{
-      html+=`
-        <div class="plot p${index}" onclick="harvest(${index})">
+    }
+
+    if (status.status === "ready") {
+      html += `
+        <div class="plot p${index}" onclick="uiHarvest(${index})">
           <div class="soil"></div>
           <div class="plant">🌾</div>
         </div>`;
     }
   });
 
-  html+=`</div></div>`;
-  content.innerHTML=html;
+  html += `
+    </div>
+  </div>
+  `;
 
-  if(state.plots.some(p=>p.crop && (Date.now()-p.plantedAt)/1000<p.growTime)){
-    setTimeout(renderHome,1000);
+  content.innerHTML = html;
+
+  // تحديث تلقائي أثناء النمو
+  if (state.plots.some((p, i) => p.cropId && getPlotGrowthStatus(i).status === "growing")) {
+    setTimeout(renderHome, 1000);
   }
 }
 
-/* ---------- زرع ---------- */
-function openPlantMenu(index){
-  let menu=`
-  <div id="plantMenu" style="position:fixed;inset:0;
-    background:rgba(0,0,0,.85);display:flex;
-    justify-content:center;align-items:center;z-index:9999">
-    <div style="background:#111;padding:14px;border-radius:14px;color:#fff;text-align:center">
+/* ---------- UI Actions ---------- */
+
+function uiOpenPlantMenu(plotIndex) {
+  let menu = `
+  <div id="plantMenu" style="
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.85);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999">
+    <div style="
+      background:#111;
+      padding:14px;
+      border-radius:14px;
+      color:#fff;
+      text-align:center;
+      max-width:300px;
+      width:100%">
       <h3>اختر محصول</h3>
       <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
   `;
 
-  const speed=vipConfig(state.vip).speed;
-
-  CROPS.forEach(c=>{
-    const time=Math.max(1,Math.round(c.time*(1-speed)));
-    menu+=`
-      <button onclick="plant(${index},'${c.id}',${time})"
-        style="padding:8px 12px;border:none;border-radius:10px;background:#222;color:#fff">
-        ${c.name}<br><small>${time}د</small>
+  CROPS.forEach(crop => {
+    const growTime = calculateGrowTime(crop.baseTime);
+    menu += `
+      <button onclick="uiPlant(${plotIndex},'${crop.id}',${growTime})"
+        style="padding:8px 12px;border:none;border-radius:10px;
+        background:#222;color:#fff;font-size:12px">
+        ${crop.name}<br><small>${growTime}ث</small>
       </button>`;
   });
 
-  menu+=`
+  menu += `
       </div>
-      <button onclick="closePlantMenu()" style="margin-top:10px;background:none;border:none;color:#aaa">
+      <button onclick="uiClosePlantMenu()"
+        style="margin-top:10px;background:none;border:none;color:#aaa">
         إلغاء
       </button>
     </div>
   </div>`;
-  document.body.insertAdjacentHTML("beforeend",menu);
+
+  document.body.insertAdjacentHTML("beforeend", menu);
 }
 
-function closePlantMenu(){
+function uiClosePlantMenu() {
   document.getElementById("plantMenu")?.remove();
 }
 
-function plant(index,cropId,time){
-  state.plots[index]={crop:cropId,plantedAt:Date.now(),growTime:time};
-  closePlantMenu();
-  renderHome();
+function uiPlant(plotIndex, cropId, growTime) {
+  const ok = plantCrop(plotIndex, cropId, growTime);
+  if (ok) {
+    onPlantForTask(cropId);
+    uiClosePlantMenu();
+    renderHome();
+  }
 }
 
-/* ---------- حصاد ---------- */
-function harvest(index){
-  state.points+=1;
-  state.plots[index]={crop:null,plantedAt:0,growTime:0};
-  renderHome();
-   }
+function uiHarvest(plotIndex) {
+  const reward = harvestPlot(plotIndex);
+  if (reward > 0) {
+    onHarvestForTask();
+    renderHome();
+  }
+}
