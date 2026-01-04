@@ -2,95 +2,193 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WinHive</title>
 
-<!-- Telegram SDK -->
+<!-- Telegram Mini App -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:#000;color:#fff;overflow:hidden}
+/* =========================
+   GLOBAL RESET
+========================= */
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:system-ui,-apple-system;
+}
 
-/* ===== CONTENT ===== */
+body{
+  background:#000;
+  color:#fff;
+  overflow:hidden;
+}
+
+/* =========================
+   CONTENT AREA
+========================= */
 #content{
-  min-height:100vh;
-  padding-bottom:120px;
-  transition:opacity .35s ease, transform .35s ease;
+  position:relative;
+  height:calc(100vh - 100px);
+  overflow-y:auto;
+  z-index:1;
+  transition:opacity .25s ease, transform .25s ease;
 }
 
-/* ===== BOTTOM NAV ===== */
-.bottom-nav{
-  position:fixed;bottom:0;left:0;width:100%;height:110px;
+#content.fade-out{
+  opacity:0;
+  transform:translateY(8px);
+}
+
+/* =========================
+   BOTTOM NAV BAR
+========================= */
+.nav-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:100px;
   background:rgba(15,15,15,.96);
-  backdrop-filter:blur(14px);
+  backdrop-filter:blur(12px);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
   border-top:1px solid #222;
-  display:flex;justify-content:space-around;align-items:center;
-  z-index:999;
+  z-index:99999;
 }
 
+/* =========================
+   NAV BUTTON
+========================= */
 .nav-btn{
-  width:58px;height:58px;border-radius:50%;
-  background:#141414;color:#aaa;font-size:11px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  transition:all .25s ease;position:relative;overflow:hidden;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#141414;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  color:#aaa;
+  font-size:11px;
+  cursor:pointer;
+  transition:all .25s ease;
 }
-.nav-btn .icon{font-size:20px;margin-bottom:3px}
 
-/* Home أكبر */
-.nav-btn.home{width:80px;height:80px;margin-top:-18px}
-.nav-btn.home .icon{font-size:30px}
+.nav-btn .icon{
+  font-size:20px;
+  margin-bottom:3px;
+}
 
-/* Active */
+/* =========================
+   HOME BUTTON (BIGGER)
+========================= */
+.nav-btn.home{
+  width:82px;
+  height:82px;
+  margin-top:-22px;
+}
+
+.nav-btn.home .icon{
+  font-size:30px;
+}
+
+/* =========================
+   ACTIVE EFFECT
+========================= */
 .nav-btn.active{
   color:#fff;
-  box-shadow:0 0 16px rgba(255,200,0,.45), 0 0 32px rgba(255,200,0,.2);
+  box-shadow:
+    0 0 14px rgba(255,200,0,.6),
+    0 0 28px rgba(255,200,0,.2);
+  transform:scale(1.08);
 }
 
-/* Press */
-.nav-btn:active{transform:scale(.92)}
-
-/* Ripple */
-.nav-btn::after{
-  content:"";position:absolute;inset:0;opacity:0;transition:.3s;
-  background:radial-gradient(circle,
-    rgba(255,220,120,.35) 0%,
-    rgba(255,220,120,.15) 35%,
-    transparent 60%);
+/* =========================
+   PRESS EFFECT
+========================= */
+.nav-btn:active{
+  transform:scale(.92);
 }
-.nav-btn:active::after{opacity:1}
 
-/* Page transitions */
-.page-exit{opacity:0;transform:translateY(10px)}
-.page-enter{opacity:1;transform:translateY(0)}
+/* =========================
+   PAGE FADE
+========================= */
+.page{
+  animation:fadeIn .25s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
 </style>
 </head>
 
 <body>
 
+<!-- =========================
+     CONTENT
+========================= -->
 <div id="content"></div>
 
-<div class="bottom-nav">
-  <div class="nav-btn"><div class="icon">⚙️</div>الإعدادات</div>
-  <div class="nav-btn"><div class="icon">⭐</div>VIP</div>
-  <div class="nav-btn"><div class="icon">💼</div>المحفظة</div>
-  <div class="nav-btn home active"><div class="icon">🏠</div>الرئيسية</div>
-  <div class="nav-btn"><div class="icon">📋</div>المهام</div>
-  <div class="nav-btn"><div class="icon">👥</div>الإحالة</div>
-  <div class="nav-btn"><div class="icon">🧾</div>السجلات</div>
+<!-- =========================
+     BOTTOM NAVIGATION
+========================= -->
+<div class="nav-bar">
+
+  <div class="nav-btn" data-page="settings">
+    <div class="icon">⚙️</div>
+    الإعدادات
+  </div>
+
+  <div class="nav-btn" data-page="vip">
+    <div class="icon">👑</div>
+    VIP
+  </div>
+
+  <div class="nav-btn" data-page="wallet">
+    <div class="icon">💼</div>
+    المحفظة
+  </div>
+
+  <div class="nav-btn home" data-page="home">
+    <div class="icon">🏠</div>
+    الرئيسية
+  </div>
+
+  <div class="nav-btn" data-page="tasks">
+    <div class="icon">📋</div>
+    المهام
+  </div>
+
+  <div class="nav-btn" data-page="referral">
+    <div class="icon">👥</div>
+    الإحالة
+  </div>
+
+  <div class="nav-btn" data-page="logs">
+    <div class="icon">🧾</div>
+    السجلات
+  </div>
+
 </div>
 
-<!-- تحميل منطق الصفحة الرئيسية -->
-<script src="pages/home.js"></script>
-<!-- مدير التنقل -->
+<!-- =========================
+     SCRIPTS
+========================= -->
+<script>
+Telegram.WebApp.ready();
+Telegram.WebApp.expand();
+</script>
+
+<!-- Page Manager -->
 <script src="main.js"></script>
 
-<script>
-if (window.Telegram?.WebApp){
-  Telegram.WebApp.ready();
-  Telegram.WebApp.expand();
-}
-</script>
+<!-- Home Page -->
+<script src="home.page.js"></script>
 
 </body>
 </html>
