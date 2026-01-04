@@ -1,74 +1,87 @@
 /* =====================================================
-   MAIN PAGE MANAGER — FINAL FIXED VERSION
+   MAIN NAVIGATION SYSTEM — WinHive
+   Fixes Home Page Rendering Bug
 ===================================================== */
-
-window.ACTIVE_PAGE = "home";
 
 const content = document.getElementById("content");
 
-/* ---------- Page Registry ---------- */
-const Pages = {
-  home: {
-    onEnter: () => window.onEnterHome && window.onEnterHome(),
-    onExit: () => window.onExitHome && window.onExitHome()
-  },
-  vip:      { onEnter: () => renderPage("👑 VIP"), onExit: () => {} },
-  tasks:    { onEnter: () => renderPage("📋 المهام"), onExit: () => {} },
-  wallet:   { onEnter: () => renderPage("💼 المحفظة"), onExit: () => {} },
-  referral: { onEnter: () => renderPage("👥 الإحالة"), onExit: () => {} },
-  settings: { onEnter: () => renderPage("⚙️ الإعدادات"), onExit: () => {} },
-  logs:     { onEnter: () => renderPage("🧾 السجلات"), onExit: () => {} }
-};
-
-/* ---------- Navigation ---------- */
-function navigateTo(page) {
-  if (window.ACTIVE_PAGE === page) return;
-
-  Pages[window.ACTIVE_PAGE]?.onExit();
-  window.ACTIVE_PAGE = page;
-
-  fadeOut(() => {
-    Pages[page]?.onEnter();
-    updateActiveNav(page);
-    fadeIn();
+/* ---------- Active Button ---------- */
+function setActiveButton(page){
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.page === page);
   });
 }
 
-/* ---------- Simple Page ---------- */
-function renderPage(title) {
-  content.innerHTML = `
-    <div class="page fade">
-      <h2>${title}</h2>
-      <p>قريبًا...</p>
-    </div>
-  `;
+/* ---------- Navigation ---------- */
+function navigateTo(page){
+  if (!content) return;
+
+  // تأثير انتقال
+  content.classList.add("fade-out");
+
+  setTimeout(() => {
+    content.classList.remove("fade-out");
+    content.innerHTML = "";
+    content.className = "page";
+
+    setActiveButton(page);
+
+    /* ===============================
+       HOME (CRITICAL FIX)
+    =============================== */
+    if (page === "home") {
+      if (typeof renderHome === "function") {
+        renderHome();   // ✅ إعادة بناء المزرعة دائمًا
+      } else {
+        content.innerHTML = "<p>خطأ: لم يتم تحميل صفحة الرئيسية</p>";
+      }
+      return;
+    }
+
+    /* ===============================
+       OTHER PAGES (STATIC)
+    =============================== */
+    switch(page){
+
+      case "wallet":
+        content.innerHTML = "<h3>💼 المحفظة</h3><p>قريبًا...</p>";
+        break;
+
+      case "tasks":
+        content.innerHTML = "<h3>📋 المهام</h3><p>قريبًا...</p>";
+        break;
+
+      case "vip":
+        content.innerHTML = "<h3>👑 VIP</h3><p>قريبًا...</p>";
+        break;
+
+      case "settings":
+        content.innerHTML = "<h3>⚙️ الإعدادات</h3><p>قريبًا...</p>";
+        break;
+
+      case "referral":
+        content.innerHTML = "<h3>👥 الإحالة</h3><p>قريبًا...</p>";
+        break;
+
+      case "logs":
+        content.innerHTML = "<h3>🧾 السجلات</h3><p>قريبًا...</p>";
+        break;
+
+      default:
+        content.innerHTML = "<p>صفحة غير موجودة</p>";
+    }
+
+  }, 180);
 }
 
-/* ---------- Active Button ---------- */
-function updateActiveNav(page) {
-  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-  document.querySelector(`.nav-btn[data-page="${page}"]`)?.classList.add("active");
-}
-
-/* ---------- Events ---------- */
-document.addEventListener("click", e => {
-  const btn = e.target.closest(".nav-btn");
-  if (!btn) return;
-  navigateTo(btn.dataset.page);
+/* ---------- Nav Buttons ---------- */
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    navigateTo(btn.dataset.page);
+  });
 });
 
-/* ---------- Transitions ---------- */
-function fadeOut(cb) {
-  content.classList.add("fade-out");
-  setTimeout(cb, 200);
-}
-
-function fadeIn() {
-  content.classList.remove("fade-out");
-}
-
-/* ---------- Boot ---------- */
-document.addEventListener("DOMContentLoaded", () => {
-  Pages.home.onEnter();
-  updateActiveNav("home");
+/* ---------- Initial Load ---------- */
+window.addEventListener("load", ()=>{
+  navigateTo("home"); // ✅ إجبار فتح المزرعة عند التشغيل
 });
