@@ -2,78 +2,150 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>WinHive</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GgersCoin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: Arial, sans-serif;
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:system-ui, Arial;
     }
 
-    #content {
-      min-height: calc(100vh - 70px);
-      padding: 15px;
-      box-sizing: border-box;
+    body{
+      background:#000;
+      color:#fff;
+      overflow:hidden;
     }
 
-    /* Bottom Nav */
-    .nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 70px;
-      background: #0e0e0e;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      border-top: 1px solid #222;
+    /* ===== المحتوى ===== */
+    #content{
+      height:calc(100vh - 90px);
+      padding:16px;
+      transition:opacity .25s ease, transform .25s ease;
     }
 
-    .nav-btn {
-      text-align: center;
-      font-size: 12px;
-      color: #aaa;
-      cursor: pointer;
-      transition: 0.2s;
+    #content.fade{
+      opacity:0;
+      transform:translateY(10px);
     }
 
-    .nav-btn.active {
-      color: #ffd54a;
-      text-shadow: 0 0 8px #ffd54a;
-      transform: scale(1.1);
+    /* ===== شريط القوائم ===== */
+    .nav-bar{
+      position:fixed;
+      bottom:0;
+      right:0;
+      left:0;
+      height:90px;
+      background:#0f0f0f;
+      border-top:1px solid #222;
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      z-index:1000;
     }
 
-    .page-box {
-      background: #111;
-      padding: 15px;
-      border-radius: 12px;
-      text-align: center;
-      margin-top: 20px;
+    .nav-btn{
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      background:#141414;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      color:#aaa;
+      cursor:pointer;
+      transition:all .25s ease;
+    }
+
+    .nav-btn span{
+      font-size:20px;
+      margin-bottom:3px;
+    }
+
+    /* ===== زر الرئيسية ===== */
+    .nav-btn.home{
+      width:78px;
+      height:78px;
+      margin-top:-20px;
+    }
+
+    .nav-btn.home span{
+      font-size:30px;
+    }
+
+    /* ===== النشط ===== */
+    .nav-btn.active{
+      color:#fff;
+      box-shadow:
+        0 0 14px rgba(255,200,0,.45),
+        0 0 26px rgba(255,200,0,.15);
+      transform:scale(1.08);
+    }
+
+    .nav-btn:active{
+      transform:scale(.93);
+    }
+
+    /* ===== صندوق الصفحات ===== */
+    .page-box{
+      background:#111;
+      padding:20px;
+      border-radius:14px;
+      text-align:center;
+      margin-top:20px;
     }
   </style>
 </head>
 
 <body>
 
-  <div id="content">
-    ⏳ يتم تحميل اللعبة...
+  <!-- المحتوى -->
+  <div id="content"></div>
+
+  <!-- القوائم (يمين → يسار) -->
+  <div class="nav-bar">
+
+    <div class="nav-btn" data-page="settings">
+      <span>⚙️</span>
+      الإعدادات
+    </div>
+
+    <div class="nav-btn" data-page="vip">
+      <span>👑</span>
+      VIP
+    </div>
+
+    <div class="nav-btn" data-page="wallet">
+      <span>💼</span>
+      المحفظة
+    </div>
+
+    <div class="nav-btn home active" data-page="home">
+      <span>🏠</span>
+      الرئيسية
+    </div>
+
+    <div class="nav-btn" data-page="tasks">
+      <span>📋</span>
+      المهام
+    </div>
+
+    <div class="nav-btn" data-page="referral">
+      <span>👥</span>
+      الإحالة
+    </div>
+
+    <div class="nav-btn" data-page="logs">
+      <span>🧾</span>
+      السجلات
+    </div>
+
   </div>
 
-  <div class="nav">
-    <div class="nav-btn active" onclick="goHome()">🏠<br>الرئيسية</div>
-    <div class="nav-btn" onclick="goTasks()">📋<br>المهام</div>
-    <div class="nav-btn" onclick="goWallet()">💼<br>المحفظة</div>
-    <div class="nav-btn" onclick="goVip()">👑<br>VIP</div>
-    <div class="nav-btn" onclick="goSettings()">⚙️<br>الإعدادات</div>
-  </div>
-
-  <!-- ⚠️ الترتيب مهم جدًا -->
-  <script src="home.page.js"></script>
   <script src="main.js"></script>
-
 </body>
 </html>
