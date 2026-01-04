@@ -1,76 +1,129 @@
 /* =====================================================
-   main.js — Navigation + Transitions + Page Guard
+   MAIN PAGE MANAGER
+   WinHive Mini App
 ===================================================== */
 
-(function(){
+/* ---------- Global Active Page ---------- */
+// الصفحة النشطة حاليًا
+window.ACTIVE_PAGE = null;
 
-// الحالة النشطة عالميًا (لحماية عدم التداخل)
-window.__ACTIVE_PAGE__ = "home";
-
-let currentPage = "home";
+/* ---------- DOM ---------- */
 const content = document.getElementById("content");
-const buttons = document.querySelectorAll(".nav-btn");
 
-// ربط الأزرار
-buttons.forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const page = getPage(btn);
-    if(!page || page === currentPage) return;
-    setActive(btn);
-    switchPage(page);
-  });
-});
-
-// تحديد الصفحة من نص الزر
-function getPage(btn){
-  const t = btn.textContent;
-  if(t.includes("الرئيسية")) return "home";
-  if(t.includes("VIP")) return "vip";
-  if(t.includes("المهام")) return "tasks";
-  if(t.includes("المحفظة")) return "wallet";
-  if(t.includes("الإحالة")) return "referral";
-  if(t.includes("الإعدادات")) return "settings";
-  if(t.includes("السجلات")) return "logs";
-  return null;
-}
-
-// تفعيل زر
-function setActive(active){
-  buttons.forEach(b=>b.classList.remove("active"));
-  active.classList.add("active");
-}
-
-// التنقّل مع انتقالات + تحديث الحالة
-function switchPage(page){
-  window.__ACTIVE_PAGE__ = page; // 🔒 الحارس
-  currentPage = page;
-
-  content.classList.add("page-exit");
-
-  setTimeout(()=>{
-    content.classList.remove("page-exit");
-
-    if(page === "home" && typeof renderHome === "function"){
-      renderHome();
-    }else{
-      content.innerHTML = `
-        <div style="padding:40px;text-align:center;color:#aaa">
-          🚧 هذه الصفحة قيد التطوير
-        </div>`;
+/* ---------- Page Registry ---------- */
+/*
+  كل صفحة لها:
+  - onEnter(): ماذا يحدث عند الدخول
+  - onExit(): ماذا يحدث عند الخروج
+*/
+const Pages = {
+  home: {
+    onEnter: () => {
+      if (typeof onEnterHome === "function") {
+        onEnterHome();
+      }
+    },
+    onExit: () => {
+      if (typeof onExitHome === "function") {
+        onExitHome();
+      }
     }
+  },
 
-    content.classList.add("page-enter");
-    setTimeout(()=>content.classList.remove("page-enter"),300);
+  vip: {
+    onEnter: () => {
+      renderSimplePage("👑 VIP", "نظام VIP سيتم إضافته لاحقًا");
+    },
+    onExit: () => {}
+  },
 
-  },180);
+  tasks: {
+    onEnter: () => {
+      renderSimplePage("📋 المهام", "قائمة المهام");
+    },
+    onExit: () => {}
+  },
+
+  wallet: {
+    onEnter: () => {
+      renderSimplePage("💼 المحفظة", "السحب والإيداع");
+    },
+    onExit: () => {}
+  },
+
+  referral: {
+    onEnter: () => {
+      renderSimplePage("👥 الإحالة", "نظام الإحالات");
+    },
+    onExit: () => {}
+  },
+
+  settings: {
+    onEnter: () => {
+      renderSimplePage("⚙️ الإعدادات", "الإعدادات العامة");
+    },
+    onExit: () => {}
+  },
+
+  logs: {
+    onEnter: () => {
+      renderSimplePage("🧾 السجلات", "سجل العمليات");
+    },
+    onExit: () => {}
+  }
+};
+
+/* ---------- Navigation ---------- */
+function navigateTo(pageName) {
+  if (window.ACTIVE_PAGE === pageName) return;
+
+  // خروج من الصفحة الحالية
+  if (window.ACTIVE_PAGE && Pages[window.ACTIVE_PAGE]) {
+    Pages[window.ACTIVE_PAGE].onExit();
+  }
+
+  // تعيين الصفحة الجديدة
+  window.ACTIVE_PAGE = pageName;
+
+  // دخول الصفحة الجديدة
+  if (Pages[pageName]) {
+    Pages[pageName].onEnter();
+  } else {
+    console.warn("Page not found:", pageName);
+  }
+
+  updateActiveNav(pageName);
 }
 
-// فتح الرئيسية أول مرة
-document.addEventListener("DOMContentLoaded",()=>{
-  window.__ACTIVE_PAGE__ = "home";
-  if(typeof renderHome === "function"){
-    renderHome();
-  }
-});
+/* ---------- Simple Page Renderer ---------- */
+function renderSimplePage(title, text) {
+  if (!content) return;
 
-})();
+  content.innerHTML = `
+    <div style="padding:20px;text-align:center">
+      <h2>${title}</h2>
+      <p>${text}</p>
+    </div>
+  `;
+}
+
+/* ---------- Bottom Navigation Highlight ---------- */
+function updateActiveNav(pageName) {
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  const activeBtn = document.querySelector(
+    `.nav-btn[data-page="${pageName}"]`
+  );
+
+  if (activeBtn) {
+    activeBtn.classList.add("active");
+  }
+}
+
+/* ---------- Safe Bootstrap ---------- */
+document.addEventListener("DOMContentLoaded", () => {
+  // الدخول الافتراضي على الرئيسية
+  navigateTo("home");
+});
