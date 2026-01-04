@@ -18,7 +18,7 @@ body{
   padding:20px;
 }
 
-/* ===== NAV BAR ===== */
+/* NAV BAR */
 .nav{
   position:fixed;
   bottom:0;
@@ -44,19 +44,10 @@ body{
 
 .nav button.active{
   color:#ffd54f;
-  text-shadow:
-    0 0 6px rgba(255,213,79,.8),
-    0 0 12px rgba(255,213,79,.6);
+  text-shadow:0 0 8px rgba(255,213,79,.8);
   transform:translateY(-4px);
-  font-size:15px;
 }
 
-.nav button:active{
-  transform:scale(.9);
-  filter:brightness(1.2);
-}
-
-/* ===== PAGE FADE ===== */
 .fade{
   animation:fade .25s ease;
 }
@@ -83,8 +74,9 @@ body{
 </div>
 
 <script src="core/navigation.js"></script>
-<script src="main.js"></script>
+<script src="core/timer.js"></script>
 <script src="pages/home.page.js"></script>
+<script src="main.js"></script>
 
 </body>
 </html>
