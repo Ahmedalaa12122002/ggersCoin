@@ -177,18 +177,32 @@ body{
 </div>
 
 <!-- =========================
-     SCRIPTS
+     SCRIPTS (ORDER IS CRITICAL)
 ========================= -->
+
 <script>
 Telegram.WebApp.ready();
 Telegram.WebApp.expand();
 </script>
 
-<!-- Page Manager -->
+<!-- ⚠️ مهم: home.page.js أولاً -->
+<script src="home.page.js"></script>
+
+<!-- ثم main.js -->
 <script src="main.js"></script>
 
-<!-- Home Page -->
-<script src="home.page.js"></script>
+<!-- ✅ BOOT GUARANTEE -->
+<script>
+/*
+  ضمان تشغيل الصفحة الرئيسية بعد تحميل كل شيء
+  حتى لو فشل أي استدعاء سابق
+*/
+window.addEventListener("load", () => {
+  if (typeof navigateTo === "function") {
+    navigateTo("home");
+  }
+});
+</script>
 
 </body>
 </html>
