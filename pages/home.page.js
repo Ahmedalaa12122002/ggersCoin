@@ -1,221 +1,114 @@
-/* =====================================================
-   WinHive Farm – Home Page (Real Farming System)
-===================================================== */
+/* ================================
+   HOME PAGE – FARM GAME
+================================ */
 
-/* ---------- Config ---------- */
-const FARM_STORAGE_KEY = "winhive_farm_state_v1";
-const TOTAL_PLOTS = 6;
+const STORAGE_KEY = "winhive_farm_v1";
 
-/* ---------- Crops ---------- */
 const CROPS = [
-  { id: "wheat",  name: "قمح",  time: 300, icon: "🌾", reward: 2 },
-  { id: "carrot", name: "جزر",  time: 600, icon: "🥕", reward: 3 },
-  { id: "pepper", name: "فلفل", time: 900, icon: "🌶️", reward: 4 }
+  { id: "wheat", name: "قمح", time: 30, icon: "🌾" },
+  { id: "corn", name: "ذرة", time: 60, icon: "🌽" },
+  { id: "carrot", name: "جزر", time: 90, icon: "🥕" }
 ];
 
-/* ---------- State ---------- */
-let farmState = {
-  points: 0,
-  vip: 0,
+let farm = {
+  vip: false,
   plots: []
 };
 
-/* ---------- Helpers ---------- */
-function now() {
-  return Math.floor(Date.now() / 1000);
-}
-
-/* ---------- Init ---------- */
-function initFarm() {
-  const saved = localStorage.getItem(FARM_STORAGE_KEY);
+/* ---------- INIT ---------- */
+function loadFarm() {
+  const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
-    farmState = JSON.parse(saved);
-    return;
-  }
-
-  farmState.plots = [];
-  for (let i = 0; i < TOTAL_PLOTS; i++) {
-    farmState.plots.push({
+    farm = JSON.parse(saved);
+  } else {
+    farm.plots = Array.from({ length: 6 }, (_, i) => ({
+      locked: i !== 0,
       crop: null,
-      plantedAt: 0,
-      growTime: 0
-    });
+      plantedAt: 0
+    }));
+    saveFarm();
   }
-
-  saveFarm();
 }
 
 function saveFarm() {
-  localStorage.setItem(FARM_STORAGE_KEY, JSON.stringify(farmState));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(farm));
 }
 
-/* ---------- Growth ---------- */
-function plotStatus(plot) {
-  if (!plot.crop) return { stage: "empty" };
+/* ---------- RENDER ---------- */
+function renderHome() {
+  loadFarm();
 
-  const elapsed = now() - plot.plantedAt;
-  if (elapsed >= plot.growTime) {
-    return { stage: "ready" };
-  }
-
-  if (elapsed > plot.growTime * 0.6) {
-    return { stage: "growing2", remaining: plot.growTime - elapsed };
-  }
-
-  return { stage: "growing1", remaining: plot.growTime - elapsed };
-}
-
-/* ---------- Render ---------- */
-window.renderHome = function () {
-  initFarm();
-
-  const content = document.getElementById("content");
   let html = `
-    <style>
-      .farm-wrap{max-width:420px;margin:auto}
-      .farm-top{display:flex;justify-content:space-between;margin-bottom:10px}
-      .farm-board{
-        background:linear-gradient(#6dbb4f,#4e8f3a);
-        border-radius:20px;
-        padding:15px;
-        display:grid;
-        grid-template-columns:repeat(3,1fr);
-        gap:12px;
-      }
-      .plot{
-        background:#5a3b1e;
-        border-radius:14px;
-        height:90px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:#fff;
-        font-size:26px;
-        position:relative;
-        cursor:pointer;
-      }
-      .plot.locked{background:#333;cursor:not-allowed}
-      .timer{
-        position:absolute;
-        top:-10px;
-        background:rgba(0,0,0,.7);
-        padding:2px 6px;
-        border-radius:8px;
-        font-size:11px;
-      }
-    </style>
-
-    <div class="farm-wrap">
-      <div class="farm-top">
-        <div>💰 ${farmState.points}</div>
-        <div>👑 VIP ${farmState.vip}</div>
-      </div>
-
-      <div class="farm-board">
+    <h3 style="text-align:center">🌱 المزرعة</h3>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
   `;
 
-  farmState.plots.forEach((plot, i) => {
-    if (i > 0 && farmState.vip === 0) {
-      html += `<div class="plot locked">🔒</div>`;
+  farm.plots.forEach((plot, i) => {
+    if (plot.locked) {
+      html += `<div style="padding:20px;background:#222;text-align:center;border-radius:10px">🔒 VIP</div>`;
       return;
     }
 
-    const status = plotStatus(plot);
-
-    if (status.stage === "empty") {
-      html += `<div class="plot" onclick="openPlantMenu(${i})">🟫</div>`;
-    }
-
-    if (status.stage === "growing1") {
+    if (!plot.crop) {
       html += `
-        <div class="plot">
-          <div class="timer">${status.remaining}s</div>🌱
+        <div onclick="openPlant(${i})"
+          style="padding:20px;background:#3e2723;text-align:center;border-radius:10px;cursor:pointer">
+          أرض فارغة
         </div>`;
+      return;
     }
 
-    if (status.stage === "growing2") {
+    const crop = CROPS.find(c => c.id === plot.crop);
+    const elapsed = Math.floor(Date.now()/1000 - plot.plantedAt);
+    const remaining = crop.time - elapsed;
+
+    if (remaining <= 0) {
       html += `
-        <div class="plot">
-          <div class="timer">${status.remaining}s</div>🌿
+        <div onclick="harvest(${i})"
+          style="padding:20px;background:#4caf50;text-align:center;border-radius:10px;cursor:pointer">
+          ${crop.icon}<br>احصد
         </div>`;
-    }
-
-    if (status.stage === "ready") {
+    } else {
       html += `
-        <div class="plot" onclick="harvest(${i})">
-          🌾
+        <div style="padding:20px;background:#795548;text-align:center;border-radius:10px">
+          ${crop.icon}<br>${remaining}s
         </div>`;
     }
   });
 
-  html += `
-      </div>
-    </div>
-  `;
+  html += "</div>";
+  document.getElementById("content").innerHTML = html;
 
-  content.innerHTML = html;
+  setTimeout(renderHome, 1000);
+}
 
-  if (farmState.plots.some(p => p.crop)) {
-    setTimeout(renderHome, 1000);
-  }
-};
-
-/* ---------- Plant Menu ---------- */
-window.openPlantMenu = function (index) {
-  let menu = `
-    <div id="plantMenu" style="
-      position:fixed;inset:0;
-      background:rgba(0,0,0,.8);
-      display:flex;align-items:center;justify-content:center;
-      z-index:9999">
-      <div style="background:#111;padding:15px;border-radius:14px;text-align:center">
-        <h3>اختر المحصول</h3>
-  `;
+/* ---------- ACTIONS ---------- */
+function openPlant(index) {
+  let menu = `<div style="position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center">
+    <div style="background:#111;padding:15px;border-radius:12px">`;
 
   CROPS.forEach(c => {
-    menu += `
-      <button onclick="plant(${index},'${c.id}')"
-        style="margin:5px;padding:8px 12px;border-radius:10px;border:none">
-        ${c.icon} ${c.name}
-      </button>`;
+    menu += `<button onclick="plant(${index},'${c.id}')"
+      style="display:block;width:100%;margin:6px 0">${c.icon} ${c.name}</button>`;
   });
 
-  menu += `
-        <br><br>
-        <button onclick="closePlantMenu()">إلغاء</button>
-      </div>
-    </div>`;
-
+  menu += `<button onclick="closeMenu()">إلغاء</button></div></div>`;
   document.body.insertAdjacentHTML("beforeend", menu);
-};
+}
 
-window.closePlantMenu = function () {
-  document.getElementById("plantMenu")?.remove();
-};
+function closeMenu() {
+  document.body.lastChild.remove();
+}
 
-/* ---------- Actions ---------- */
-window.plant = function (index, cropId) {
-  const crop = CROPS.find(c => c.id === cropId);
-  if (!crop) return;
-
-  farmState.plots[index] = {
-    crop: cropId,
-    plantedAt: now(),
-    growTime: crop.time
-  };
-
+function plant(index, cropId) {
+  farm.plots[index].crop = cropId;
+  farm.plots[index].plantedAt = Math.floor(Date.now()/1000);
   saveFarm();
-  closePlantMenu();
-  renderHome();
-};
+  closeMenu();
+}
 
-window.harvest = function (index) {
-  const cropId = farmState.plots[index].crop;
-  const crop = CROPS.find(c => c.id === cropId);
-  if (!crop) return;
-
-  farmState.points += crop.reward;
-  farmState.plots[index] = { crop: null, plantedAt: 0, growTime: 0 };
+function harvest(index) {
+  farm.plots[index].crop = null;
+  farm.plots[index].plantedAt = 0;
   saveFarm();
-  renderHome();
-};
+}
