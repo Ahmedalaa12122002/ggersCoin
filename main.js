@@ -89,3 +89,32 @@
   }
 
 })();
+/* =====================================================
+   PART 8 — PAGE TRANSITION FIX
+   (NO FUNCTION REDEFINITION)
+===================================================== */
+
+(function enablePageTransitions(){
+
+  const content = document.getElementById("content");
+  if (!content) return;
+
+  // نراقب الضغط على أزرار القوائم
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      // خروج الصفحة الحالية
+      content.classList.add("page-exit");
+
+      setTimeout(()=>{
+        content.classList.remove("page-exit");
+        content.classList.add("page-enter");
+
+        setTimeout(()=>{
+          content.classList.remove("page-enter");
+        }, 300);
+
+      }, 150);
+    });
+  });
+
+})();
