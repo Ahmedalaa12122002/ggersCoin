@@ -15,10 +15,10 @@ body{
 
 #content{
   min-height:80vh;
-  padding:20px;
+  padding:16px;
 }
 
-/* ===== NAV BAR ===== */
+/* ===== NAV BAR (RESPONSIVE FIXED) ===== */
 .nav{
   position:fixed;
   bottom:0;
@@ -26,52 +26,56 @@ body{
   right:0;
   background:#0b0b0b;
   display:flex;
-  justify-content:space-around;
-  padding:12px 0;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 6px;
   border-top:1px solid #222;
 }
 
-/* الأزرار العادية */
+/* كل زر ياخد نفس العرض */
 .nav button{
+  flex:1;
   background:none;
   border:none;
   color:#aaa;
-  font-size:15px;          /* ⬅️ كبرنا الخط */
-  padding:10px 14px;       /* ⬅️ كبرنا مساحة الزر */
-  min-width:68px;
   cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:6px 0;
   transition:all .25s ease;
+  min-width:0; /* مهم جدًا */
 }
 
-/* زر الرئيسية */
-.nav button[data-page="home"]{
-  font-size:17px;          /* ⬅️ أكبر شوية */
-  padding:12px 18px;
+/* الأيقونة */
+.nav button .icon{
+  font-size:clamp(18px, 5vw, 22px);
+  line-height:1;
+}
+
+/* النص */
+.nav button .label{
+  font-size:clamp(10px, 2.5vw, 12px);
+  white-space:nowrap;
 }
 
 /* الزر النشط */
 .nav button.active{
   color:#ffd54f;
   text-shadow:
-    0 0 6px rgba(255,213,79,.8),
-    0 0 12px rgba(255,213,79,.6);
-  transform:translateY(-6px);
+    0 0 6px rgba(255,213,79,.7),
+    0 0 12px rgba(255,213,79,.4);
 }
 
-/* إحساس الضغط */
+/* زر الرئيسية أكبر لكن بدون كسر التصميم */
+.nav button[data-page="home"].active{
+  transform:scale(1.15) translateY(-4px);
+}
+
+/* تأثير ضغط */
 .nav button:active{
-  transform:scale(.92);
-  filter:brightness(1.2);
-}
-
-/* انتقال الصفحات */
-.fade{
-  animation:fade .25s ease;
-}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:none}
+  transform:scale(.9);
 }
 </style>
 </head>
@@ -81,13 +85,40 @@ body{
 <div id="content">⌛ جاري التحميل...</div>
 
 <div class="nav">
-  <button data-page="settings" onclick="goPage('settings')">⚙️<br>الإعدادات</button>
-  <button data-page="vip" onclick="goPage('vip')">👑<br>VIP</button>
-  <button data-page="wallet" onclick="goPage('wallet')">💼<br>المحفظة</button>
-  <button data-page="home" class="active" onclick="goPage('home')">🏠<br>الرئيسية</button>
-  <button data-page="tasks" onclick="goPage('tasks')">📋<br>المهام</button>
-  <button data-page="ref" onclick="goPage('ref')">👥<br>الإحالة</button>
-  <button data-page="logs" onclick="goPage('logs')">🧾<br>السجلات</button>
+  <button data-page="settings" onclick="goPage('settings')">
+    <div class="icon">⚙️</div>
+    <div class="label">الإعدادات</div>
+  </button>
+
+  <button data-page="vip" onclick="goPage('vip')">
+    <div class="icon">👑</div>
+    <div class="label">VIP</div>
+  </button>
+
+  <button data-page="wallet" onclick="goPage('wallet')">
+    <div class="icon">💼</div>
+    <div class="label">المحفظة</div>
+  </button>
+
+  <button data-page="home" class="active" onclick="goPage('home')">
+    <div class="icon">🏠</div>
+    <div class="label">الرئيسية</div>
+  </button>
+
+  <button data-page="tasks" onclick="goPage('tasks')">
+    <div class="icon">📋</div>
+    <div class="label">المهام</div>
+  </button>
+
+  <button data-page="ref" onclick="goPage('ref')">
+    <div class="icon">👥</div>
+    <div class="label">الإحالة</div>
+  </button>
+
+  <button data-page="logs" onclick="goPage('logs')">
+    <div class="icon">🧾</div>
+    <div class="label">السجلات</div>
+  </button>
 </div>
 
 <script src="core/navigation.js"></script>
