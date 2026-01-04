@@ -1,109 +1,154 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WinHive</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>WinHive</title>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:#000;color:#fff;overflow:hidden}
+  <style>
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:system-ui, -apple-system, BlinkMacSystemFont;
+    }
 
-#content{
-  height:calc(100vh - 110px);
-  overflow-y:auto;
-  padding:15px;
-}
+    body{
+      background:#000;
+      color:#fff;
+      min-height:100vh;
+      overflow:hidden;
+    }
 
-/* ===== NAV BAR ===== */
-.nav-bar{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  height:110px;
-  background:rgba(15,15,15,.96);
-  backdrop-filter:blur(12px);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  border-top:1px solid #222;
-}
+    /* ===== MAIN CONTENT ===== */
+    #content{
+      width:100%;
+      min-height:100vh;
+      overflow-y:auto;
+      padding-bottom:110px; /* مساحة القوائم */
+    }
 
-.nav-btn{
-  width:58px;height:58px;
-  border-radius:50%;
-  background:#141414;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  color:#aaa;
-  font-size:11px;
-  transition:.25s;
-}
+    /* ===== BOTTOM NAV ===== */
+    .bottom-nav{
+      position:fixed;
+      bottom:0;
+      left:0;
+      width:100%;
+      height:100px;
+      background:rgba(15,15,15,.96);
+      backdrop-filter:blur(12px);
+      border-top:1px solid #222;
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      z-index:999;
+    }
 
-.nav-btn .icon{font-size:20px;margin-bottom:3px}
+    .nav-btn{
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      background:#141414;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      color:#aaa;
+      font-size:11px;
+      transition:.2s ease;
+    }
 
-.home-btn{
-  width:78px;height:78px;
-  margin-top:-18px;
-}
+    .nav-btn .icon{
+      font-size:20px;
+      margin-bottom:3px;
+    }
 
-.home-btn .icon{font-size:28px}
+    /* زر الرئيسية أكبر */
+    .nav-btn.home{
+      width:78px;
+      height:78px;
+      margin-top:-18px;
+      font-size:12px;
+    }
 
-.nav-btn.active{
-  color:#fff;
-  box-shadow:
-    0 0 18px rgba(255,200,0,.35),
-    0 0 32px rgba(255,200,0,.15);
-}
+    .nav-btn.home .icon{
+      font-size:30px;
+    }
 
-.nav-btn:active{transform:scale(.92)}
-</style>
+    /* الزر النشط */
+    .nav-btn.active{
+      color:#fff;
+      box-shadow:
+        0 0 18px rgba(255,200,0,.35),
+        0 0 32px rgba(255,200,0,.15);
+    }
+
+    .nav-btn:active{
+      transform:scale(.93);
+    }
+  </style>
 </head>
 
 <body>
 
-<div id="content"></div>
+  <!-- ================= CONTENT ================= -->
+  <div id="content"></div>
 
-<div class="nav-bar">
-  <div class="nav-btn" onclick="go('logs',this)">
-    <div class="icon">🧾</div>السجلات
-  </div>
-  <div class="nav-btn" onclick="go('referral',this)">
-    <div class="icon">👥</div>الإحالة
-  </div>
-  <div class="nav-btn" onclick="go('tasks',this)">
-    <div class="icon">📋</div>المهام
+  <!-- ================= BOTTOM NAV ================= -->
+  <div class="bottom-nav">
+
+    <div class="nav-btn">
+      <div class="icon">⚙️</div>
+      الإعدادات
+    </div>
+
+    <div class="nav-btn">
+      <div class="icon">⭐</div>
+      VIP
+    </div>
+
+    <div class="nav-btn">
+      <div class="icon">💼</div>
+      المحفظة
+    </div>
+
+    <div class="nav-btn home active">
+      <div class="icon">🏠</div>
+      الرئيسية
+    </div>
+
+    <div class="nav-btn">
+      <div class="icon">📋</div>
+      المهام
+    </div>
+
+    <div class="nav-btn">
+      <div class="icon">👥</div>
+      الإحالة
+    </div>
+
+    <div class="nav-btn">
+      <div class="icon">🧾</div>
+      السجلات
+    </div>
+
   </div>
 
-  <div class="nav-btn home-btn active" onclick="go('home',this)">
-    <div class="icon">🏠</div>الرئيسية
-  </div>
+  <!-- ================= GAME LOGIC ================= -->
+  <script src="pages/home.js"></script>
 
-  <div class="nav-btn" onclick="go('wallet',this)">
-    <div class="icon">💼</div>المحفظة
-  </div>
-  <div class="nav-btn" onclick="go('vip',this)">
-    <div class="icon">⭐</div>VIP
-  </div>
-  <div class="nav-btn" onclick="go('settings',this)">
-    <div class="icon">⚙️</div>الإعدادات
-  </div>
-</div>
-
-<script src="main.js"></script>
-
-<!-- تحميل الصفحات -->
-<script src="pages/home.js"></script>
-<script src="pages/vip.js"></script>
-<script src="pages/tasks.js"></script>
-<script src="pages/referral.js"></script>
-<script src="pages/wallet.js"></script>
-<script src="pages/settings.js"></script>
-<script src="pages/logs.js"></script>
+  <!-- ================= TELEGRAM INIT ================= -->
+  <script>
+    (function(){
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+      }
+    })();
+  </script>
 
 </body>
-</html>
+    </html>
