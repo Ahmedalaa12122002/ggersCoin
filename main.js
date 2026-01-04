@@ -1,6 +1,6 @@
 /* =====================================================
-   MAIN PAGE MANAGER
-   WinHive Mini App (FIXED NAVIGATION)
+   MAIN PAGE MANAGER — FINAL STABLE VERSION
+   Fix Navigation + Restore Effects
 ===================================================== */
 
 /* ---------- Global Active Page ---------- */
@@ -12,70 +12,37 @@ const content = document.getElementById("content");
 /* ---------- Page Registry ---------- */
 const Pages = {
   home: {
-    onEnter: () => {
-      if (typeof onEnterHome === "function") onEnterHome();
-    },
-    onExit: () => {
-      if (typeof onExitHome === "function") onExitHome();
-    }
+    onEnter: () => typeof onEnterHome === "function" && onEnterHome(),
+    onExit: () => typeof onExitHome === "function" && onExitHome()
   },
-
-  vip: {
-    onEnter: () => renderSimplePage("👑 VIP", "نظام VIP سيتم إضافته لاحقًا"),
-    onExit: () => {}
-  },
-
-  tasks: {
-    onEnter: () => renderSimplePage("📋 المهام", "قائمة المهام"),
-    onExit: () => {}
-  },
-
-  wallet: {
-    onEnter: () => renderSimplePage("💼 المحفظة", "السحب والإيداع"),
-    onExit: () => {}
-  },
-
-  referral: {
-    onEnter: () => renderSimplePage("👥 الإحالة", "نظام الإحالات"),
-    onExit: () => {}
-  },
-
-  settings: {
-    onEnter: () => renderSimplePage("⚙️ الإعدادات", "الإعدادات العامة"),
-    onExit: () => {}
-  },
-
-  logs: {
-    onEnter: () => renderSimplePage("🧾 السجلات", "سجل العمليات"),
-    onExit: () => {}
-  }
+  vip: { onEnter: () => renderSimplePage("👑 VIP", "قريبًا"), onExit: () => {} },
+  tasks: { onEnter: () => renderSimplePage("📋 المهام", "قريبًا"), onExit: () => {} },
+  wallet: { onEnter: () => renderSimplePage("💼 المحفظة", "قريبًا"), onExit: () => {} },
+  referral:{ onEnter: () => renderSimplePage("👥 الإحالة", "قريبًا"), onExit: () => {} },
+  settings:{ onEnter: () => renderSimplePage("⚙️ الإعدادات", "قريبًا"), onExit: () => {} },
+  logs: { onEnter: () => renderSimplePage("🧾 السجلات", "قريبًا"), onExit: () => {} }
 };
 
-/* ---------- Navigation Core ---------- */
-function navigateTo(pageName) {
-  if (window.ACTIVE_PAGE === pageName) return;
+/* ---------- Navigation ---------- */
+function navigateTo(page) {
+  if (window.ACTIVE_PAGE === page) return;
 
-  // خروج من الصفحة الحالية
   if (window.ACTIVE_PAGE && Pages[window.ACTIVE_PAGE]) {
     Pages[window.ACTIVE_PAGE].onExit();
   }
 
-  window.ACTIVE_PAGE = pageName;
+  window.ACTIVE_PAGE = page;
 
-  // دخول الصفحة الجديدة
-  if (Pages[pageName]) {
-    Pages[pageName].onEnter();
-  } else {
-    console.warn("Page not found:", pageName);
+  if (Pages[page]) {
+    Pages[page].onEnter();
   }
 
-  updateActiveNav(pageName);
+  updateActiveNav(page);
 }
 
-/* ---------- Simple Page Renderer ---------- */
+/* ---------- Simple Renderer ---------- */
 function renderSimplePage(title, text) {
   if (!content) return;
-
   content.innerHTML = `
     <div style="padding:20px;text-align:center">
       <h2>${title}</h2>
@@ -84,35 +51,62 @@ function renderSimplePage(title, text) {
   `;
 }
 
-/* ---------- Bottom Navigation Highlight ---------- */
-function updateActiveNav(pageName) {
+/* ---------- Active Button Effect ---------- */
+function updateActiveNav(page) {
   document.querySelectorAll(".nav-btn").forEach(btn => {
     btn.classList.remove("active");
   });
-
-  const activeBtn = document.querySelector(
-    `.nav-btn[data-page="${pageName}"]`
-  );
-
-  if (activeBtn) activeBtn.classList.add("active");
+  const active = document.querySelector(`.nav-btn[data-page="${page}"]`);
+  if (active) active.classList.add("active");
 }
 
 /* =====================================================
-   🔥 NAV BUTTON FIX (IMPORTANT PART)
-   Event Delegation — No onclick needed
+   🔥 NAV FIX (FINAL)
 ===================================================== */
 
-document.addEventListener("click", function (e) {
+/* 1️⃣ منع أي محتوى من خطف الضغط */
+document.addEventListener("DOMContentLoaded", () => {
+  const style = document.createElement("style");
+  style.innerHTML = `
+    .nav-bar{
+      position:fixed;
+      bottom:0;
+      width:100%;
+      z-index:99999;
+      pointer-events:auto;
+    }
+    #content{
+      position:relative;
+      z-index:1;
+      pointer-events:auto;
+    }
+    .nav-btn{
+      transition:all .25s ease;
+      cursor:pointer;
+    }
+    .nav-btn.active{
+      box-shadow:0 0 14px rgba(255,200,0,.6);
+      transform:scale(1.08);
+    }
+    .nav-btn:active{
+      transform:scale(.92);
+    }
+  `;
+  document.head.appendChild(style);
+});
+
+/* 2️⃣ التقاط الضغط من الجذر */
+document.addEventListener("click", (e) => {
   const btn = e.target.closest(".nav-btn");
   if (!btn) return;
 
-  const page = btn.getAttribute("data-page");
+  const page = btn.dataset.page;
   if (!page) return;
 
   navigateTo(page);
 });
 
-/* ---------- Safe Bootstrap ---------- */
+/* ---------- Start ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   navigateTo("home");
 });
