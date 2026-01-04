@@ -67,4 +67,4 @@ buttons.forEach(btn=>{
 });
 
 /* تشغيل افتراضي */
-openPage("home");
+<script src="pages/home.page.js"></script>
