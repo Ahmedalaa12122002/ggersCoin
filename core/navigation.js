@@ -1,31 +1,22 @@
-Telegram.WebApp.ready();
-
-const content = document.getElementById("content");
-const buttons = document.querySelectorAll(".nav-btn");
-
 let currentPage = "home";
 
-function setActive(btn){
-  buttons.forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-}
+function goPage(page) {
+  currentPage = page;
 
-function loadPage(name){
-  currentPage = name;
-  if(window.pages && typeof window.pages[name] === "function"){
-    window.pages[name]();
-  }else{
-    content.innerHTML = `<h3>${name}</h3><p>قيد التطوير</p>`;
+  document.querySelectorAll(".nav button").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  document.querySelectorAll(".nav button").forEach(btn => {
+    if (btn.getAttribute("onclick")?.includes(page)) {
+      btn.classList.add("active");
+    }
+  });
+
+  if (page === "home") {
+    renderHome();
+  } else {
+    document.getElementById("content").innerHTML =
+      `<div style="padding:20px;text-align:center">📄 ${page} (قيد التطوير)</div>`;
   }
 }
-
-buttons.forEach(btn=>{
-  btn.onclick = ()=>{
-    const page = btn.dataset.page;
-    setActive(btn);
-    loadPage(page);
-  };
-});
-
-// تحميل الرئيسية عند البدء
-loadPage("home");
