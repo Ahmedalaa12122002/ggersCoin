@@ -1,112 +1,74 @@
 /* =====================================================
-   MAIN PAGE MANAGER — FINAL STABLE VERSION
-   Fix Navigation + Restore Effects
+   MAIN PAGE MANAGER — FINAL FIXED VERSION
 ===================================================== */
 
-/* ---------- Global Active Page ---------- */
-window.ACTIVE_PAGE = null;
+window.ACTIVE_PAGE = "home";
 
-/* ---------- DOM ---------- */
 const content = document.getElementById("content");
 
 /* ---------- Page Registry ---------- */
 const Pages = {
   home: {
-    onEnter: () => typeof onEnterHome === "function" && onEnterHome(),
-    onExit: () => typeof onExitHome === "function" && onExitHome()
+    onEnter: () => window.onEnterHome && window.onEnterHome(),
+    onExit: () => window.onExitHome && window.onExitHome()
   },
-  vip: { onEnter: () => renderSimplePage("👑 VIP", "قريبًا"), onExit: () => {} },
-  tasks: { onEnter: () => renderSimplePage("📋 المهام", "قريبًا"), onExit: () => {} },
-  wallet: { onEnter: () => renderSimplePage("💼 المحفظة", "قريبًا"), onExit: () => {} },
-  referral:{ onEnter: () => renderSimplePage("👥 الإحالة", "قريبًا"), onExit: () => {} },
-  settings:{ onEnter: () => renderSimplePage("⚙️ الإعدادات", "قريبًا"), onExit: () => {} },
-  logs: { onEnter: () => renderSimplePage("🧾 السجلات", "قريبًا"), onExit: () => {} }
+  vip:      { onEnter: () => renderPage("👑 VIP"), onExit: () => {} },
+  tasks:    { onEnter: () => renderPage("📋 المهام"), onExit: () => {} },
+  wallet:   { onEnter: () => renderPage("💼 المحفظة"), onExit: () => {} },
+  referral: { onEnter: () => renderPage("👥 الإحالة"), onExit: () => {} },
+  settings: { onEnter: () => renderPage("⚙️ الإعدادات"), onExit: () => {} },
+  logs:     { onEnter: () => renderPage("🧾 السجلات"), onExit: () => {} }
 };
 
 /* ---------- Navigation ---------- */
 function navigateTo(page) {
   if (window.ACTIVE_PAGE === page) return;
 
-  if (window.ACTIVE_PAGE && Pages[window.ACTIVE_PAGE]) {
-    Pages[window.ACTIVE_PAGE].onExit();
-  }
-
+  Pages[window.ACTIVE_PAGE]?.onExit();
   window.ACTIVE_PAGE = page;
 
-  if (Pages[page]) {
-    Pages[page].onEnter();
-  }
-
-  updateActiveNav(page);
+  fadeOut(() => {
+    Pages[page]?.onEnter();
+    updateActiveNav(page);
+    fadeIn();
+  });
 }
 
-/* ---------- Simple Renderer ---------- */
-function renderSimplePage(title, text) {
-  if (!content) return;
+/* ---------- Simple Page ---------- */
+function renderPage(title) {
   content.innerHTML = `
-    <div style="padding:20px;text-align:center">
+    <div class="page fade">
       <h2>${title}</h2>
-      <p>${text}</p>
+      <p>قريبًا...</p>
     </div>
   `;
 }
 
-/* ---------- Active Button Effect ---------- */
+/* ---------- Active Button ---------- */
 function updateActiveNav(page) {
-  document.querySelectorAll(".nav-btn").forEach(btn => {
-    btn.classList.remove("active");
-  });
-  const active = document.querySelector(`.nav-btn[data-page="${page}"]`);
-  if (active) active.classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector(`.nav-btn[data-page="${page}"]`)?.classList.add("active");
 }
 
-/* =====================================================
-   🔥 NAV FIX (FINAL)
-===================================================== */
-
-/* 1️⃣ منع أي محتوى من خطف الضغط */
-document.addEventListener("DOMContentLoaded", () => {
-  const style = document.createElement("style");
-  style.innerHTML = `
-    .nav-bar{
-      position:fixed;
-      bottom:0;
-      width:100%;
-      z-index:99999;
-      pointer-events:auto;
-    }
-    #content{
-      position:relative;
-      z-index:1;
-      pointer-events:auto;
-    }
-    .nav-btn{
-      transition:all .25s ease;
-      cursor:pointer;
-    }
-    .nav-btn.active{
-      box-shadow:0 0 14px rgba(255,200,0,.6);
-      transform:scale(1.08);
-    }
-    .nav-btn:active{
-      transform:scale(.92);
-    }
-  `;
-  document.head.appendChild(style);
-});
-
-/* 2️⃣ التقاط الضغط من الجذر */
-document.addEventListener("click", (e) => {
+/* ---------- Events ---------- */
+document.addEventListener("click", e => {
   const btn = e.target.closest(".nav-btn");
   if (!btn) return;
-
-  const page = btn.dataset.page;
-  if (!page) return;
-
-  navigateTo(page);
+  navigateTo(btn.dataset.page);
 });
 
-/* ---------- Start ---------- */
+/* ---------- Transitions ---------- */
+function fadeOut(cb) {
+  content.classList.add("fade-out");
+  setTimeout(cb, 200);
+}
+
+function fadeIn() {
+  content.classList.remove("fade-out");
+}
+
+/* ---------- Boot ---------- */
 document.addEventListener("DOMContentLoaded", () => {
-  navigateTo("home");
+  Pages.home.onEnter();
+  updateActiveNav("home");
 });
