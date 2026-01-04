@@ -1,2 +1,3 @@
-// main.js
-document.addEventListener("DOMContentLoaded", ()=>{});
+document.addEventListener("DOMContentLoaded", ()=>{
+  goPage("home");
+});
