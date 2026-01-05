@@ -2,10 +2,11 @@
    Home Page
    File: pages/home.page.js
    Responsibility:
-   - Render Home Screen content ONLY
+   - Home screen
    - Farm game with real timers
    - Crop selection
-   - Enhanced realistic visuals
+   - Enhanced animations (plant & harvest)
+   - Realistic farm visuals
    - Stable & extendable
 ===================================================== */
 
@@ -24,7 +25,8 @@ const farmState = {
     planted: false,
     crop: null,
     startTime: 0,
-    duration: 0
+    duration: 0,
+    anim: ""
   })),
   selectingPlot: null
 };
@@ -52,7 +54,7 @@ function renderHome() {
 
       .home-header{
         text-align:center;
-        margin-bottom:12px;
+        margin-bottom:10px;
       }
       .home-header h2{
         margin:0;
@@ -61,7 +63,7 @@ function renderHome() {
       }
       .home-header p{
         font-size:13px;
-        color:#aaa;
+        color:#bbb;
       }
 
       .home-stats{
@@ -75,7 +77,6 @@ function renderHome() {
         border-radius:14px;
         padding:10px;
         text-align:center;
-        box-shadow:inset 0 0 0 1px #1f1f1f;
       }
       .stat-card .value{
         font-size:18px;
@@ -87,15 +88,15 @@ function renderHome() {
         color:#888;
       }
 
-      /* ---------- Game Box ---------- */
+      /* ---------- Farm Background ---------- */
       .game-box{
         background:
-          linear-gradient(#2e7d32,#1b5e20);
-        border-radius:18px;
+          linear-gradient(#7cb342,#558b2f);
+        border-radius:20px;
         padding:14px;
         box-shadow:
-          inset 0 0 30px rgba(0,0,0,.4),
-          0 8px 24px rgba(0,0,0,.5);
+          inset 0 0 40px rgba(0,0,0,.35),
+          0 8px 26px rgba(0,0,0,.55);
       }
 
       /* ---------- Farm Grid ---------- */
@@ -108,41 +109,73 @@ function renderHome() {
       /* ---------- Plot ---------- */
       .farm-plot{
         position:relative;
-        height:90px;
-        border-radius:16px;
+        height:92px;
+        border-radius:18px;
         background:
-          radial-gradient(circle at top,#6d4c41,#3e2723);
+          radial-gradient(circle at top,#8d6e63,#4e342e);
         display:flex;
         align-items:center;
         justify-content:center;
-        font-size:28px;
         cursor:pointer;
         overflow:hidden;
         box-shadow:
-          inset 0 3px 6px rgba(255,255,255,.08),
-          inset 0 -4px 8px rgba(0,0,0,.6),
-          0 4px 10px rgba(0,0,0,.5);
+          inset 0 4px 6px rgba(255,255,255,.08),
+          inset 0 -6px 10px rgba(0,0,0,.6),
+          0 6px 12px rgba(0,0,0,.45);
         transition:transform .15s ease;
       }
 
       .farm-plot:active{
-        transform:scale(.95);
+        transform:scale(.94);
       }
 
       .farm-plot.ready{
         background:
-          radial-gradient(circle at top,#9ccc65,#558b2f);
+          radial-gradient(circle at top,#aed581,#689f38);
+      }
+
+      /* ---------- Soil ---------- */
+      .soil{
+        position:absolute;
+        bottom:0;
+        width:100%;
+        height:38%;
+        background:
+          linear-gradient(#5d4037,#3e2723);
+        border-radius:0 0 18px 18px;
+        z-index:1;
       }
 
       /* ---------- Plant ---------- */
       .plant{
         z-index:2;
-        animation:growPulse 2s ease-in-out infinite alternate;
+        font-size:30px;
       }
 
-      @keyframes growPulse{
-        from{ transform:scale(.95); }
+      .plant.grow{
+        animation:growAnim 1.6s ease-out;
+      }
+
+      .plant.idle{
+        animation:plantIdle 2.8s ease-in-out infinite alternate;
+      }
+
+      .plant.harvest{
+        animation:harvestAnim .6s ease forwards;
+      }
+
+      @keyframes growAnim{
+        0%{ transform:scale(.3) translateY(20px); opacity:0; }
+        100%{ transform:scale(1) translateY(0); opacity:1; }
+      }
+
+      @keyframes plantIdle{
+        from{ transform:scale(.96); }
         to{ transform:scale(1.05); }
+      }
+
+      @keyframes harvestAnim{
+        to{ transform:scale(0); opacity:0; }
       }
 
       /* ---------- Timer ---------- */
@@ -187,10 +220,9 @@ function renderHome() {
       .crop-box{
         background:#111;
         padding:16px;
-        border-radius:18px;
+        border-radius:20px;
         width:300px;
         text-align:center;
-        box-shadow:0 0 20px rgba(0,0,0,.6);
       }
 
       .crop-list{
@@ -210,13 +242,13 @@ function renderHome() {
         cursor:pointer;
         transition:transform .15s ease;
       }
+
       .crop-btn:active{
         transform:scale(.95);
       }
     </style>
 
     <div class="home-wrapper">
-
       <div class="home-header">
         <h2>🌾 المزرعة</h2>
         <p>ازرع • انتظر • احصد</p>
@@ -247,14 +279,20 @@ function renderHome() {
 
             return `
               <div class="farm-plot ${ready?"ready":""}" data-index="${i}">
-                <div class="plant">
+                <div class="soil"></div>
+
+                <div class="plant
+                  ${plot.anim}
+                  ${plot.planted && ready ? "idle" : ""}">
                   ${plot.planted
                     ? (ready ? plot.crop.icon : "🌱")
                     : "🟫"}
                 </div>
+
                 ${plot.planted && !ready
                   ? `<div class="timer">${remaining}s</div>`
                   : ""}
+
                 ${plot.planted
                   ? `<div class="progress-bar" style="width:${progress}%"></div>`
                   : ""}
@@ -263,7 +301,6 @@ function renderHome() {
           }).join("")}
         </div>
       </div>
-
     </div>
   `;
 
@@ -283,15 +320,21 @@ function bindFarmEvents(){
       const index = parseInt(el.dataset.index);
       const plot = farmState.plots[index];
 
+      // حصاد
       if (plot.planted && now() - plot.startTime >= plot.duration) {
-        plot.planted = false;
-        plot.crop = null;
-        plot.startTime = 0;
-        plot.duration = 0;
-        renderHome();
+        plot.anim = "harvest";
+        setTimeout(()=>{
+          plot.planted = false;
+          plot.crop = null;
+          plot.startTime = 0;
+          plot.duration = 0;
+          plot.anim = "";
+          renderHome();
+        },500);
         return;
       }
 
+      // زرع
       if (!plot.planted) {
         farmState.selectingPlot = index;
         openCropSelector();
@@ -333,6 +376,7 @@ function openCropSelector(){
       plot.crop = crop;
       plot.startTime = now();
       plot.duration = crop.time;
+      plot.anim = "grow";
 
       farmState.selectingPlot = null;
       overlay.remove();
