@@ -1,53 +1,11 @@
-/* =====================================================
-   HOME PAGE – FARM GAME
-===================================================== */
+function renderHome(){
+  const content = document.getElementById("content");
+  if(!content) return;
 
-const farm = {
-  plots: Array.from({ length: 6 }, () => ({
-    planted: false
-  }))
-};
-
-/* ---------------- Render ---------------- */
-function renderHome() {
-  const app = document.getElementById("app");
-
-  app.innerHTML = `
-    <div class="farm">
-      <h2>🌱 المزرعة</h2>
-
-      <div class="farm-grid">
-        ${farm.plots
-          .map(
-            (p, i) => `
-          <div class="plot ${p.planted ? "planted" : ""}" data-index="${i}">
-            ${p.planted ? "🌿" : "🟫"}
-          </div>
-        `
-          )
-          .join("")}
-      </div>
-
-      <button id="plantBtn">🌾 زرع</button>
+  content.innerHTML = `
+    <div style="padding:20px;text-align:center">
+      <h2>🏠 الرئيسية</h2>
+      <p>هنا هتكون اللعبة</p>
     </div>
   `;
-
-  bindFarmEvents();
-}
-
-/* ---------------- Events ---------------- */
-function bindFarmEvents() {
-  document.querySelectorAll(".plot").forEach(plot => {
-    plot.onclick = () => {
-      const i = plot.dataset.index;
-      farm.plots[i].planted = true;
-      plot.classList.add("planted");
-      plot.innerHTML = "🌿";
-    };
-  });
-
-  document.getElementById("plantBtn").onclick = () => {
-    farm.plots.forEach(p => (p.planted = false));
-    renderHome();
-  };
 }
