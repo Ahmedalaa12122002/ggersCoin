@@ -11,9 +11,9 @@
 ===================================================== */
 
 /* =====================================================
-   PAGE GUARD (حل نهائي لمشكلة التداخل)
+   PAGE GUARD (حل مشكلة ظهور اللعبة خارج الرئيسية)
 ===================================================== */
-function isHomeActive() {
+function isHomePage() {
   return document.body.dataset.page === "home";
 }
 
@@ -47,7 +47,7 @@ function now() {
    Render Home
 ===================================================== */
 function renderHome() {
-  if (!isHomeActive()) return;
+  if (!isHomePage()) return;
 
   const content = document.getElementById("content");
   if (!content) return;
@@ -58,11 +58,6 @@ function renderHome() {
       .home-header{text-align:center;margin-bottom:10px;}
       .home-header h2{margin:0;font-size:22px;color:#ffd54f;}
       .home-header p{font-size:13px;color:#bbb;}
-
-      .home-stats{display:flex;gap:10px;margin-bottom:14px;}
-      .stat-card{flex:1;background:#0f0f0f;border-radius:14px;padding:10px;text-align:center;}
-      .stat-card .value{font-size:18px;color:#ffd54f;font-weight:600;}
-      .stat-card .label{font-size:11px;color:#888;}
 
       .game-box{
         background:linear-gradient(#7cb342,#558b2f);
@@ -78,26 +73,40 @@ function renderHome() {
         background:radial-gradient(circle at top,#8d6e63,#4e342e);
         display:flex;align-items:center;justify-content:center;
         cursor:pointer;overflow:hidden;
-        box-shadow:inset 0 4px 6px rgba(255,255,255,.08),
-                   inset 0 -6px 10px rgba(0,0,0,.6),
-                   0 6px 12px rgba(0,0,0,.45);
+        box-shadow:
+          inset 0 4px 6px rgba(255,255,255,.08),
+          inset 0 -6px 10px rgba(0,0,0,.6),
+          0 6px 12px rgba(0,0,0,.45);
       }
 
-      .soil{position:absolute;bottom:0;width:100%;height:38%;
-            background:linear-gradient(#5d4037,#3e2723);}
+      .soil{
+        position:absolute;bottom:0;width:100%;height:38%;
+        background:linear-gradient(#5d4037,#3e2723);
+      }
 
       .plant{z-index:2;font-size:30px;}
       .plant.grow{animation:growAnim 1.6s ease-out;}
       .plant.idle{animation:plantIdle 2.8s ease-in-out infinite alternate;}
       .plant.harvest{animation:harvestAnim .6s ease forwards;}
 
-      @keyframes growAnim{0%{transform:scale(.3) translateY(20px);opacity:0}
-                          100%{transform:scale(1) translateY(0);opacity:1}}
-      @keyframes plantIdle{from{transform:scale(.96)}to{transform:scale(1.05)}}
-      @keyframes harvestAnim{to{transform:scale(0);opacity:0}}
+      @keyframes growAnim{
+        0%{transform:scale(.3) translateY(20px);opacity:0}
+        100%{transform:scale(1) translateY(0);opacity:1}
+      }
+      @keyframes plantIdle{
+        from{transform:scale(.96)}
+        to{transform:scale(1.05)}
+      }
+      @keyframes harvestAnim{
+        to{transform:scale(0);opacity:0}
+      }
 
-      .timer{position:absolute;top:6px;background:rgba(0,0,0,.65);
-             padding:2px 6px;border-radius:8px;font-size:11px;z-index:3;}
+      .timer{
+        position:absolute;top:6px;
+        background:rgba(0,0,0,.65);
+        padding:2px 6px;border-radius:8px;
+        font-size:11px;
+      }
 
       .progress-bar{
         position:absolute;bottom:0;left:0;height:7px;
@@ -108,7 +117,9 @@ function renderHome() {
         position:fixed;inset:0;background:rgba(0,0,0,.85);
         display:flex;align-items:center;justify-content:center;z-index:9999;
       }
-      .crop-box{background:#111;padding:16px;border-radius:20px;width:300px;text-align:center;}
+      .crop-box{
+        background:#111;padding:16px;border-radius:20px;width:300px;text-align:center;
+      }
       .crop-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
       .crop-btn{
         background:#1a1a1a;border:none;border-radius:14px;
@@ -122,17 +133,12 @@ function renderHome() {
         <p>ازرع • انتظر • احصد</p>
       </div>
 
-      <div class="home-stats">
-        <div class="stat-card"><div class="value">0</div><div class="label">النقاط</div></div>
-        <div class="stat-card"><div class="value">VIP 0</div><div class="label">المستوى</div></div>
-      </div>
-
       <div class="game-box">
         <div class="farm-grid">
           ${farmState.plots.map((plot,i)=>{
             const elapsed = plot.planted ? now() - plot.startTime : 0;
             const remaining = plot.planted ? Math.max(0, plot.duration - elapsed) : 0;
-            const progress = plot.planted ? Math.min(100,(elapsed / plot.duration) * 100) : 0;
+            const progress = plot.planted ? Math.min(100,(elapsed / plot.duration)*100) : 0;
             const ready = plot.planted && remaining === 0;
 
             return `
@@ -153,8 +159,9 @@ function renderHome() {
 
   bindFarmEvents();
 
+  // ⛔ التايمر يشتغل فقط لو الصفحة الرئيسية مفتوحة
   if (
-    isHomeActive() &&
+    isHomePage() &&
     farmState.plots.some(p => p.planted && now() - p.startTime < p.duration)
   ) {
     setTimeout(renderHome, 1000);
@@ -165,11 +172,11 @@ function renderHome() {
    Farm Events
 ===================================================== */
 function bindFarmEvents(){
-  if (!isHomeActive()) return;
+  if (!isHomePage()) return;
 
   document.querySelectorAll(".farm-plot").forEach(el=>{
     el.onclick = ()=>{
-      if (!isHomeActive()) return;
+      if (!isHomePage()) return;
 
       const index = +el.dataset.index;
       const plot = farmState.plots[index];
@@ -199,7 +206,7 @@ function bindFarmEvents(){
    Crop Selector
 ===================================================== */
 function openCropSelector(){
-  if (!isHomeActive()) return;
+  if (!isHomePage()) return;
 
   const overlay = document.createElement("div");
   overlay.className = "crop-selector";
@@ -239,4 +246,4 @@ function openCropSelector(){
   });
 
   document.body.appendChild(overlay);
-   }
+                   }
