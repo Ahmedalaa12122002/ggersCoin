@@ -5,7 +5,7 @@
    - Render Home Screen content ONLY
    - Farm game with real timers
    - Crop selection
-   - No navigation logic
+   - Enhanced realistic visuals
    - Stable & extendable
 ===================================================== */
 
@@ -43,6 +43,7 @@ function renderHome() {
 
   content.innerHTML = `
     <style>
+      /* ---------- Layout ---------- */
       .home-wrapper{
         padding:16px;
         max-width:480px;
@@ -74,6 +75,7 @@ function renderHome() {
         border-radius:14px;
         padding:10px;
         text-align:center;
+        box-shadow:inset 0 0 0 1px #1f1f1f;
       }
       .stat-card .value{
         font-size:18px;
@@ -85,59 +87,93 @@ function renderHome() {
         color:#888;
       }
 
+      /* ---------- Game Box ---------- */
       .game-box{
-        background:#111;
-        border-radius:16px;
+        background:
+          linear-gradient(#2e7d32,#1b5e20);
+        border-radius:18px;
         padding:14px;
+        box-shadow:
+          inset 0 0 30px rgba(0,0,0,.4),
+          0 8px 24px rgba(0,0,0,.5);
       }
 
+      /* ---------- Farm Grid ---------- */
       .farm-grid{
         display:grid;
         grid-template-columns:repeat(3,1fr);
-        gap:10px;
+        gap:12px;
       }
 
+      /* ---------- Plot ---------- */
       .farm-plot{
         position:relative;
-        height:86px;
-        border-radius:14px;
-        background:#4e342e;
+        height:90px;
+        border-radius:16px;
+        background:
+          radial-gradient(circle at top,#6d4c41,#3e2723);
         display:flex;
         align-items:center;
         justify-content:center;
-        font-size:26px;
+        font-size:28px;
         cursor:pointer;
         overflow:hidden;
+        box-shadow:
+          inset 0 3px 6px rgba(255,255,255,.08),
+          inset 0 -4px 8px rgba(0,0,0,.6),
+          0 4px 10px rgba(0,0,0,.5);
+        transition:transform .15s ease;
+      }
+
+      .farm-plot:active{
+        transform:scale(.95);
       }
 
       .farm-plot.ready{
-        background:#7cb342;
+        background:
+          radial-gradient(circle at top,#9ccc65,#558b2f);
       }
 
+      /* ---------- Plant ---------- */
+      .plant{
+        z-index:2;
+        animation:growPulse 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes growPulse{
+        from{ transform:scale(.95); }
+        to{ transform:scale(1.05); }
+      }
+
+      /* ---------- Timer ---------- */
+      .timer{
+        position:absolute;
+        top:6px;
+        background:rgba(0,0,0,.65);
+        padding:2px 6px;
+        border-radius:8px;
+        font-size:11px;
+        z-index:3;
+      }
+
+      /* ---------- Progress ---------- */
       .progress-bar{
         position:absolute;
         bottom:0;
         left:0;
-        height:6px;
+        height:7px;
         width:0%;
-        background:linear-gradient(
-          90deg,
-          #ff5252,
-          #ffca28,
-          #66bb6a
-        );
-        transition:width .3s linear;
+        background:
+          linear-gradient(
+            90deg,
+            #ff5252 0%,
+            #ffca28 50%,
+            #66bb6a 100%
+          );
+        transition:width .4s linear;
       }
 
-      .timer{
-        position:absolute;
-        top:4px;
-        font-size:11px;
-        background:rgba(0,0,0,.6);
-        padding:2px 6px;
-        border-radius:8px;
-      }
-
+      /* ---------- Crop Selector ---------- */
       .crop-selector{
         position:fixed;
         inset:0;
@@ -151,9 +187,10 @@ function renderHome() {
       .crop-box{
         background:#111;
         padding:16px;
-        border-radius:16px;
+        border-radius:18px;
         width:300px;
         text-align:center;
+        box-shadow:0 0 20px rgba(0,0,0,.6);
       }
 
       .crop-list{
@@ -166,15 +203,20 @@ function renderHome() {
       .crop-btn{
         background:#1a1a1a;
         border:none;
-        border-radius:12px;
+        border-radius:14px;
         padding:10px;
         width:90px;
         color:#fff;
         cursor:pointer;
+        transition:transform .15s ease;
+      }
+      .crop-btn:active{
+        transform:scale(.95);
       }
     </style>
 
     <div class="home-wrapper">
+
       <div class="home-header">
         <h2>🌾 المزرعة</h2>
         <p>ازرع • انتظر • احصد</p>
@@ -195,30 +237,38 @@ function renderHome() {
         <div class="farm-grid">
           ${farmState.plots.map((plot,i)=>{
             const elapsed = plot.planted ? now() - plot.startTime : 0;
-            const progress = plot.planted
-              ? Math.min(100, (elapsed / plot.duration) * 100)
-              : 0;
             const remaining = plot.planted
               ? Math.max(0, plot.duration - elapsed)
+              : 0;
+            const progress = plot.planted
+              ? Math.min(100,(elapsed / plot.duration) * 100)
               : 0;
             const ready = plot.planted && remaining === 0;
 
             return `
               <div class="farm-plot ${ready?"ready":""}" data-index="${i}">
-                ${plot.planted ? (ready ? plot.crop.icon : "🌱") : "🟫"}
-                ${plot.planted && !ready ? `<div class="timer">${remaining}s</div>` : ""}
-                ${plot.planted ? `<div class="progress-bar" style="width:${progress}%"></div>` : ""}
+                <div class="plant">
+                  ${plot.planted
+                    ? (ready ? plot.crop.icon : "🌱")
+                    : "🟫"}
+                </div>
+                ${plot.planted && !ready
+                  ? `<div class="timer">${remaining}s</div>`
+                  : ""}
+                ${plot.planted
+                  ? `<div class="progress-bar" style="width:${progress}%"></div>`
+                  : ""}
               </div>
             `;
           }).join("")}
         </div>
       </div>
+
     </div>
   `;
 
   bindFarmEvents();
 
-  // إعادة التحديث أثناء وجود زراعة
   if (farmState.plots.some(p => p.planted && now() - p.startTime < p.duration)) {
     setTimeout(renderHome, 1000);
   }
@@ -233,7 +283,6 @@ function bindFarmEvents(){
       const index = parseInt(el.dataset.index);
       const plot = farmState.plots[index];
 
-      // حصاد
       if (plot.planted && now() - plot.startTime >= plot.duration) {
         plot.planted = false;
         plot.crop = null;
@@ -243,7 +292,6 @@ function bindFarmEvents(){
         return;
       }
 
-      // زرع
       if (!plot.planted) {
         farmState.selectingPlot = index;
         openCropSelector();
@@ -293,4 +341,4 @@ function openCropSelector(){
   });
 
   document.body.appendChild(overlay);
-     }
+}
