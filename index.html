@@ -1,108 +1,38 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WinHive</title>
-
-<style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family: system-ui, -apple-system;
-}
-
-body{
-  background:#000;
-  color:#fff;
-  overflow:hidden;
-}
-
-/* ===== Main Content ===== */
-#content{
-  min-height:calc(100vh - 80px);
-  padding:16px;
-  transition:opacity .25s ease, transform .25s ease;
-}
-
-/* Page animation */
-.page-exit{
-  opacity:0;
-  transform:translateY(12px);
-}
-.page-enter{
-  opacity:0;
-  transform:translateY(-12px);
-}
-
-/* ===== Bottom Nav ===== */
-.navbar{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:80px;
-  background:#0a0a0a;
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  border-top:1px solid #222;
-}
-
-.nav-btn{
-  flex:1;
-  text-align:center;
-  font-size:.8rem;
-  color:#aaa;
-  transition:.2s;
-}
-
-.nav-btn span{
-  display:block;
-  font-size:1.6rem;
-}
-
-.nav-btn.active{
-  color:#ffd54a;
-  text-shadow:0 0 8px rgba(255,213,74,.6);
-}
-
-.nav-btn:active{
-  transform:scale(.92);
-}
-
-/* Home bigger */
-.nav-btn.home span{
-  font-size:2.2rem;
-}
-
-/* ===== Simple Pages ===== */
-.page-box{
-  background:#111;
-  border-radius:14px;
-  padding:20px;
-  text-align:center;
-  margin-top:30px;
-  box-shadow:0 0 20px rgba(0,0,0,.5);
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WinHive</title>
+  <style>
+    body{
+      margin:0;
+      background:#000;
+      color:#fff;
+      font-family:system-ui;
+    }
+    #content{
+      padding-bottom:90px; /* مساحة القوائم */
+      min-height:100vh;
+    }
+  </style>
 </head>
-
 <body>
 
-<div id="content"></div>
+  <!-- المكان الوحيد اللي بيتغير -->
+  <div id="content"></div>
 
-<div class="navbar">
-  <div class="nav-btn" onclick="goPage('settings')"><span>⚙️</span>الإعدادات</div>
-  <div class="nav-btn" onclick="goPage('vip')"><span>👑</span>VIP</div>
-  <div class="nav-btn" onclick="goPage('wallet')"><span>💼</span>المحفظة</div>
-  <div class="nav-btn home active" onclick="goPage('home')"><span>🏠</span>الرئيسية</div>
-  <div class="nav-btn" onclick="goPage('tasks')"><span>📋</span>المهام</div>
-  <div class="nav-btn" onclick="goPage('ref')"><span>👥</span>الإحالة</div>
-  <div class="nav-btn" onclick="goPage('logs')"><span>📜</span>السجلات</div>
-</div>
+  <!-- القوائم -->
+  <script src="core/navigation.js"></script>
 
-<script src="main.js"></script>
+  <!-- صفحات القوائم -->
+  <script src="pages/home.page.js"></script>
+  <script src="pages/tasks.page.js"></script>
+  <script src="pages/vip.page.js"></script>
+  <script src="pages/wallet.page.js"></script>
+  <script src="pages/settings.page.js"></script>
+  <script src="pages/ref.page.js"></script>
+  <script src="pages/logs.page.js"></script>
+
 </body>
 </html>
