@@ -2,8 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WinHive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body{
       margin:0;
@@ -12,27 +13,24 @@
       font-family:system-ui;
     }
     #content{
-      padding-bottom:90px; /* مساحة القوائم */
       min-height:100vh;
+      padding-bottom:90px;
     }
   </style>
 </head>
 <body>
 
-  <!-- المكان الوحيد اللي بيتغير -->
   <div id="content"></div>
 
   <!-- القوائم -->
   <script src="core/navigation.js"></script>
 
-  <!-- صفحات القوائم -->
-  <script src="pages/home.page.js"></script>
-  <script src="pages/tasks.page.js"></script>
-  <script src="pages/vip.page.js"></script>
-  <script src="pages/wallet.page.js"></script>
-  <script src="pages/settings.page.js"></script>
-  <script src="pages/ref.page.js"></script>
-  <script src="pages/logs.page.js"></script>
+  <!-- الصفحات -->
+  <script src="pages/home/home.ui.js"></script>
+  <script src="pages/home/home.page.js"></script>
+
+  <!-- الكنترول -->
+  <script src="main.js"></script>
 
 </body>
 </html>
