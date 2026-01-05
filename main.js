@@ -1,66 +1,57 @@
 /* =====================================================
-   MAIN NAVIGATION CONTROLLER
+   MAIN NAVIGATION + ANIMATIONS
 ===================================================== */
 
-const appContainer = document.getElementById("app");
+const app = document.getElementById("app");
 
-/* -----------------------------------------------------
-   تحميل الصفحات
------------------------------------------------------ */
-function loadPage(pageName) {
-  appContainer.innerHTML = "";
+/* ---------------- Page Loader ---------------- */
+function loadPage(page) {
+  app.classList.remove("page-show");
+  app.classList.add("page-hide");
 
-  switch (pageName) {
-    case "home":
-      if (typeof renderHome === "function") {
+  setTimeout(() => {
+    app.innerHTML = "";
+
+    switch (page) {
+      case "home":
         renderHome();
-      } else {
-        appContainer.innerHTML = "❌ home.page.js غير محمّل";
-      }
-      break;
+        break;
+      case "tasks":
+        app.innerHTML = "<h2>📋 المهام</h2>";
+        break;
+      case "wallet":
+        app.innerHTML = "<h2>💼 المحفظة</h2>";
+        break;
+      case "vip":
+        app.innerHTML = "<h2>👑 VIP</h2>";
+        break;
+      case "settings":
+        app.innerHTML = "<h2>⚙️ الإعدادات</h2>";
+        break;
+      case "ref":
+        app.innerHTML = "<h2>👥 الإحالة</h2>";
+        break;
+      case "logs":
+        app.innerHTML = "<h2>📜 السجلات</h2>";
+        break;
+    }
 
-    case "tasks":
-      appContainer.innerHTML = "<h2>📋 المهام</h2>";
-      break;
-
-    case "wallet":
-      appContainer.innerHTML = "<h2>💼 المحفظة</h2>";
-      break;
-
-    case "vip":
-      appContainer.innerHTML = "<h2>👑 VIP</h2>";
-      break;
-
-    case "settings":
-      appContainer.innerHTML = "<h2>⚙️ الإعدادات</h2>";
-      break;
-
-    case "ref":
-      appContainer.innerHTML = "<h2>👥 الإحالة</h2>";
-      break;
-
-    case "logs":
-      appContainer.innerHTML = "<h2>📜 السجلات</h2>";
-      break;
-
-    default:
-      appContainer.innerHTML = "❌ صفحة غير معروفة";
-  }
+    app.classList.remove("page-hide");
+    app.classList.add("page-show");
+  }, 180);
 }
 
-/* -----------------------------------------------------
-   أزرار القائمة
------------------------------------------------------ */
+/* ---------------- Menu Buttons ---------------- */
 document.querySelectorAll("[data-page]").forEach(btn => {
   btn.addEventListener("click", () => {
-    const page = btn.getAttribute("data-page");
-    loadPage(page);
+    document
+      .querySelectorAll(".nav-btn")
+      .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+    loadPage(btn.dataset.page);
   });
 });
 
-/* -----------------------------------------------------
-   تحميل الصفحة الرئيسية عند البدء
------------------------------------------------------ */
-window.addEventListener("DOMContentLoaded", () => {
-  loadPage("home");
-});
+/* ---------------- Initial Load ---------------- */
+window.onload = () => loadPage("home");
