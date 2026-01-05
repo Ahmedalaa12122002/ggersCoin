@@ -1,75 +1,66 @@
-const content = document.getElementById("content");
-const buttons = document.querySelectorAll(".nav-btn");
+/* =====================================================
+   MAIN NAVIGATION CONTROLLER
+===================================================== */
 
-/* ===== Navigation ===== */
-function setActive(page){
-  buttons.forEach(b=>b.classList.remove("active"));
-  const map={
-    settings:0,
-    vip:1,
-    wallet:2,
-    home:3,
-    tasks:4,
-    ref:5,
-    logs:6
-  };
-  if(map[page] !== undefined){
-    buttons[map[page]].classList.add("active");
-  }
-}
+const appContainer = document.getElementById("app");
 
-function goPage(page){
-  content.classList.add("page-exit");
+/* -----------------------------------------------------
+   تحميل الصفحات
+----------------------------------------------------- */
+function loadPage(pageName) {
+  appContainer.innerHTML = "";
 
-  setTimeout(()=>{
-    loadPage(page);
-    content.classList.remove("page-exit");
-    content.classList.add("page-enter");
-
-    setTimeout(()=>{
-      content.classList.remove("page-enter");
-    },50);
-
-    setActive(page);
-  },200);
-}
-
-/* ===== Pages ===== */
-function loadPage(page){
-  switch(page){
+  switch (pageName) {
     case "home":
-      content.innerHTML=`
-        <div class="page-box">
-          <h2>🌱 المزرعة</h2>
-          <p>هنا هيتم وضع نظام الزراعة والحصاد</p>
-        </div>`;
+      if (typeof renderHome === "function") {
+        renderHome();
+      } else {
+        appContainer.innerHTML = "❌ home.page.js غير محمّل";
+      }
       break;
 
     case "tasks":
-      content.innerHTML=`<div class="page-box">📋 المهام</div>`;
+      appContainer.innerHTML = "<h2>📋 المهام</h2>";
       break;
 
     case "wallet":
-      content.innerHTML=`<div class="page-box">💼 المحفظة</div>`;
+      appContainer.innerHTML = "<h2>💼 المحفظة</h2>";
       break;
 
     case "vip":
-      content.innerHTML=`<div class="page-box">👑 VIP</div>`;
-      break;
-
-    case "ref":
-      content.innerHTML=`<div class="page-box">👥 الإحالة</div>`;
-      break;
-
-    case "logs":
-      content.innerHTML=`<div class="page-box">📜 السجلات</div>`;
+      appContainer.innerHTML = "<h2>👑 VIP</h2>";
       break;
 
     case "settings":
-      content.innerHTML=`<div class="page-box">⚙️ الإعدادات</div>`;
+      appContainer.innerHTML = "<h2>⚙️ الإعدادات</h2>";
       break;
+
+    case "ref":
+      appContainer.innerHTML = "<h2>👥 الإحالة</h2>";
+      break;
+
+    case "logs":
+      appContainer.innerHTML = "<h2>📜 السجلات</h2>";
+      break;
+
+    default:
+      appContainer.innerHTML = "❌ صفحة غير معروفة";
   }
 }
 
-/* ===== Start ===== */
-loadPage("home");
+/* -----------------------------------------------------
+   أزرار القائمة
+----------------------------------------------------- */
+document.querySelectorAll("[data-page]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const page = btn.getAttribute("data-page");
+    loadPage(page);
+  });
+});
+
+/* -----------------------------------------------------
+   تحميل الصفحة الرئيسية عند البدء
+----------------------------------------------------- */
+window.addEventListener("DOMContentLoaded", () => {
+  loadPage("home");
+});
