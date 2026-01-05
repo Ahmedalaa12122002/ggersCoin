@@ -3,12 +3,23 @@
    File: pages/home.page.js
    Responsibility:
    - Render Home Screen content ONLY
+   - Home stats
+   - Farm game (12 plots)
    - No navigation logic
-   - No timers
-   - No auto refresh
-   - Stable base for future additions
+   - Stable & extendable
 ===================================================== */
 
+/* ---------- Farm State (LOCAL) ---------- */
+const farmState = {
+  plots: Array.from({ length: 12 }, () => ({
+    planted: false,
+    ready: false
+  }))
+};
+
+/* =====================================================
+   Render Home
+===================================================== */
 function renderHome() {
   const content = document.getElementById("content");
   if (!content) return;
@@ -72,15 +83,50 @@ function renderHome() {
       .game-box{
         background:#111;
         border-radius:16px;
-        height:320px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:#666;
-        font-size:14px;
+        padding:14px;
         box-shadow:
           inset 0 0 0 1px #222,
           0 6px 20px rgba(0,0,0,.4);
+      }
+
+      /* ---------- Farm Grid ---------- */
+      .farm-grid{
+        display:grid;
+        grid-template-columns:repeat(3, 1fr);
+        gap:10px;
+      }
+
+      .farm-plot{
+        height:80px;
+        border-radius:14px;
+        background:linear-gradient(#5d4037, #3e2723);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:26px;
+        cursor:pointer;
+        transition:transform .15s ease, box-shadow .15s ease;
+        box-shadow:inset 0 0 0 1px #2a2a2a;
+      }
+
+      .farm-plot:active{
+        transform:scale(.95);
+      }
+
+      .farm-plot.planted{
+        background:linear-gradient(#66bb6a, #2e7d32);
+      }
+
+      .farm-plot.ready{
+        background:linear-gradient(#aed581, #7cb342);
+        box-shadow:0 0 10px rgba(174,213,129,.6);
+      }
+
+      .farm-info{
+        margin-top:10px;
+        font-size:12px;
+        color:#888;
+        text-align:center;
       }
     </style>
 
@@ -103,9 +149,56 @@ function renderHome() {
       </div>
 
       <div class="game-box">
-        مساحة اللعبة (سيتم تطويرها)
+        <div class="farm-grid">
+          ${farmState.plots.map((plot, index) => `
+            <div
+              class="farm-plot
+                ${plot.planted ? "planted" : ""}
+                ${plot.ready ? "ready" : ""}"
+              data-index="${index}"
+            >
+              ${plot.ready ? "🌾" : plot.planted ? "🌱" : "🟫"}
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="farm-info">
+          اضغط على الأرض للزرع — اضغط مرة أخرى للحصاد
+        </div>
       </div>
 
     </div>
   `;
+
+  bindFarmEvents();
 }
+
+/* =====================================================
+   Farm Events (Plant / Harvest)
+===================================================== */
+function bindFarmEvents(){
+  const plots = document.querySelectorAll(".farm-plot");
+
+  plots.forEach(plotEl => {
+    plotEl.onclick = () => {
+      const index = parseInt(plotEl.dataset.index);
+      const plot = farmState.plots[index];
+
+      // زرع
+      if (!plot.planted) {
+        plot.planted = true;
+        plot.ready = true; // مؤقتًا بدون وقت
+        renderHome();
+        return;
+      }
+
+      // حصاد
+      if (plot.ready) {
+        plot.planted = false;
+        plot.ready = false;
+        renderHome();
+        return;
+      }
+    };
+  });
+     }
