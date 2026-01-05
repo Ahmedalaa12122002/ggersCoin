@@ -1,17 +1,8 @@
 /* =====================================================
-   Bottom Navigation Controller (FINAL)
+   Bottom Navigation Controller (FINAL FIXED)
    WinHive Telegram WebApp
-   ===================================================== */
+===================================================== */
 
-/*
-  مسؤولية الملف:
-  - إنشاء 7 قوائم سفلية
-  - التحكم في الزر النشط
-  - الانتقالات والمؤثرات
-  - فتح الصفحة المطلوبة بدون تداخل
-*/
-
-/* ---------- CONFIG ---------- */
 const NAV_ITEMS = [
   { id: "settings", label: "الإعدادات", icon: "⚙️" },
   { id: "vip",      label: "VIP",       icon: "👑" },
@@ -50,6 +41,10 @@ function initBottomNavigation() {
   });
 
   document.body.appendChild(nav);
+
+  /* 🔥 الحل هنا */
+  // افتح الصفحة الرئيسية أول ما التطبيق يفتح
+  openPage(currentPage);
 }
 
 /* ---------- CLICK HANDLER ---------- */
@@ -68,7 +63,7 @@ function updateActiveButton(page) {
   });
 }
 
-/* ---------- PAGE OPEN (HOOK) ---------- */
+/* ---------- PAGE OPEN ---------- */
 function openPage(page) {
   const content = document.getElementById("content");
   if (!content) return;
@@ -79,41 +74,36 @@ function openPage(page) {
   setTimeout(() => {
     content.innerHTML = "";
 
-    /*
-      الربط هنا فقط
-      كل صفحة لها ملفها الخاص
-      هذا الملف لا يعرف أي منطق داخلي
-    */
     switch (page) {
       case "home":
         if (typeof renderHome === "function") renderHome();
         break;
       case "tasks":
-        content.innerHTML = `<div class="page-box">📋 المهام</div>`;
+        if (typeof renderTasks === "function") renderTasks();
         break;
       case "wallet":
-        content.innerHTML = `<div class="page-box">💼 المحفظة</div>`;
+        if (typeof renderWallet === "function") renderWallet();
         break;
       case "vip":
-        content.innerHTML = `<div class="page-box">👑 VIP</div>`;
+        if (typeof renderVip === "function") renderVip();
         break;
       case "settings":
-        content.innerHTML = `<div class="page-box">⚙️ الإعدادات</div>`;
+        if (typeof renderSettings === "function") renderSettings();
         break;
       case "ref":
-        content.innerHTML = `<div class="page-box">👥 الإحالة</div>`;
+        if (typeof renderRef === "function") renderRef();
         break;
       case "logs":
-        content.innerHTML = `<div class="page-box">🧾 السجلات</div>`;
+        if (typeof renderLogs === "function") renderLogs();
         break;
     }
 
     content.classList.remove("page-exit");
     content.classList.add("page-enter");
-  }, 180);
+  }, 150);
 }
 
-/* ---------- STYLES (RESPONSIVE) ---------- */
+/* ---------- STYLES ---------- */
 function injectNavStyles() {
   const style = document.createElement("style");
   style.innerHTML = `
@@ -141,24 +131,19 @@ function injectNavStyles() {
       gap:4px;
       cursor:pointer;
       transition:all .25s ease;
-      min-width:0;
     }
 
     .nav-btn .icon{
-      font-size:clamp(18px, 5vw, 22px);
-      line-height:1;
+      font-size:22px;
     }
 
     .nav-btn .label{
-      font-size:clamp(10px, 2.6vw, 12px);
-      white-space:nowrap;
+      font-size:12px;
     }
 
     .nav-btn.active{
       color:#ffd54f;
-      text-shadow:
-        0 0 6px rgba(255,213,79,.7),
-        0 0 12px rgba(255,213,79,.4);
+      text-shadow:0 0 8px rgba(255,213,79,.6);
     }
 
     .nav-btn:active{
@@ -169,7 +154,6 @@ function injectNavStyles() {
       transform:scale(1.15) translateY(-4px);
     }
 
-    /* Page animation */
     #content{
       transition:opacity .25s ease, transform .25s ease;
     }
@@ -180,12 +164,6 @@ function injectNavStyles() {
     .page-enter{
       opacity:1;
       transform:translateY(0);
-    }
-
-    .page-box{
-      padding:24px;
-      text-align:center;
-      font-size:18px;
     }
   `;
   document.head.appendChild(style);
