@@ -2,97 +2,52 @@
    HOME PAGE – FARM GAME
 ===================================================== */
 
-const farmState = {
-  plots: [
-    { planted: false },
-    { planted: false },
-    { planted: false },
-    { planted: false },
-    { planted: false },
-    { planted: false }
-  ]
+const farm = {
+  plots: Array.from({ length: 6 }, () => ({
+    planted: false
+  }))
 };
 
-/* -----------------------------------------------------
-   رسم الصفحة الرئيسية
------------------------------------------------------ */
-function renderHomePage() {
+/* ---------------- Render ---------------- */
+function renderHome() {
   const app = document.getElementById("app");
 
-  let html = `
-    <div style="padding:16px">
-      <h2 style="text-align:center">🌱 المزرعة</h2>
+  app.innerHTML = `
+    <div class="farm">
+      <h2>🌱 المزرعة</h2>
 
-      <div style="
-        display:grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap:12px;
-        margin-top:20px;
-      ">
-  `;
-
-  farmState.plots.forEach((plot, i) => {
-    html += `
-      <div
-        onclick="plantCrop(${i})"
-        style="
-          height:80px;
-          background:${plot.planted ? "#4caf50" : "#5d4037"};
-          border-radius:12px;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          color:white;
-          font-size:22px;
-        "
-      >
-        ${plot.planted ? "🌿" : "🟫"}
-      </div>
-    `;
-  });
-
-  html += `
+      <div class="farm-grid">
+        ${farm.plots
+          .map(
+            (p, i) => `
+          <div class="plot ${p.planted ? "planted" : ""}" data-index="${i}">
+            ${p.planted ? "🌿" : "🟫"}
+          </div>
+        `
+          )
+          .join("")}
       </div>
 
-      <button
-        onclick="resetFarm()"
-        style="
-          margin-top:20px;
-          width:100%;
-          padding:12px;
-          font-size:18px;
-          border:none;
-          border-radius:12px;
-          background:#fbc02d;
-        "
-      >
-        🌾 زرع
-      </button>
+      <button id="plantBtn">🌾 زرع</button>
     </div>
   `;
 
-  app.innerHTML = html;
+  bindFarmEvents();
 }
 
-/* -----------------------------------------------------
-   زرع محصول
------------------------------------------------------ */
-function plantCrop(index) {
-  farmState.plots[index].planted = true;
-  renderHomePage();
-}
+/* ---------------- Events ---------------- */
+function bindFarmEvents() {
+  document.querySelectorAll(".plot").forEach(plot => {
+    plot.onclick = () => {
+      const i = plot.dataset.index;
+      farm.plots[i].planted = true;
+      plot.classList.add("planted");
+      plot.innerHTML = "🌿";
+    };
+  });
 
-/* -----------------------------------------------------
-   إعادة ضبط المزرعة
------------------------------------------------------ */
-function resetFarm() {
-  farmState.plots.forEach(p => p.planted = false);
-  renderHomePage();
-}
-
-/* -----------------------------------------------------
-   جسر الربط مع main.js
------------------------------------------------------ */
-function renderHome() {
-  renderHomePage();
+  document.getElementById("plantBtn").onclick = () => {
+    farm.plots.forEach(p => (p.planted = false));
+    renderHome();
+  };
 }
