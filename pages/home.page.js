@@ -1,78 +1,79 @@
-const STORAGE_KEY = "winhive_farm_v2";
+/* =====================================================
+   Home Page – Stage 1 (SAFE BASE)
+   WinHive
+   ===================================================== */
 
-const CROPS = [
-  {id:"wheat", name:"قمح", time:15, icon:"🌾"},
-  {id:"carrot", name:"جزر", time:30, icon:"🥕"},
-  {id:"pepper", name:"فلفل", time:45, icon:"🌶️"}
-];
+/*
+  هذا الملف مسؤول فقط عن:
+  - عرض محتوى الصفحة الرئيسية
+  - أرض واحدة
+  - زر واحد (ازرع)
+  بدون أي منطق وقت أو VIP
+*/
 
-function getState(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(raw) return JSON.parse(raw);
+/* حالة بسيطة للمرحلة الأولى */
+let homeState = {
+  planted: false
+};
 
-  return {
-    vip:0,
-    plots:Array.from({length:6},()=>({
-      crop:null,
-      planted:0,
-      ready:false
-    }))
+/* الدالة التي يستدعيها main.js */
+function renderHomePage() {
+  const content = document.getElementById("content");
+  if (!content) return;
+
+  // مسح أي محتوى قديم
+  content.innerHTML = "";
+
+  // إنشاء الحاوية
+  const wrapper = document.createElement("div");
+  wrapper.style.maxWidth = "420px";
+  wrapper.style.margin = "0 auto";
+  wrapper.style.padding = "20px";
+  wrapper.style.textAlign = "center";
+
+  // العنوان
+  const title = document.createElement("h2");
+  title.textContent = "🌱 المزرعة";
+  title.style.marginBottom = "20px";
+  wrapper.appendChild(title);
+
+  // الأرض
+  const plot = document.createElement("div");
+  plot.style.height = "140px";
+  plot.style.borderRadius = "16px";
+  plot.style.background = homeState.planted
+    ? "linear-gradient(#4caf50, #2e7d32)"
+    : "linear-gradient(#5d4037, #3e2723)";
+  plot.style.display = "flex";
+  plot.style.alignItems = "center";
+  plot.style.justifyContent = "center";
+  plot.style.fontSize = "40px";
+  plot.style.marginBottom = "20px";
+  plot.textContent = homeState.planted ? "🌿" : "🟫";
+  wrapper.appendChild(plot);
+
+  // زر الزراعة
+  const button = document.createElement("button");
+  button.textContent = homeState.planted ? "تم الزرع ✅" : "ازرع";
+  button.disabled = homeState.planted;
+  button.style.width = "100%";
+  button.style.padding = "14px";
+  button.style.fontSize = "16px";
+  button.style.border = "none";
+  button.style.borderRadius = "12px";
+  button.style.cursor = homeState.planted ? "default" : "pointer";
+  button.style.background = homeState.planted ? "#555" : "#ffd54f";
+  button.style.color = "#000";
+
+  button.onclick = () => {
+    homeState.planted = true;
+    renderHomePage();
   };
+
+  wrapper.appendChild(button);
+
+  // إدخال كل شيء في الصفحة
+  content.appendChild(wrapper);
 }
 
-function saveState(s){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-}
-
-function renderHome(){
-  const state = getState();
-  let html = `<div class="fade">
-    <h3 style="text-align:center">🌱 المزرعة</h3>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">`;
-
-  state.plots.forEach((p,i)=>{
-    const unlocked = i===0 || state.vip>0;
-
-    if(!unlocked){
-      html+=`<div style="background:#222;padding:22px;border-radius:14px;text-align:center">🔒 VIP</div>`;
-      return;
-    }
-
-    if(!p.crop){
-      html+=`<button onclick="plant(${i})"
-        style="background:#3a2;padding:22px;border-radius:14px;border:none;color:#fff">
-        🟫 ازرع
-      </button>`;
-    }else if(!p.ready){
-      html+=`<div style="background:#2a3;padding:22px;border-radius:14px;text-align:center">
-        ${p.crop.icon}<br>ينمو...
-      </div>`;
-    }else{
-      html+=`<button onclick="harvest(${i})"
-        style="background:#6a4;padding:22px;border-radius:14px;border:none">
-        🌾 احصد
-      </button>`;
-    }
-  });
-
-  html+=`</div></div>`;
-  document.getElementById("content").innerHTML = html;
-}
-
-function plant(i){
-  const state = getState();
-  state.plots[i] = {
-    crop:CROPS[0],
-    planted:Math.floor(Date.now()/1000),
-    ready:false
-  };
-  saveState(state);
-  renderHome();
-}
-
-function harvest(i){
-  const state = getState();
-  state.plots[i] = {crop:null,planted:0,ready:false};
-  saveState(state);
-  renderHome();
-}
+/* حماية: لا يتم التشغيل تلقائياً */
