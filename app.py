@@ -10,7 +10,7 @@ APP_URL = os.environ.get("https://ggerscoin-production.up.railway.app")  # https
 bot = telebot.TeleBot(BOT_TOKEN)
 app = FastAPI()
 
-# ===== Telegram Webhook =====
+# ===== Telegram webhook =====
 @app.post("/webhook")
 async def telegram_webhook(req: Request):
     update = telebot.types.Update.de_json(await req.json())
@@ -28,12 +28,12 @@ def start(message):
     )
     bot.send_message(
         message.chat.id,
-        "👋 أهلاً بك\nاضغط الزر للدخول",
+        "👋 أهلاً بك\nاضغط الزر للدخول إلى التطبيق",
         reply_markup=kb
     )
 
 @app.on_event("startup")
-async def startup():
+async def on_startup():
     bot.remove_webhook()
     bot.set_webhook(url=f"{APP_URL}/webhook")
 
