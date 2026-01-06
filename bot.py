@@ -1,6 +1,6 @@
 import telebot
 
-BOT_TOKEN = "8088771179:AAGvjDfgYc8LbwMhCyO1cgR-5zPdqYllhwE"
+BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 WEB_APP_URL = "https://ggerscoin-production.up.railway.app/"
 
 bot = telebot.TeleBot(BOT_TOKEN)
