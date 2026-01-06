@@ -2,7 +2,7 @@ import telebot
 import os
 from start import start_message
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("8088771179:AAGvjDfgYc8LbwMhCyO1cgR-5zPdqYllhwE")
 
 if not BOT_TOKEN:
     raise Exception("BOT_TOKEN is not set")
