@@ -1,7 +1,7 @@
 from telebot import types
 import os
 
-WEB_APP_URL = os.getenv("WEB_APP_URL")
+WEB_APP_URL = os.getenv("https://ggerscoin-production.up.railway.app/")
 
 def start_keyboard():
     note = types.InlineKeyboardMarkup()
