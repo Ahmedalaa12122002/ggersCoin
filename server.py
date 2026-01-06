@@ -4,7 +4,6 @@ from fastapi.responses import FileResponse
 
 app = FastAPI()
 
-# ربط مجلد الويب
 app.mount("/static", StaticFiles(directory="webapp"), name="static")
 
 @app.get("/")
