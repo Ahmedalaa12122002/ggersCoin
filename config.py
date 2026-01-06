@@ -1,5 +1,5 @@
 # bot/config.py
 
-BOT_TOKEN = "8440388547:AAF8Ftiu7Qmi1GLfHzViIRAzgZE7khvvXC8"
+BOT_TOKEN = "8088771179:AAGvjDfgYc8LbwMhCyO1cgR-5zPdqYllhwE"
 
 WEB_APP_URL = "https://ggerscoin-production.up.railway.app/"
