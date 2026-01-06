@@ -1,15 +1,15 @@
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import CommandHandler, ContextTypes
 
-def setup_handlers(app):
+def setup_handlers(application):
 
     async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [
             [
                 KeyboardButton(
-                    text="🚀 تشغيل التطبيق",
+                    text="🚀 دخول تطبيق GgersCoin",
                     web_app=WebAppInfo(
-                        url="https://example.com"  # مؤقت
+                        url="https://ggerscoin-production.up.railway.app/"
                     )
                 )
             ]
@@ -21,9 +21,9 @@ def setup_handlers(app):
         )
 
         await update.message.reply_text(
-            "👋 أهلاً بك\n"
-            "اضغط على الزر لتشغيل التطبيق",
+            "👋 أهلاً بك في بوت GgersCoin\n\n"
+            "اضغط على الزر بالأسفل للدخول إلى تطبيق الويب 👇",
             reply_markup=reply_markup
         )
 
-    app.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("start", start))
