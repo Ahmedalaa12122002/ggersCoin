@@ -1,15 +1,16 @@
 import telebot
-import os
 from start import start_message
 
-BOT_TOKEN = os.getenv("8088771179:AAGvjDfgYc8LbwMhCyO1cgR-5zPdqYllhwE")
+BOT_TOKEN = "8088771179:AAGvjDfgYc8LbwMhCyO1cgR-5zPdqYllhwE"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
+# مهم جدًا لمنع أي تعارض قديم
+bot.delete_webhook(drop_pending_updates=True)
+
 @bot.message_handler(commands=["start"])
-def start_handler(message):
-    print("START command received")  # 👈 سطر تشخيص
+def handle_start(message):
     start_message(bot, message)
 
-print("🤖 Bot is running...")
+print("BOT STARTED SUCCESSFULLY")
 bot.infinity_polling(skip_pending=True)
