@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 import telebot
 
 BOT_TOKEN = os.environ.get("8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ")
-APP_URL = os.environ.get("https://ggerscoin-production.up.railway.app/")  # https://xxxx.up.railway.app
+APP_URL = os.environ.get("https://ggerscoin-production.up.railway.app")  # https://xxxx.up.railway.app
 
 bot = telebot.TeleBot(BOT_TOKEN)
 app = FastAPI()
