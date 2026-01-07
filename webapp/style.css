@@ -1,27 +1,37 @@
-body {
-  margin: 0;
-  background: #000;
-  color: #fff;
-  font-family: Arial;
+:root {
+  --bg: #0b0b0b;
+  --nav: #111;
+  --btn: #1a1a1a;
+  --active: #ffcc00;
+  --play: #ff0044;
 }
 
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #fff;
+  font-family: "Segoe UI", Tahoma;
+}
+
+/* ====== منطقة العرض ====== */
 .view {
   height: calc(100vh - 80px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  transition: opacity .3s ease, transform .3s ease;
+  text-align: center;
+  transition: opacity .35s ease, transform .35s ease;
 }
 
-.fade-out {
+.view.hide {
   opacity: 0;
-  transform: scale(.98);
+  transform: scale(.97);
 }
 
+/* ====== شريط القوائم ====== */
 .navbar {
   height: 80px;
-  background: #111;
+  background: var(--nav);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -30,23 +40,42 @@ body {
   width: 100%;
 }
 
-button {
-  background: #222;
-  color: #ccc;
+/* ====== الأزرار ====== */
+.navbar button {
+  background: var(--btn);
+  color: #bbb;
   border: none;
-  padding: 10px 14px;
   border-radius: 14px;
-  transition: .2s;
+  padding: 10px 14px;
+  font-size: 13px;
+  transition: 
+    background .25s,
+    transform .15s,
+    box-shadow .25s,
+    color .25s;
 }
 
-button:active {
-  box-shadow: 0 0 12px #ffcc00;
-  transform: scale(.95);
+/* توهج عند الضغط */
+.navbar button:active {
+  transform: scale(.93);
+  box-shadow: 0 0 14px rgba(255, 204, 0, 0.7);
 }
 
-.play {
-  background: #ff0044;
+/* الزر النشط */
+.navbar button.active {
+  color: var(--active);
+  box-shadow: 0 0 10px rgba(255, 204, 0, .6);
+}
+
+/* زر Play */
+.navbar .play {
+  background: var(--play);
   color: #fff;
-  font-size: 18px;
+  font-size: 17px;
   padding: 16px 22px;
+  box-shadow: 0 0 18px rgba(255, 0, 68, .5);
+}
+
+.navbar .play.active {
+  box-shadow: 0 0 22px rgba(255, 204, 0, .9);
 }
