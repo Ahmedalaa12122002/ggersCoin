@@ -1,88 +1,140 @@
+/* =========================
+   Root Variables
+========================= */
 :root {
-  --bg: #0a0a0a;
-  --nav: #111;
-  --btn: #1b1b1b;
-  --text: #bbb;
+  --bg: #0f0f0f;
+  --nav: #141414;
+  --btn: #1e1e1e;
+  --text: #ffffff;
   --active: #ffcc00;
-  --play: #ff0044;
+  --play: #ff003c;
+}
+
+/* =========================
+   Global
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
-  margin: 0;
   background: var(--bg);
-  color: #fff;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* ===== منطقة المحتوى ===== */
+/* =========================
+   Main View
+========================= */
 .view {
-  height: calc(100vh - 80px);
+  height: calc(100vh - 90px);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  transition: opacity .35s ease, transform .35s ease;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-.view.hide {
-  opacity: 0;
-  transform: scale(.96);
+.view h1 {
+  font-size: 22px;
+  opacity: 0.9;
 }
 
-/* ===== شريط القوائم ===== */
+/* =========================
+   Navbar (Bottom Menu)
+========================= */
 .navbar {
-  height: 80px;
-  background: var(--nav);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
   position: fixed;
   bottom: 0;
   width: 100%;
+
+  background: var(--nav);
+  padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
 }
-/* ===== الأزرار ===== */
+
+/* =========================
+   Buttons
+========================= */
 .navbar button {
+  flex: 1;
+  min-width: 0;
+
   background: var(--btn);
   color: var(--text);
   border: none;
-  border-radius: 16px;
+  border-radius: 14px;
 
-  /* 👇 تكبير محسوب */
-  padding: clamp(12px, 2.8vw, 16px) clamp(14px, 3.5vw, 22px);
-  font-size: clamp(14px, 3.2vw, 16px);
+  padding: 10px 0;
+  font-size: 13px;
+
+  cursor: pointer;
 
   transition:
-    background .25s,
-    color .25s,
-    transform .15s,
-    box-shadow .25s;
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.15s ease,
+    box-shadow 0.25s ease;
 }
 
-/* توهج عند الضغط */
-.navbar button:active {
-  transform: scale(.93);
-  box-shadow: 0 0 14px rgba(255, 204, 0, 0.6);
-}
-
-/* الزر النشط */
+/* Active button */
 .navbar button.active {
   color: var(--active);
-  box-shadow: 0 0 12px rgba(255, 204, 0, 0.55);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
 }
 
-/* ===== زر Play ===== */
+/* Click effect */
+.navbar button:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+}
+
+/* =========================
+   Play Button (Special)
+========================= */
 .navbar .play {
+  flex: 1.3;
   background: var(--play);
   color: #fff;
 
-  /* 👇 أكبر شوية من الباقي */
-  padding: clamp(16px, 4vw, 20px) clamp(20px, 5vw, 30px);
-  font-size: clamp(17px, 4vw, 20px);
+  font-size: 14px;
+  font-weight: 600;
 
-  border-radius: 20px;
-  box-shadow: 0 0 22px rgba(255, 0, 68, 0.6);
+  padding: 12px 0;
+  border-radius: 16px;
+
+  box-shadow: 0 0 14px rgba(255, 0, 60, 0.6);
+}
+
+.navbar .play:active {
+  transform: scale(0.96);
+  box-shadow: 0 0 18px rgba(255, 204, 0, 0.9);
 }
 
 .navbar .play.active {
-  box-shadow: 0 0 26px rgba(255, 204, 0, 0.9);
+  box-shadow: 0 0 18px rgba(255, 204, 0, 0.9);
+}
+
+/* =========================
+   Responsive Safety
+========================= */
+@media (max-width: 360px) {
+  .navbar button {
+    font-size: 12px;
+    padding: 9px 0;
+  }
+
+  .navbar .play {
+    font-size: 13px;
+    padding: 11px 0;
+  }
   }
