@@ -1,19 +1,28 @@
 const view = document.getElementById("view");
+const buttons = document.querySelectorAll(".navbar button");
 
-document.querySelectorAll("button[data-page]").forEach(btn => {
-  btn.addEventListener("click", () => loadPage(btn.dataset.page));
+buttons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    setActive(btn);
+    loadPage(btn.dataset.page);
+  });
 });
 
-function loadPage(page) {
-  view.classList.add("fade-out");
+function setActive(activeBtn) {
+  buttons.forEach(b => b.classList.remove("active"));
+  activeBtn.classList.add("active");
+}
+
+async function loadPage(page) {
+  view.classList.add("hide");
 
   setTimeout(async () => {
     const res = await fetch(`pages/${page}/${page}.html`);
     view.innerHTML = await res.text();
-    view.classList.remove("fade-out");
+    view.classList.remove("hide");
 
     loadAssets(page);
-  }, 200);
+  }, 250);
 }
 
 function loadAssets(page) {
@@ -35,4 +44,4 @@ function loadAssets(page) {
 function removeOld(id) {
   const el = document.getElementById(id);
   if (el) el.remove();
-}
+    }
