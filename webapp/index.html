@@ -2,24 +2,28 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>Web App</title>
+  <title>GgersCoin</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<div class="content">
+<div id="content" class="content">
   <h2>🎮 Play</h2>
+  <p>اضغط على أي قائمة بالأسفل</p>
 </div>
 
 <div class="navbar">
-  <button>حسابي</button>
-  <button>المحفظة</button>
-  <button>VIP</button>
-  <button class="main">Play</button>
-  <button>المهمات</button>
-  <button>الإحالة</button>
-  <button>سجل المعلومات</button>
+  <button onclick="show('profile')">حسابي</button>
+  <button onclick="show('wallet')">المحفظة</button>
+  <button onclick="show('vip')">VIP</button>
+
+  <button class="main" onclick="show('play')">Play</button>
+
+  <button onclick="show('tasks')">المهمات</button>
+  <button onclick="show('referral')">الإحالة</button>
+  <button onclick="show('history')">سجل المعلومات</button>
 </div>
 
+<script src="/static/app.js"></script>
 </body>
 </html>
