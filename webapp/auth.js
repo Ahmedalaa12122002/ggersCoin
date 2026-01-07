@@ -18,3 +18,8 @@ if (user) {
 } else {
   console.warn("Telegram user not found");
 }
+fetch("/api/auth", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(authUser)
+});
