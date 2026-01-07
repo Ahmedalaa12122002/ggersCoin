@@ -3,27 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>GgersCoin</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="content" class="content">
+<div id="view" class="view">
   <h2>🎮 Play</h2>
-  <p>اضغط على أي قائمة بالأسفل</p>
 </div>
 
-<div class="navbar">
-  <button onclick="show('profile')">حسابي</button>
-  <button onclick="show('wallet')">المحفظة</button>
-  <button onclick="show('vip')">VIP</button>
+<nav class="navbar">
+  <button data-page="profile">حسابي</button>
+  <button data-page="wallet">المحفظة</button>
+  <button data-page="vip">VIP</button>
 
-  <button class="main" onclick="show('play')">Play</button>
+  <button class="play" data-page="play">Play</button>
 
-  <button onclick="show('tasks')">المهمات</button>
-  <button onclick="show('referral')">الإحالة</button>
-  <button onclick="show('history')">سجل المعلومات</button>
-</div>
+  <button data-page="tasks">المهمات</button>
+  <button data-page="referral">الإحالة</button>
+  <button data-page="history">سجل</button>
+</nav>
 
-<script src="/static/app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
