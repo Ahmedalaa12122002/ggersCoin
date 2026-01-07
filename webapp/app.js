@@ -12,18 +12,9 @@ const pages = {
 };
 
 buttons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    // إزالة active
+  btn.onclick = () => {
     buttons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-
-    // انتقال بسيط
-    view.style.opacity = 0;
-
-    setTimeout(() => {
-      const page = btn.dataset.page;
-      view.innerHTML = `<h1>${pages[page]}</h1>`;
-      view.style.opacity = 1;
-    }, 200);
-  });
+    view.innerHTML = `<h1>${pages[btn.dataset.page]}</h1>`;
+  };
 });
