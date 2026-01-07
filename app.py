@@ -2,7 +2,21 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
+from database import init_db
+from models import get_user, create_user
+from fastapi import Body
+@app.on_event("startup")
+async def startup_event():
+    init_db()
+    @app.post("/api/auth")
+def auth_user(user: dict = Body(...)):
+    existing = get_user(user["id"])
 
+    if not existing:
+        create_user(user)
+        return {"status": "created"}
+    
+    return {"status": "exists"}
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 APP_URL   = "https://web-production-1ba0e.up.railway.app"
 
