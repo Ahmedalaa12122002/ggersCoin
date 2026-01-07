@@ -40,15 +40,17 @@ body {
   bottom: 0;
   width: 100%;
 }
-
 /* ===== الأزرار ===== */
 .navbar button {
   background: var(--btn);
   color: var(--text);
   border: none;
-  border-radius: 14px;
-  padding: 10px 14px;
-  font-size: 13px;
+  border-radius: 16px;
+
+  /* 👇 تكبير محسوب */
+  padding: clamp(12px, 2.8vw, 16px) clamp(14px, 3.5vw, 22px);
+  font-size: clamp(14px, 3.2vw, 16px);
+
   transition:
     background .25s,
     color .25s,
@@ -58,25 +60,29 @@ body {
 
 /* توهج عند الضغط */
 .navbar button:active {
-  transform: scale(.92);
+  transform: scale(.93);
   box-shadow: 0 0 14px rgba(255, 204, 0, 0.6);
 }
 
 /* الزر النشط */
 .navbar button.active {
   color: var(--active);
-  box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.55);
 }
 
-/* زر Play */
+/* ===== زر Play ===== */
 .navbar .play {
   background: var(--play);
   color: #fff;
-  font-size: 17px;
-  padding: 16px 24px;
-  box-shadow: 0 0 20px rgba(255, 0, 68, 0.6);
+
+  /* 👇 أكبر شوية من الباقي */
+  padding: clamp(16px, 4vw, 20px) clamp(20px, 5vw, 30px);
+  font-size: clamp(17px, 4vw, 20px);
+
+  border-radius: 20px;
+  box-shadow: 0 0 22px rgba(255, 0, 68, 0.6);
 }
 
 .navbar .play.active {
-  box-shadow: 0 0 24px rgba(255, 204, 0, 0.9);
+  box-shadow: 0 0 26px rgba(255, 204, 0, 0.9);
   }
