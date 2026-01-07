@@ -1,45 +1,116 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request, Body
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
+import sqlite3
+import os
 
+# =============================
+# الإعدادات
+# =============================
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
-APP_URL   = "https://web-production-1ba0e.up.railway.app"
-
+APP_URL = "https://web-production-1ba0e.up.railway.app"
 BOT_NAME = "GgersCoin Bot"
 
-bot = telebot.TeleBot(BOT_TOKEN)
+# =============================
+# إنشاء التطبيق والبوت
+# =============================
 app = FastAPI()
+bot = telebot.TeleBot(BOT_TOKEN)
 
-# ===== Telegram Webhook =====
+# =============================
+# قاعدة البيانات (SQLite)
+# =============================
+DB_NAME = "database.db"
+
+def get_db():
+    return sqlite3.connect(DB_NAME)
+
+def init_db():
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        first_name TEXT,
+        last_name TEXT,
+        username TEXT,
+        language TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    db.commit()
+    db.close()
+
+# =============================
+# تشغيل عند بدء السيرفر
+# =============================
+@app.on_event("startup")
+async def on_startup():
+    init_db()
+    bot.remove_webhook()
+    bot.set_webhook(url=f"{APP_URL}/webhook")
+
+# =============================
+# Webhook Telegram
+# =============================
 @app.post("/webhook")
-async def telegram_webhook(req: Request):
-    update = telebot.types.Update.de_json(await req.json())
+async def telegram_webhook(request: Request):
+    data = await request.json()
+    update = telebot.types.Update.de_json(data)
     bot.process_new_updates([update])
-    return {"ok": True}
+    return JSONResponse({"ok": True})
 
+# =============================
+# أمر /start
+# =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
-    kb = telebot.types.InlineKeyboardMarkup()
-    kb.add(
+    keyboard = telebot.types.InlineKeyboardMarkup()
+    keyboard.add(
         telebot.types.InlineKeyboardButton(
             "🚀 دخول التطبيق",
             web_app=telebot.types.WebAppInfo(url=APP_URL)
         )
     )
+
     bot.send_message(
         message.chat.id,
         f"👋 أهلاً بك في *{BOT_NAME}*\n\nاضغط الزر للدخول إلى التطبيق",
-        reply_markup=kb,
+        reply_markup=keyboard,
         parse_mode="Markdown"
     )
 
-@app.on_event("startup")
-async def on_startup():
-    bot.remove_webhook()
-    bot.set_webhook(url=f"{APP_URL}/webhook")
+# =============================
+# API: تسجيل المستخدم
+# =============================
+@app.post("/api/auth")
+def auth_user(user: dict = Body(...)):
+    db = get_db()
+    cursor = db.cursor()
 
-# ===== Web App =====
+    cursor.execute("SELECT id FROM users WHERE id = ?", (user["id"],))
+    exists = cursor.fetchone()
+
+    if not exists:
+        cursor.execute("""
+        INSERT INTO users (id, first_name, last_name, username, language)
+        VALUES (?, ?, ?, ?, ?)
+        """, (
+            user.get("id"),
+            user.get("first_name"),
+            user.get("last_name"),
+            user.get("username"),
+            user.get("language")
+        ))
+        db.commit()
+
+    db.close()
+    return {"status": "ok"}
+
+# =============================
+# Web App
+# =============================
 app.mount("/static", StaticFiles(directory="webapp"), name="static")
 
 @app.get("/")
