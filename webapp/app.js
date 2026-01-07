@@ -44,4 +44,4 @@ function loadAssets(page) {
 function removeOld(id) {
   const el = document.getElementById(id);
   if (el) el.remove();
-    }
+}
