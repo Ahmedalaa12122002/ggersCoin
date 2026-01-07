@@ -2,85 +2,83 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-html, body {
-  height: 100%;
-}
-
-body {
-  background: #0b0b0b;
-  color: #fff;
-  overflow: hidden;
   font-family: system-ui, sans-serif;
 }
 
-/* المحتوى */
-.view {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 72px;
+body {
+  background: #0e0e0e;
+  color: #fff;
+  height: 100vh;
+  overflow: hidden;
+}
 
+.view {
+  height: calc(100vh - 90px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  transition: opacity 0.3s ease;
 }
 
-/* 🔴 الشريط السفلي – إجباري تحت */
-.navbar {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0;
-  right: 0;
-
-  height: 72px;
-  padding: 6px;
-
+/* الشريط السفلي */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 90px;
+  background: #151515;
   display: flex;
-  gap: 6px;
+  justify-content: space-around;
   align-items: center;
-
-  background: #141414;
-  z-index: 9999;
+  padding: 8px;
 }
 
 /* الأزرار */
-.navbar button {
-  flex: 1;
-  height: 52px;
-
+.bottom-nav button {
   background: #1f1f1f;
   border: none;
-  border-radius: 14px;
   color: #fff;
-
+  border-radius: 16px;
+  padding: 8px 10px;
+  width: 13%;
+  min-width: 55px;
+  max-width: 80px;
+  height: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  font-size: 12px;
-  transition: all 0.2s ease;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.navbar button:active {
-  transform: scale(0.94);
-  box-shadow: 0 0 10px rgba(255,204,0,.7);
+/* الأيقونة */
+.bottom-nav .icon {
+  font-size: 20px;
 }
 
-.navbar button.active {
-  color: #ffcc00;
-  box-shadow: 0 0 8px rgba(255,204,0,.6);
+/* النص */
+.bottom-nav .text {
+  font-size: 11px;
 }
 
 /* زر Play */
-.navbar .play {
-  flex: 1.3;
-  height: 58px;
-  background: #ff003c;
-  font-weight: bold;
-  border-radius: 16px;
+.bottom-nav .play {
+  background: #e50914;
+  width: 18%;
+  height: 72px;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+/* عند التفعيل */
+.bottom-nav button.active {
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+  transform: translateY(-3px);
+}
+
+/* عند الضغط */
+.bottom-nav button:active {
+  transform: scale(0.92);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.8);
 }
