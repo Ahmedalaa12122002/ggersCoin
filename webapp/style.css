@@ -1,18 +1,12 @@
-/* =========================
-   Root Variables
-========================= */
 :root {
-  --bg: #0f0f0f;
+  --bg: #0b0b0b;
   --nav: #141414;
-  --btn: #1e1e1e;
+  --btn: #1f1f1f;
   --text: #ffffff;
   --active: #ffcc00;
   --play: #ff003c;
 }
 
-/* =========================
-   Global
-========================= */
 * {
   margin: 0;
   padding: 0;
@@ -24,100 +18,86 @@
 body {
   background: var(--bg);
   color: var(--text);
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
 /* =========================
-   Main View
+   CONTENT AREA
 ========================= */
 .view {
-  height: calc(100vh - 90px);
+  height: calc(100dvh - 72px);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.view h1 {
-  font-size: 22px;
-  opacity: 0.9;
 }
 
 /* =========================
-   Navbar (Bottom Menu)
+   NAVBAR (INSIDE SCREEN)
 ========================= */
 .navbar {
+  height: 72px;
+  padding: 6px;
+  padding-bottom: env(safe-area-inset-bottom);
+
   position: fixed;
   bottom: 0;
-  width: 100%;
+  left: 0;
+  right: 0;
 
   background: var(--nav);
-  padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
-
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   gap: 6px;
+  align-items: center;
 }
 
 /* =========================
-   Buttons
+   BUTTONS
 ========================= */
 .navbar button {
   flex: 1;
-  min-width: 0;
+  height: 52px;
 
   background: var(--btn);
   color: var(--text);
   border: none;
   border-radius: 14px;
 
-  padding: 10px 0;
   font-size: 13px;
 
-  cursor: pointer;
-
-  transition:
-    background 0.25s ease,
-    color 0.25s ease,
+  transition: 
     transform 0.15s ease,
-    box-shadow 0.25s ease;
+    box-shadow 0.25s ease,
+    color 0.25s ease;
 }
 
-/* Active button */
+/* Active */
 .navbar button.active {
   color: var(--active);
   box-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
 }
 
-/* Click effect */
+/* Click */
 .navbar button:active {
-  transform: scale(0.95);
-  box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+  transform: scale(0.94);
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
 }
 
 /* =========================
-   Play Button (Special)
+   PLAY BUTTON (SPECIAL)
 ========================= */
 .navbar .play {
   flex: 1.3;
+  height: 58px;
+
   background: var(--play);
   color: #fff;
-
   font-size: 14px;
   font-weight: 600;
 
-  padding: 12px 0;
   border-radius: 16px;
-
   box-shadow: 0 0 14px rgba(255, 0, 60, 0.6);
-}
-
-.navbar .play:active {
-  transform: scale(0.96);
-  box-shadow: 0 0 18px rgba(255, 204, 0, 0.9);
 }
 
 .navbar .play.active {
@@ -125,16 +105,20 @@ body {
 }
 
 /* =========================
-   Responsive Safety
+   SMALL SCREENS
 ========================= */
 @media (max-width: 360px) {
+  .navbar {
+    height: 66px;
+  }
+
   .navbar button {
+    height: 48px;
     font-size: 12px;
-    padding: 9px 0;
   }
 
   .navbar .play {
+    height: 54px;
     font-size: 13px;
-    padding: 11px 0;
   }
-  }
+   }
