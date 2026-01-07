@@ -7,6 +7,7 @@
   --play: #ff003c;
 }
 
+/* ===== Reset ===== */
 * {
   margin: 0;
   padding: 0;
@@ -22,9 +23,7 @@ body {
   overflow: hidden;
 }
 
-/* =========================
-   CONTENT AREA
-========================= */
+/* ===== محتوى الصفحة ===== */
 .view {
   height: calc(100dvh - 72px);
   display: flex;
@@ -33,18 +32,16 @@ body {
   text-align: center;
 }
 
-/* =========================
-   NAVBAR (INSIDE SCREEN)
-========================= */
+/* ===== شريط القوائم ===== */
 .navbar {
-  height: 72px;
-  padding: 6px;
-  padding-bottom: env(safe-area-inset-bottom);
-
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
+
+  height: 72px;
+  padding: 6px;
+  padding-bottom: env(safe-area-inset-bottom);
 
   background: var(--nav);
   display: flex;
@@ -52,9 +49,7 @@ body {
   align-items: center;
 }
 
-/* =========================
-   BUTTONS
-========================= */
+/* ===== الأزرار ===== */
 .navbar button {
   flex: 1;
   height: 52px;
@@ -64,35 +59,51 @@ body {
   border: none;
   border-radius: 14px;
 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+
   font-size: 13px;
 
-  transition: 
+  transition:
     transform 0.15s ease,
     box-shadow 0.25s ease,
     color 0.25s ease;
 }
 
-/* Active */
-.navbar button.active {
-  color: var(--active);
-  box-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
-}
-
-/* Click */
+/* تأثير عند الضغط */
 .navbar button:active {
   transform: scale(0.94);
   box-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
 }
 
-/* =========================
-   PLAY BUTTON (SPECIAL)
-========================= */
+/* الزر النشط */
+.navbar button.active {
+  color: var(--active);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
+}
+
+/* ===== الأيقونات ===== */
+.navbar .icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.navbar .text {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+/* ===== زر Play ===== */
 .navbar .play {
   flex: 1.3;
   height: 58px;
 
   background: var(--play);
   color: #fff;
+
   font-size: 14px;
   font-weight: 600;
 
@@ -100,13 +111,19 @@ body {
   box-shadow: 0 0 14px rgba(255, 0, 60, 0.6);
 }
 
+.navbar .play .icon {
+  font-size: 18px;
+}
+
+.navbar .play .text {
+  font-size: 12px;
+}
+
 .navbar .play.active {
   box-shadow: 0 0 18px rgba(255, 204, 0, 0.9);
 }
 
-/* =========================
-   SMALL SCREENS
-========================= */
+/* ===== شاشات صغيرة ===== */
 @media (max-width: 360px) {
   .navbar {
     height: 66px;
@@ -121,4 +138,4 @@ body {
     height: 54px;
     font-size: 13px;
   }
-   }
+}
