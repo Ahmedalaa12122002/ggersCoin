@@ -1,167 +1,132 @@
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
 }
 
 body {
-    background: radial-gradient(circle at top, #111 0%, #000 70%);
-    color: #fff;
-    height: 100vh;
-    overflow: hidden;
+  margin: 0;
+  background: radial-gradient(circle at top, #111, #000);
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* ===== Top Bar ===== */
-.top-bar {
-    text-align: center;
-    padding: 14px;
-    font-size: 20px;
-    background: rgba(20,20,20,0.6);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-/* ===== Content ===== */
-#content {
-    height: calc(100vh - 120px);
-    padding: 20px;
-    overflow-y: auto;
-}
-
-.page {
-    display: none;
-    animation: fade 0.35s ease;
-}
-
-.page.active {
-    display: block;
-}
-
-/* ===== Bottom Navigation ===== */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 10px 6px;
-    display: flex;
-    justify-content: space-between;
-    background: rgba(15,15,15,0.65);
-    backdrop-filter: blur(14px);
-    border-top: 1px solid rgba(255,255,255,0.08);
-}
-
-/* ===== Buttons ===== */
-.nav-btn {
-    flex: 1;
-    margin: 0 4px;
-    background: rgba(255,255,255,0.85);
-    color: #000;
-    border: none;
-    border-radius: 14px;
-    padding: 8px 4px;
-    font-size: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.25s ease;
-    cursor: pointer;
-}
-
-.nav-btn span {
-    font-size: 11px;
-    white-space: nowrap;
-}
-
-/* ===== Play Button ===== */
-.play-btn {
-    transform: translateY(-16px);
-    padding: 12px 6px;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-/* ===== Active (Neon) ===== */
-.nav-btn.active {
-    background: linear-gradient(135deg, #ff004c, #ffae00);
-    color: #fff;
-    box-shadow:
-        0 0 10px rgba(255, 200, 0, 0.7),
-        0 0 25px rgba(255, 80, 0, 0.6);
-}
-
-/* ===== Press Effect ===== */
-.nav-btn:active {
-    transform: scale(0.95);
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 380px) {
-    .nav-btn span {
-        font-size: 10px;
-    }
-    .play-btn {
-        font-size: 13px;
-    }
-}
-
-@media (min-width: 600px) {
-    .nav-btn {
-        max-width: 90px;
-    }
-}
-
-/* ===== Animation ===== */
-@keyframes fade {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-/* ===== Splash Screen ===== */
+/* Splash */
 #splash {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at top, #111, #000);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    animation: splashFade 0.6s ease forwards;
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
 .splash-content {
-    text-align: center;
-    animation: splashScale 1s ease infinite alternate;
+  text-align: center;
+  animation: pulse 1.2s infinite alternate;
 }
 
-.splash-content .logo {
-    font-size: 60px;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 15px gold);
+.logo {
+  font-size: 60px;
+  filter: drop-shadow(0 0 15px gold);
 }
 
-.splash-content h1 {
-    font-size: 28px;
-    letter-spacing: 2px;
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
 }
 
-.splash-content p {
-    opacity: 0.7;
-    margin-top: 6px;
+/* Content */
+#content {
+  padding: 20px;
+  padding-bottom: 110px;
+  text-align: center;
 }
 
-@keyframes splashScale {
-    from { transform: scale(1); }
-    to { transform: scale(1.05); }
+#page-title {
+  margin-top: 30px;
+  font-size: 26px;
 }
 
-@keyframes splashFade {
-    to { opacity: 0; visibility: hidden; }
-                 }
+/* Loader */
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255,255,255,.2);
+  border-top-color: gold;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 40px auto;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 10px;
+  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.08);
+  border-radius: 22px;
+}
+
+.nav-btn {
+  flex: 1;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border-radius: 16px;
+  padding: 8px 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .3s ease;
+}
+
+.nav-btn span {
+  display: block;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.nav-btn.active {
+  background: gold;
+  color: #000;
+  box-shadow: 0 0 15px gold;
+  transform: translateY(-6px);
+}
+
+.nav-btn:active {
+  transform: scale(0.95);
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(30,30,30,0.95);
+  padding: 10px 20px;
+  border-radius: 14px;
+  opacity: 0;
+  transition: .4s;
+  box-shadow: 0 0 10px gold;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+    }
