@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+
     const buttons = document.querySelectorAll(".nav-btn");
     const pages = document.querySelectorAll(".page");
     const title = document.getElementById("page-title");
@@ -10,30 +11,27 @@ document.addEventListener("DOMContentLoaded", () => {
         wallet: "المحفظة 💰",
         vip: "VIP 💎",
         profile: "حسابي 👤",
-        log: "سجل 🧾"
+        log: "السجل 🧾"
     };
 
     buttons.forEach(btn => {
         btn.addEventListener("click", () => {
-            const pageId = btn.dataset.page;
 
-            // إزالة التفعيل
+            // إزالة active من كل الأزرار
             buttons.forEach(b => b.classList.remove("active"));
-            pages.forEach(p => p.classList.remove("active"));
-
-            // تفعيل الزر
             btn.classList.add("active");
 
-            // إظهار الصفحة
+            // إخفاء كل الصفحات
+            pages.forEach(p => p.classList.remove("active"));
+
+            // إظهار الصفحة المطلوبة
+            const pageId = btn.dataset.page;
             const page = document.getElementById(pageId);
-            if (page) {
-                page.classList.add("active");
-            }
+            if (page) page.classList.add("active");
 
             // تغيير العنوان
-            if (titles[pageId]) {
-                title.textContent = titles[pageId];
-            }
+            title.textContent = titles[pageId] || "GgersCoin";
         });
     });
+
 });
