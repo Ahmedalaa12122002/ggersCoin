@@ -6,7 +6,7 @@
 }
 
 body {
-    background: radial-gradient(circle at top, #121212 0%, #000 70%);
+    background: radial-gradient(circle at top, #141414 0%, #000 70%);
     color: #fff;
     height: 100vh;
     overflow: hidden;
@@ -16,9 +16,9 @@ body {
 .top-bar {
     text-align: center;
     padding: 14px 10px;
-    background: rgba(20,20,20,0.65);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: rgba(18,18,18,0.75);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .top-bar h1 {
@@ -34,10 +34,10 @@ body {
 
 /* ===== View ===== */
 #view {
-    height: calc(100vh - 135px);
+    height: calc(100vh - 138px);
     padding: 16px;
     overflow-y: auto;
-    animation: fade 0.35s ease;
+    animation: fadeIn 0.35s ease;
 }
 
 .loader {
@@ -52,11 +52,11 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 10px 6px;
+    padding: 12px 6px;
     display: flex;
-    justify-content: space-between;
-    background: rgba(12,12,12,0.85);
-    backdrop-filter: blur(16px);
+    gap: 6px;
+    background: rgba(10,10,10,0.88);
+    backdrop-filter: blur(18px);
     border-top: 1px solid rgba(255,255,255,0.08);
     z-index: 100;
 }
@@ -64,50 +64,69 @@ body {
 /* ===== Buttons ===== */
 .nav-btn {
     flex: 1;
-    margin: 0 4px;
-    background: rgba(255,255,255,0.88);
-    color: #000;
-    border: none;
+    background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+    color: #eee;
+    border: 1px solid rgba(255,255,255,0.06);
     border-radius: 16px;
-    padding: 8px 4px;
+    padding: 10px 4px;
     font-size: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    transition: all 0.25s ease;
     cursor: pointer;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
 }
 
 .nav-btn span {
     font-size: 10px;
     white-space: nowrap;
+    opacity: 0.85;
 }
 
-/* ===== Play Button ===== */
+/* ===== Hover (لمسة احترافية) ===== */
+.nav-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ===== Play Button (الأهم) ===== */
 .play-btn {
-    transform: translateY(-16px);
+    transform: translateY(-18px);
     padding: 14px 6px;
     font-size: 14px;
     font-weight: bold;
 }
 
-/* ===== Active ===== */
+/* ===== Active (Yellow Glow) ===== */
 .nav-btn.active {
-    background: linear-gradient(135deg, #ff004c, #ffae00);
-    color: #fff;
+    background: linear-gradient(180deg, #2a2400, #141000);
+    border: 1px solid rgba(255, 215, 0, 0.55);
+    color: #ffe27a;
     box-shadow:
-        0 0 12px rgba(255,180,0,0.8),
-        0 0 28px rgba(255,80,0,0.6);
+        0 0 8px rgba(255, 215, 0, 0.35),
+        0 0 16px rgba(255, 200, 0, 0.25),
+        inset 0 0 6px rgba(255, 230, 120, 0.25);
 }
 
-/* ===== Press ===== */
+/* ===== Press Effect ===== */
 .nav-btn:active {
     transform: scale(0.94);
+    box-shadow:
+        0 0 6px rgba(255, 215, 0, 0.25),
+        inset 0 0 8px rgba(0,0,0,0.6);
 }
 
 /* ===== Anim ===== */
-@keyframes fade {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-                     }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    }
