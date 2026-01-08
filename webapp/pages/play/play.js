@@ -9,8 +9,18 @@ async function loadFarmLands() {
     container.innerHTML = "🌱 جاري تحميل الأراضي...";
 
     try {
-        const res = await fetch("/api/farm/lands");
-        if (!res.ok) throw new Error("API error");
+        const API_URL = `${window.location.origin}/api/farm/lands`;
+
+        const res = await fetch(API_URL, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        if (!res.ok) {
+            throw new Error("API request failed");
+        }
 
         const data = await res.json();
 
@@ -29,8 +39,8 @@ async function loadFarmLands() {
                 `).join("")}
             </div>
         `;
-    } catch (e) {
-        console.error(e);
+    } catch (err) {
+        console.error("❌ Farm API Error:", err);
         container.innerHTML = "❌ فشل تحميل الأراضي";
     }
 }
