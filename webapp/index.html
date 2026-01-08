@@ -18,15 +18,14 @@
     <h1 id="page-title">🎮 Play</h1>
 </header>
 
-<!-- ===== SPA View (مهم جداً) ===== -->
+<!-- ===== SPA View (المحتوى يتغير هنا فقط) ===== -->
 <main id="view">
-    <!-- محتوى Play الافتراضي (هيتشال أول ما app.js يحمل الصفحة) -->
-    <div style="text-align:center; padding:40px; opacity:0.7">
-        ⏳ جاري تحميل اللعبة...
+    <div style="text-align:center; padding:40px; opacity:0.6">
+        ⏳ جاري تحميل التطبيق...
     </div>
 </main>
 
-<!-- ===== Bottom Navigation (7 Buttons) ===== -->
+<!-- ===== Bottom Navigation ===== -->
 <nav class="bottom-nav">
 
     <button class="nav-btn" data-page="log">
@@ -59,9 +58,11 @@
 
 </nav>
 
-<!-- ===== JS (الترتيب مهم جداً) ===== -->
+<!-- ===== Telegram Auth ===== -->
 <script src="/static/auth.js"></script>
+
+<!-- ===== SPA Controller (آخر ملف دايمًا) ===== -->
 <script src="/static/app.js"></script>
 
 </body>
-    </html>
+</html>
