@@ -1,0 +1,33 @@
+.farm-container {
+    padding: 10px;
+}
+
+.lands-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.land {
+    height: 90px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.land.open {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(46,204,113,0.6);
+}
+
+.land.locked {
+    background: #333;
+    color: #aaa;
+    filter: grayscale(1);
+}
