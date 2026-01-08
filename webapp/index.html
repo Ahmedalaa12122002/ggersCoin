@@ -16,11 +16,12 @@
 <!-- ===== Top Bar ===== -->
 <header class="top-bar">
     <h1 id="page-title">🎮 Play</h1>
+    <span class="top-sub">اكسب نقاط – افتح أراضي – اسحب أرباحك 💰</span>
 </header>
 
-<!-- ===== SPA View (المحتوى يتغير هنا فقط) ===== -->
+<!-- ===== SPA View ===== -->
 <main id="view">
-    <div style="text-align:center; padding:40px; opacity:0.6">
+    <div class="loader">
         ⏳ جاري تحميل التطبيق...
     </div>
 </main>
@@ -28,41 +29,21 @@
 <!-- ===== Bottom Navigation ===== -->
 <nav class="bottom-nav">
 
-    <button class="nav-btn" data-page="log">
-        🧾 <span>السجل</span>
-    </button>
-
-    <button class="nav-btn" data-page="ref">
-        👥 <span>الإحالة</span>
-    </button>
-
-    <button class="nav-btn" data-page="tasks">
-        📋 <span>المهمات</span>
-    </button>
+    <button class="nav-btn" data-page="log">🧾 <span>السجل</span></button>
+    <button class="nav-btn" data-page="ref">👥 <span>الإحالة</span></button>
+    <button class="nav-btn" data-page="tasks">📋 <span>المهمات</span></button>
 
     <button class="nav-btn play-btn active" data-page="play">
         🎮 <span>Play</span>
     </button>
 
-    <button class="nav-btn" data-page="vip">
-        💎 <span>VIP</span>
-    </button>
-
-    <button class="nav-btn" data-page="wallet">
-        💰 <span>المحفظة</span>
-    </button>
-
-    <button class="nav-btn" data-page="profile">
-        👤 <span>حسابي</span>
-    </button>
+    <button class="nav-btn" data-page="vip">💎 <span>VIP</span></button>
+    <button class="nav-btn" data-page="wallet">💰 <span>المحفظة</span></button>
+    <button class="nav-btn" data-page="profile">👤 <span>حسابي</span></button>
 
 </nav>
 
-<!-- ===== Telegram Auth ===== -->
 <script src="/static/auth.js"></script>
-
-<!-- ===== SPA Controller (آخر ملف دايمًا) ===== -->
 <script src="/static/app.js"></script>
-
 </body>
 </html>
