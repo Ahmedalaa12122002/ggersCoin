@@ -12,17 +12,19 @@ BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 APP_URL = "https://web-production-1ba0e.up.railway.app"
 BOT_NAME = "GgersCoin Bot"
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
+DB_NAME = os.path.join(BASE_DIR, "database.db")
+
 # =============================
 # إنشاء التطبيق والبوت
 # =============================
 app = FastAPI()
-bot = telebot.TeleBot(BOT_TOKEN)
+bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
 # =============================
-# قاعدة البيانات (SQLite)
+# قاعدة البيانات
 # =============================
-DB_NAME = "database.db"
-
 def get_db():
     return sqlite3.connect(DB_NAME)
 
@@ -89,7 +91,7 @@ def auth_user(user: dict = Body(...)):
     db = get_db()
     cursor = db.cursor()
 
-    cursor.execute("SELECT id FROM users WHERE id = ?", (user["id"],))
+    cursor.execute("SELECT id FROM users WHERE id = ?", (user.get("id"),))
     exists = cursor.fetchone()
 
     if not exists:
@@ -109,10 +111,26 @@ def auth_user(user: dict = Body(...)):
     return {"status": "ok"}
 
 # =============================
-# Web App
+# Web App (Static Files)
 # =============================
-app.mount("/static", StaticFiles(directory="webapp"), name="static")
+app.mount("/webapp", StaticFiles(directory=WEBAPP_DIR), name="webapp")
 
+# =============================
+# الصفحة الرئيسية
+# =============================
 @app.get("/")
-def home():
-    return FileResponse("webapp/index.html")
+def serve_index():
+    return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
+
+# =============================
+# Fallback (مهم جداً)
+# أي مسار غير معروف يرجّع index.html
+# =============================
+@app.get("/{path:path}")
+def fallback(path: str):
+    full_path = os.path.join(WEBAPP_DIR, path)
+
+    if os.path.isfile(full_path):
+        return FileResponse(full_path)
+
+    return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
