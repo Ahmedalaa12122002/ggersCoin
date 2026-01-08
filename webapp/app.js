@@ -1,52 +1,35 @@
-const buttons = document.querySelectorAll(".nav-btn");
-const title = document.getElementById("page-title");
-const content = document.getElementById("page-content");
-const loader = document.getElementById("loader");
+document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll(".nav-btn");
+    const pages = document.querySelectorAll(".page");
+    const title = document.getElementById("page-title");
 
-const clickSound = new Audio("/webapp/click.mp3");
+    const titles = {
+        play: "Play 🎮",
+        tasks: "المهام 📋",
+        ref: "الإحالة 👥",
+        wallet: "المحفظة 💰",
+        vip: "VIP 💎",
+        profile: "حسابي 👤",
+        log: "سجل 🧾"
+    };
 
-const pages = {
-  play: "🎮 Play",
-  tasks: "📋 المهام",
-  referral: "👥 الإحالة",
-  wallet: "💰 المحفظة",
-  vip: "💎 VIP",
-  profile: "👤 حسابي",
-  history: "🧾 السجل"
-};
+    function showPage(pageId) {
+        pages.forEach(p => p.classList.remove("active"));
+        buttons.forEach(b => b.classList.remove("active"));
 
-buttons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    buttons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
+        document.getElementById(pageId).classList.add("active");
+        document.querySelector(`[data-page="${pageId}"]`).classList.add("active");
 
-    const page = btn.dataset.page;
+        title.textContent = titles[pageId] || "GgersCoin";
+    }
 
-    try { clickSound.play(); } catch {}
-    if (navigator.vibrate) navigator.vibrate(40);
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const page = btn.dataset.page;
+            showPage(page);
+        });
+    });
 
-    loader.classList.remove("hidden");
-    content.innerHTML = "";
-
-    setTimeout(() => {
-      loader.classList.add("hidden");
-      title.textContent = pages[page];
-      content.innerHTML = `تم فتح صفحة ${pages[page]}`;
-      showToast("تم الانتقال بنجاح");
-    }, 400);
-  });
+    // الصفحة الافتراضية
+    showPage("play");
 });
-
-// Splash hide
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    document.getElementById("splash").remove();
-  }, 1200);
-});
-
-function showToast(msg) {
-  const toast = document.getElementById("toast");
-  toast.textContent = msg;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 2000);
-}
