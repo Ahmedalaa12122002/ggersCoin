@@ -124,3 +124,44 @@ body {
         transform: translateY(0);
     }
 }
+/* ===== Splash Screen ===== */
+#splash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top, #111, #000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: splashFade 0.6s ease forwards;
+}
+
+.splash-content {
+    text-align: center;
+    animation: splashScale 1s ease infinite alternate;
+}
+
+.splash-content .logo {
+    font-size: 60px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 15px gold);
+}
+
+.splash-content h1 {
+    font-size: 28px;
+    letter-spacing: 2px;
+}
+
+.splash-content p {
+    opacity: 0.7;
+    margin-top: 6px;
+}
+
+@keyframes splashScale {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+}
+
+@keyframes splashFade {
+    to { opacity: 0; visibility: hidden; }
+                 }
