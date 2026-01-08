@@ -1,80 +1,35 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-    // =============================
-    // عناصر الصفحة
-    // =============================
     const buttons = document.querySelectorAll(".nav-btn");
-    const content = document.getElementById("content");
+    const pages = document.querySelectorAll(".page");
     const title = document.getElementById("page-title");
 
-    // =============================
-    // أسماء الصفحات
-    // =============================
-    const pages = {
+    const titles = {
         play: "Play 🎮",
-        tasks: "المهام 📝",
-        referral: "الإحالة 👥",
+        tasks: "المهام 📋",
+        ref: "الإحالة 👥",
         wallet: "المحفظة 💰",
         vip: "VIP 💎",
         profile: "حسابي 👤",
-        history: "سجل 📜"
+        log: "سجل 🧾"
     };
 
-    // =============================
-    // تحميل صفحة
-    // =============================
-    async function loadPage(page) {
-        try {
-            content.classList.remove("show");
-            content.classList.add("hide");
+    function showPage(pageId) {
+        pages.forEach(p => p.classList.remove("active"));
+        buttons.forEach(b => b.classList.remove("active"));
 
-            const res = await fetch(`/webapp/pages/${page}/index.html`);
-            if (!res.ok) throw new Error("Page not found");
+        document.getElementById(pageId).classList.add("active");
+        document.querySelector(`[data-page="${pageId}"]`).classList.add("active");
 
-            const html = await res.text();
-
-            setTimeout(() => {
-                content.innerHTML = html;
-                content.classList.remove("hide");
-                content.classList.add("show");
-            }, 200);
-
-            title.textContent = pages[page] || "GgersCoin";
-
-        } catch (err) {
-            content.innerHTML = `
-                <div class="error">
-                    ⚠️ الصفحة غير متاحة
-                </div>
-            `;
-        }
+        title.textContent = titles[pageId] || "GgersCoin";
     }
 
-    // =============================
-    // التحكم في الأزرار
-    // =============================
     buttons.forEach(btn => {
         btn.addEventListener("click", () => {
-
-            // إزالة active من الجميع
-            buttons.forEach(b => b.classList.remove("active"));
-
-            // تفعيل الزر الحالي
-            btn.classList.add("active");
-
-            // تحميل الصفحة
             const page = btn.dataset.page;
-            loadPage(page);
+            showPage(page);
         });
     });
 
-    // =============================
-    // تحميل صفحة Play افتراضيًا
-    // =============================
-    const defaultBtn = document.querySelector('.nav-btn[data-page="play"]');
-    if (defaultBtn) {
-        defaultBtn.classList.add("active");
-        loadPage("play");
-    }
-
+    // الصفحة الافتراضية
+    showPage("play");
 });
