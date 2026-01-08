@@ -11,19 +11,10 @@ async function loadFarmLands() {
     try {
         const API_URL = `${window.location.origin}/api/farm/lands`;
 
-        const res = await fetch(API_URL, {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        });
-
-        if (!res.ok) {
-            throw new Error("API request failed");
-        }
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("API error");
 
         const data = await res.json();
-
         if (!data.success) {
             container.innerHTML = "❌ فشل تحميل الأراضي";
             return;
