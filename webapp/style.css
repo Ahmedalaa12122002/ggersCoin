@@ -1,8 +1,8 @@
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: system-ui, sans-serif;
+  font-family: Tahoma, Arial;
 }
 
 body {
@@ -12,73 +12,61 @@ body {
   overflow: hidden;
 }
 
+/* مكان الصفحات */
 .view {
   height: calc(100vh - 90px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  transition: opacity 0.3s ease;
+  align-items: center;
+  font-size: 22px;
 }
 
-/* الشريط السفلي */
+/* شريط القوائم */
 .bottom-nav {
   position: fixed;
   bottom: 0;
   width: 100%;
   height: 90px;
-  background: #151515;
+  background: #121212;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 8px;
+  padding: 10px;
 }
 
 /* الأزرار */
 .bottom-nav button {
-  background: #1f1f1f;
+  background: #e6e6e6;
   border: none;
-  color: #fff;
-  border-radius: 16px;
-  padding: 8px 10px;
-  width: 13%;
-  min-width: 55px;
-  max-width: 80px;
-  height: 60px;
+  border-radius: 14px;
+  padding: 10px 12px;
+  min-width: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
 /* الأيقونة */
 .bottom-nav .icon {
-  font-size: 20px;
-}
-
-/* النص */
-.bottom-nav .text {
-  font-size: 11px;
+  font-size: 18px;
 }
 
 /* زر Play */
-.bottom-nav .play {
-  background: #e50914;
-  width: 18%;
-  height: 72px;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+.play-btn {
+  background: #ff2d55;
+  color: #fff;
+  transform: scale(1.15);
 }
 
-/* عند التفعيل */
+/* التوهج */
 .bottom-nav button.active {
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
-  transform: translateY(-3px);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
 }
 
 /* عند الضغط */
 .bottom-nav button:active {
-  transform: scale(0.92);
-  box-shadow: 0 0 18px rgba(255, 215, 0, 0.8);
-}
+  transform: scale(0.95);
+  }
