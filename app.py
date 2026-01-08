@@ -19,7 +19,7 @@ DB_NAME = os.path.join(BASE_DIR, "database.db")
 # =============================
 # إنشاء التطبيق والبوت
 # =============================
-app = FastAPI()
+app = FastAPI(title="GgersCoin API")
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
 # =============================
@@ -50,8 +50,11 @@ def init_db():
 @app.on_event("startup")
 async def on_startup():
     init_db()
-    bot.remove_webhook()
-    bot.set_webhook(url=f"{APP_URL}/webhook")
+    try:
+        bot.remove_webhook()
+        bot.set_webhook(url=f"{APP_URL}/webhook")
+    except Exception as e:
+        print("Telegram webhook error:", e)
 
 # =============================
 # Telegram Webhook
@@ -81,12 +84,12 @@ def start_handler(message):
 
 هنا تبدأ رحلتك في لعبة المزرعة 👨‍🌾
 
-🔹 ازرع المحاصيل
-🔹 انتظر وقت النمو
-🔹 احصد وكسب نقاط
-🔹 نفّذ المهمات اليومية
-🔹 افتح أراضي جديدة
-🔹 طوّر حسابك مع VIP
+🔹 ازرع المحاصيل  
+🔹 انتظر وقت النمو  
+🔹 احصد وكسب نقاط  
+🔹 نفّذ المهمات اليومية  
+🔹 افتح أراضي جديدة  
+🔹 طوّر حسابك مع VIP  
 
 💰 كلما لعبت أكثر → ربحت نقاط أكثر  
 🚀 اللعب سهل – ممتع – ومتاح للجميع  
@@ -129,7 +132,7 @@ def auth_user(user: dict = Body(...)):
     return {"status": "ok"}
 
 # =============================
-# Static files
+# Static files (CSS / JS / pages)
 # =============================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
@@ -141,7 +144,7 @@ def serve_index():
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
 # =============================
-# SPA Fallback
+# SPA Fallback (مهم جداً)
 # =============================
 @app.get("/{path:path}")
 def fallback(path: str):
@@ -151,7 +154,7 @@ def fallback(path: str):
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
 # =============================
-# Farm API
+# 🔥 Farm API (الأراضي)
 # =============================
 from api.farm.lands import router as lands_router
 app.include_router(lands_router)
