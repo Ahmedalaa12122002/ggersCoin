@@ -1,33 +1,75 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>Pram Points</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+    <title>GgersCoin</title>
+
+    <!-- Telegram WebApp -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/style.css" />
+
 </head>
 <body>
 
-<!-- منطقة العرض -->
-<div id="view" class="view">
-  <h2>🎮 Play</h2>
-</div>
+    <!-- عنوان الصفحة -->
+    <header class="top-bar">
+        <h1 id="page-title">Play 🎮</h1>
+    </header>
 
-<!-- شريط القوائم -->
-<nav class="navbar">
-  <button data-page="profile">حسابي</button>
-  <button data-page="wallet">المحفظة</button>
-  <button data-page="vip">VIP</button>
+    <!-- محتوى الصفحات -->
+    <main id="content">
+        <div class="page active" id="play">
+            <h2>🎮 Play</h2>
+            <p>هنا سيتم بناء اللعبة لاحقاً</p>
+        </div>
 
-  <button class="play active" data-page="play">Play</button>
+        <div class="page" id="tasks">
+            <h2>📋 المهام</h2>
+        </div>
 
-  <button data-page="tasks">المهمات</button>
-  <button data-page="referral">الإحالة</button>
-  <button data-page="history">سجل</button>
-</nav>
+        <div class="page" id="ref">
+            <h2>👥 الإحالة</h2>
+        </div>
 
-<link rel="stylesheet" href="/static/style.css">
+        <div class="page" id="wallet">
+            <h2>💰 المحفظة</h2>
+        </div>
 
-<script src="/static/auth.js"></script>
-<script src="/static/app.js"></script>
+        <div class="page" id="vip">
+            <h2>💎 VIP</h2>
+        </div>
+
+        <div class="page" id="profile">
+            <h2>👤 حسابي</h2>
+        </div>
+
+        <div class="page" id="log">
+            <h2>🧾 سجل</h2>
+        </div>
+    </main>
+
+    <!-- شريط الأزرار السفلي -->
+    <nav class="bottom-nav">
+        <button class="nav-btn" data-page="log">🧾<span>سجل</span></button>
+        <button class="nav-btn" data-page="ref">👥<span>الإحالة</span></button>
+        <button class="nav-btn" data-page="tasks">📋<span>المهام</span></button>
+
+        <button class="nav-btn play-btn active" data-page="play">
+            🎮<span>Play</span>
+        </button>
+
+        <button class="nav-btn" data-page="vip">💎<span>VIP</span></button>
+        <button class="nav-btn" data-page="wallet">💰<span>المحفظة</span></button>
+        <button class="nav-btn" data-page="profile">👤<span>حسابي</span></button>
+    </nav>
+
+    <!-- JS -->
+    <script src="/static/auth.js"></script>
+    <script src="/static/app.js"></script>
+
 </body>
-</html>
+  </html>
