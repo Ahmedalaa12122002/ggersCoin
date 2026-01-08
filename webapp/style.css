@@ -6,93 +6,118 @@
 }
 
 body {
-    background: #000;
+    background: radial-gradient(circle at top, #111 0%, #000 70%);
     color: #fff;
     height: 100vh;
     overflow: hidden;
 }
 
-/* ====== Top Bar ====== */
+/* ===== Top Bar ===== */
 .top-bar {
     text-align: center;
-    padding: 12px;
+    padding: 14px;
     font-size: 20px;
-    border-bottom: 1px solid #222;
+    background: rgba(20,20,20,0.6);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-/* ====== Content ====== */
+/* ===== Content ===== */
 #content {
+    height: calc(100vh - 120px);
     padding: 20px;
-    padding-bottom: 90px;
-    height: calc(100vh - 60px);
     overflow-y: auto;
 }
 
 .page {
     display: none;
-    animation: fade 0.3s ease;
+    animation: fade 0.35s ease;
 }
 
 .page.active {
     display: block;
 }
 
-/* ====== Bottom Nav ====== */
+/* ===== Bottom Navigation ===== */
 .bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    background: #111;
+    padding: 10px 6px;
     display: flex;
-    justify-content: space-around;
-    padding: 8px 4px;
-    border-top: 1px solid #222;
+    justify-content: space-between;
+    background: rgba(15,15,15,0.65);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(255,255,255,0.08);
 }
 
+/* ===== Buttons ===== */
 .nav-btn {
-    background: #ddd;
+    flex: 1;
+    margin: 0 4px;
+    background: rgba(255,255,255,0.85);
     color: #000;
     border: none;
-    border-radius: 12px;
-    padding: 8px 10px;
+    border-radius: 14px;
+    padding: 8px 4px;
     font-size: 12px;
-    min-width: 48px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     cursor: pointer;
 }
 
 .nav-btn span {
     font-size: 11px;
+    white-space: nowrap;
 }
 
+/* ===== Play Button ===== */
+.play-btn {
+    transform: translateY(-16px);
+    padding: 12px 6px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* ===== Active (Neon) ===== */
+.nav-btn.active {
+    background: linear-gradient(135deg, #ff004c, #ffae00);
+    color: #fff;
+    box-shadow:
+        0 0 10px rgba(255, 200, 0, 0.7),
+        0 0 25px rgba(255, 80, 0, 0.6);
+}
+
+/* ===== Press Effect ===== */
 .nav-btn:active {
     transform: scale(0.95);
 }
 
-/* ====== Active Button ====== */
-.nav-btn.active {
-    background: #ff004c;
-    color: #fff;
-    box-shadow: 0 0 15px rgba(255, 200, 0, 0.8);
+/* ===== Responsive ===== */
+@media (max-width: 380px) {
+    .nav-btn span {
+        font-size: 10px;
+    }
+    .play-btn {
+        font-size: 13px;
+    }
 }
 
-/* ====== Play Button ====== */
-.play-btn {
-    transform: translateY(-12px);
-    padding: 12px 14px;
-    font-size: 14px;
+@media (min-width: 600px) {
+    .nav-btn {
+        max-width: 90px;
+    }
 }
 
-/* ====== Animations ====== */
+/* ===== Animation ===== */
 @keyframes fade {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(12px);
     }
     to {
         opacity: 1;
