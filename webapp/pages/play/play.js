@@ -1,10 +1,22 @@
-async function loadFarm() {
-    const container = document.getElementById("play-content");
+document.addEventListener("DOMContentLoaded", () => {
+    loadFarmLands();
+});
 
-    container.innerHTML = "🌱 جاري تحميل الأراضي...";
+async function loadFarmLands() {
+    const container = document.getElementById("play");
+
+    container.innerHTML = `
+        <h2>🌱 المزرعة</h2>
+        <p>جاري تحميل الأراضي...</p>
+    `;
 
     try {
-        const res = await fetch("/api/farm/lands");
+        const res = await fetch("/api/farm/lands", {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
 
         if (!res.ok) {
             throw new Error("HTTP ERROR");
@@ -13,41 +25,42 @@ async function loadFarm() {
         const data = await res.json();
 
         if (!data.success) {
-            throw new Error("API FAILED");
+            throw new Error("API ERROR");
         }
 
         renderLands(data.lands);
 
-    } catch (e) {
-        console.error(e);
-        container.innerHTML = "❌ فشل تحميل الأراضي";
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = `
+            <h2>🌱 المزرعة</h2>
+            <p style="color:red">❌ فشل تحميل الأراضي</p>
+        `;
     }
 }
 
 function renderLands(lands) {
-    const container = document.getElementById("play-content");
+    const container = document.getElementById("play");
 
-    container.innerHTML = `
-        <h3>🌱 المزرعة</h3>
-        <div class="lands"></div>
-    `;
+    let html = `<div class="lands">`;
 
-    const grid = container.querySelector(".lands");
-
-    lands.forEach(land => {
-        const div = document.createElement("div");
-        div.className = "land";
-
-        if (!land.unlocked) {
-            div.classList.add("locked");
-            div.innerText = "🔒 VIP";
+    lands.forEach((land, index) => {
+        if (land.open) {
+            html += `
+                <div class="land open">
+                    🌾 أرض ${index + 1}
+                </div>
+            `;
         } else {
-            div.innerText = "🌾 أرض " + land.id;
+            html += `
+                <div class="land locked">
+                    🔒 أرض ${index + 1}<br>
+                    <small>VIP</small>
+                </div>
+            `;
         }
-
-        grid.appendChild(div);
     });
-}
 
-/* تشغيل عند فتح Play */
-loadFarm();
+    html += `</div>`;
+    container.innerHTML = html;
+}
