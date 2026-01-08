@@ -1,48 +1,94 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GgersCoin</title>
+    <meta charset="UTF-8">
+    <title>GgersCoin</title>
 
-<link rel="stylesheet" href="/webapp/style.css">
-<script defer src="/webapp/app.js"></script>
-<script defer src="/webapp/auth.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <!-- Telegram WebApp -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-
 <body>
 
-<!-- Splash -->
-<div id="splash">
-  <div class="splash-content">
-    <div class="logo">💎</div>
-    <h1>GgersCoin</h1>
-    <p>Loading...</p>
-  </div>
-</div>
+    <!-- العنوان -->
+    <header class="top-bar">
+        <h1 id="page-title">Play 🎮</h1>
+    </header>
 
-<!-- Toast -->
-<div id="toast"></div>
+    <!-- المحتوى -->
+    <main id="content">
 
-<!-- Content -->
-<div id="content">
-  <h2 id="page-title">Play 🎮</h2>
-  <div id="loader" class="loader hidden"></div>
-  <div id="page-content">
-    هنا سيتم بناء اللعبة لاحقًا
-  </div>
-</div>
+        <section class="page active" id="play">
+            <h2>🎮 Play</h2>
+            <p>هنا سيتم بناء اللعبة لاحقًا</p>
+        </section>
 
-<!-- Bottom Nav -->
-<nav class="bottom-nav">
-  <button class="nav-btn active" data-page="play">🎮<span>Play</span></button>
-  <button class="nav-btn" data-page="tasks">📋<span>المهام</span></button>
-  <button class="nav-btn" data-page="referral">👥<span>الإحالة</span></button>
-  <button class="nav-btn" data-page="wallet">💰<span>المحفظة</span></button>
-  <button class="nav-btn" data-page="vip">💎<span>VIP</span></button>
-  <button class="nav-btn" data-page="profile">👤<span>حسابي</span></button>
-  <button class="nav-btn" data-page="history">🧾<span>سجل</span></button>
-</nav>
+        <section class="page" id="tasks">
+            <h2>📋 المهام</h2>
+        </section>
+
+        <section class="page" id="ref">
+            <h2>👥 الإحالة</h2>
+        </section>
+
+        <section class="page" id="wallet">
+            <h2>💰 المحفظة</h2>
+        </section>
+
+        <section class="page" id="vip">
+            <h2>💎 VIP</h2>
+        </section>
+
+        <section class="page" id="profile">
+            <h2>👤 حسابي</h2>
+        </section>
+
+        <section class="page" id="log">
+            <h2>🧾 سجل</h2>
+        </section>
+
+    </main>
+
+    <!-- شريط الأزرار -->
+    <nav class="bottom-nav">
+
+        <button class="nav-btn" data-page="log">
+            🧾 <span>سجل</span>
+        </button>
+
+        <button class="nav-btn" data-page="ref">
+            👥 <span>الإحالة</span>
+        </button>
+
+        <button class="nav-btn" data-page="tasks">
+            📋 <span>المهام</span>
+        </button>
+
+        <button class="nav-btn play-btn active" data-page="play">
+            🎮 <span>Play</span>
+        </button>
+
+        <button class="nav-btn" data-page="vip">
+            💎 <span>VIP</span>
+        </button>
+
+        <button class="nav-btn" data-page="wallet">
+            💰 <span>المحفظة</span>
+        </button>
+
+        <button class="nav-btn" data-page="profile">
+            👤 <span>حسابي</span>
+        </button>
+
+    </nav>
+
+    <!-- JS (الترتيب مهم) -->
+    <script src="/static/auth.js"></script>
+    <script src="/static/app.js"></script>
 
 </body>
 </html>
