@@ -1,21 +1,13 @@
-const landsDiv = document.getElementById("lands");
-const user = Telegram.WebApp.initDataUnsafe.user;
-
-fetch("/api/farm/lands", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: user.id })
-})
+fetch("/api/farm/lands")
 .then(res => res.json())
 .then(data => {
-    landsDiv.innerHTML = "";
+    const box = document.getElementById("lands");
+    box.innerHTML = "";
 
     data.lands.forEach(land => {
         const div = document.createElement("div");
-        div.className = `land ${land.status}`;
-        div.innerText = land.status === "open"
-            ? `🌾 أرض ${land.land_id}`
-            : `🔒 أرض ${land.land_id}`;
-        landsDiv.appendChild(div);
+        div.className = land.open ? "land open" : "land locked";
+        div.innerText = land.open ? "🌱 أرض مفتوحة" : "🔒 أرض مقفولة";
+        box.appendChild(div);
     });
 });
