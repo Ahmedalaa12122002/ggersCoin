@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const pages = document.querySelectorAll(".page");
     const title = document.getElementById("page-title");
 
+    const clickSound = new Audio("/webapp/click.mp3");
+
     const titles = {
         play: "Play 🎮",
         tasks: "المهام 📋",
@@ -13,12 +15,23 @@ document.addEventListener("DOMContentLoaded", () => {
         log: "سجل 🧾"
     };
 
+    function vibrate() {
+        if (navigator.vibrate) {
+            navigator.vibrate(20);
+        }
+    }
+
     function showPage(pageId) {
         pages.forEach(p => p.classList.remove("active"));
         buttons.forEach(b => b.classList.remove("active"));
 
-        document.getElementById(pageId).classList.add("active");
-        document.querySelector(`[data-page="${pageId}"]`).classList.add("active");
+        const page = document.getElementById(pageId);
+        const btn = document.querySelector(`[data-page="${pageId}"]`);
+
+        if (page && btn) {
+            page.classList.add("active");
+            btn.classList.add("active");
+        }
 
         title.textContent = titles[pageId] || "GgersCoin";
     }
@@ -26,10 +39,13 @@ document.addEventListener("DOMContentLoaded", () => {
     buttons.forEach(btn => {
         btn.addEventListener("click", () => {
             const page = btn.dataset.page;
+
+            try { clickSound.currentTime = 0; clickSound.play(); } catch {}
+            vibrate();
             showPage(page);
         });
     });
 
-    // الصفحة الافتراضية
+    // Default page
     showPage("play");
 });
