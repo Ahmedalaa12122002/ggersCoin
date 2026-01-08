@@ -131,3 +131,5 @@ def fallback(path: str):
     if os.path.isfile(file_path):
         return FileResponse(file_path)
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
+from api.farm.lands import router as lands_router
+app.include_router(lands_router)
