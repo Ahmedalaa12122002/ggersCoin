@@ -5,9 +5,6 @@ import telebot
 import sqlite3
 import os
 
-# =============================
-# الإعدادات
-# =============================
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 APP_URL = "https://web-production-1ba0e.up.railway.app"
 BOT_NAME = "GgersCoin Bot"
@@ -16,14 +13,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
 DB_NAME = os.path.join(BASE_DIR, "database.db")
 
-# =============================
-# إنشاء التطبيق والبوت
-# =============================
 app = FastAPI(title="GgersCoin API")
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
 # =============================
-# قاعدة البيانات
+# Database
 # =============================
 def get_db():
     return sqlite3.connect(DB_NAME)
@@ -44,9 +38,6 @@ def init_db():
     db.commit()
     db.close()
 
-# =============================
-# Startup
-# =============================
 @app.on_event("startup")
 async def on_startup():
     init_db()
@@ -54,7 +45,7 @@ async def on_startup():
         bot.remove_webhook()
         bot.set_webhook(url=f"{APP_URL}/webhook")
     except Exception as e:
-        print("Telegram webhook error:", e)
+        print("Telegram error:", e)
 
 # =============================
 # Telegram Webhook
@@ -64,10 +55,10 @@ async def telegram_webhook(request: Request):
     data = await request.json()
     update = telebot.types.Update.de_json(data)
     bot.process_new_updates([update])
-    return JSONResponse({"ok": True})
+    return {"ok": True}
 
 # =============================
-# /start – رسالة ترحيب قوية
+# Telegram /start
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -79,29 +70,10 @@ def start_handler(message):
         )
     )
 
-    welcome_text = f"""
-🌱 *مرحبًا بك في {BOT_NAME}* 🌱
-
-هنا تبدأ رحلتك في لعبة المزرعة 👨‍🌾
-
-🔹 ازرع المحاصيل  
-🔹 انتظر وقت النمو  
-🔹 احصد وكسب نقاط  
-🔹 نفّذ المهمات اليومية  
-🔹 افتح أراضي جديدة  
-🔹 طوّر حسابك مع VIP  
-
-💰 كلما لعبت أكثر → ربحت نقاط أكثر  
-🚀 اللعب سهل – ممتع – ومتاح للجميع  
-
-اضغط الزر بالأسفل وابدأ اللعب فورًا 👇
-"""
-
     bot.send_message(
         message.chat.id,
-        welcome_text,
-        reply_markup=keyboard,
-        parse_mode="Markdown"
+        f"🌱 مرحبًا بك في {BOT_NAME}",
+        reply_markup=keyboard
     )
 
 # =============================
@@ -111,11 +83,8 @@ def start_handler(message):
 def auth_user(user: dict = Body(...)):
     db = get_db()
     cursor = db.cursor()
-
     cursor.execute("SELECT id FROM users WHERE id = ?", (user.get("id"),))
-    exists = cursor.fetchone()
-
-    if not exists:
+    if not cursor.fetchone():
         cursor.execute("""
         INSERT INTO users (id, first_name, last_name, username, language)
         VALUES (?, ?, ?, ?, ?)
@@ -127,12 +96,17 @@ def auth_user(user: dict = Body(...)):
             user.get("language")
         ))
         db.commit()
-
     db.close()
     return {"status": "ok"}
 
 # =============================
-# Static files (CSS / JS / pages)
+# 🔥 Farm API (قبل fallback)
+# =============================
+from api.farm.lands import router as lands_router
+app.include_router(lands_router)
+
+# =============================
+# Static files
 # =============================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
@@ -144,17 +118,15 @@ def serve_index():
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
 # =============================
-# SPA Fallback (مهم جداً)
+# SPA fallback (بدون API)
 # =============================
 @app.get("/{path:path}")
-def fallback(path: str):
+def spa_fallback(path: str):
+    if path.startswith("api/"):
+        return JSONResponse({"error": "Not Found"}, status_code=404)
+
     file_path = os.path.join(WEBAPP_DIR, path)
     if os.path.isfile(file_path):
         return FileResponse(file_path)
-    return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
-# =============================
-# 🔥 Farm API (الأراضي)
-# =============================
-from api.farm.lands import router as lands_router
-app.include_router(lands_router)
+    return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
