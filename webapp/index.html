@@ -5,27 +5,55 @@
     <title>GgersCoin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Global Style -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
 <header class="top-bar">
-    <h1 id="page-title">🌱 المزرعة</h1>
+    <h1 id="page-title">🎮 Play</h1>
 </header>
 
-<main id="view" class="content"></main>
+<!-- SPA View -->
+<main id="view"></main>
 
+<!-- Bottom Navigation (7 Buttons) -->
 <nav class="bottom-nav">
-    <button class="nav-btn active" data-page="farm">🌱<span>المزرعة</span></button>
-    <button class="nav-btn" data-page="tasks">📋<span>المهام</span></button>
-    <button class="nav-btn" data-page="vip">💎<span>VIP</span></button>
-    <button class="nav-btn" data-page="wallet">💰<span>المحفظة</span></button>
-    <button class="nav-btn" data-page="profile">👤<span>حسابي</span></button>
+
+    <button class="nav-btn" data-page="log">
+        🧾 <span>السجل</span>
+    </button>
+
+    <button class="nav-btn" data-page="ref">
+        👥 <span>الإحالة</span>
+    </button>
+
+    <button class="nav-btn" data-page="tasks">
+        📋 <span>المهمات</span>
+    </button>
+
+    <button class="nav-btn play-btn active" data-page="play">
+        🎮 <span>Play</span>
+    </button>
+
+    <button class="nav-btn" data-page="vip">
+        💎 <span>VIP</span>
+    </button>
+
+    <button class="nav-btn" data-page="wallet">
+        💰 <span>المحفظة</span>
+    </button>
+
+    <button class="nav-btn" data-page="profile">
+        👤 <span>حسابي</span>
+    </button>
+
 </nav>
 
 <script src="/static/auth.js"></script>
 <script src="/static/app.js"></script>
-
 </body>
 </html>
