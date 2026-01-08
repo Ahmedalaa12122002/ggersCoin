@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pram points</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- المحتوى -->
+  <!-- محتوى الصفحات -->
   <main id="view" class="view"></main>
 
   <!-- شريط القوائم -->
   <nav class="bottom-nav">
+
     <button data-page="history">
       <span class="icon">📜</span>
       <span class="text">سجل</span>
@@ -25,10 +26,10 @@
 
     <button data-page="tasks">
       <span class="icon">📝</span>
-      <span class="text">المهمات</span>
+      <span class="text">المهام</span>
     </button>
 
-    <button data-page="play" class="play active">
+    <button class="play-btn active" data-page="play">
       <span class="icon">🎮</span>
       <span class="text">Play</span>
     </button>
@@ -47,8 +48,9 @@
       <span class="icon">👤</span>
       <span class="text">حسابي</span>
     </button>
+
   </nav>
 
-  <script src="./app.js"></script>
+  <script src="app.js"></script>
 </body>
-  </html>
+</html>
