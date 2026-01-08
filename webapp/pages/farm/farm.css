@@ -1,0 +1,23 @@
+.lands {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.land {
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.land.open {
+    background: #2ecc71;
+    color: #000;
+}
+
+.land.locked {
+    background: #444;
+    color: #aaa;
+}
