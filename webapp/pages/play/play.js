@@ -1,11 +1,12 @@
 async function loadFarmLands() {
-    const view = document.getElementById("view");
+    const container = document.getElementById("play");
 
-    view.innerHTML = `
-        <div id="farm">
-            🌱 جاري تحميل الأراضي...
-        </div>
-    `;
+    if (!container) {
+        console.error("❌ عنصر play غير موجود");
+        return;
+    }
+
+    container.innerHTML = "🌱 جاري تحميل الأراضي...";
 
     try {
         const res = await fetch("/api/farm/lands");
@@ -14,26 +15,23 @@ async function loadFarmLands() {
         const data = await res.json();
 
         if (!data.success) {
-            view.innerHTML = "❌ فشل تحميل الأراضي";
+            container.innerHTML = "❌ فشل تحميل الأراضي";
             return;
         }
 
-        view.innerHTML = `
-            <h2>🌱 المزرعة</h2>
+        container.innerHTML = `
             <div class="lands">
                 ${data.lands.map(land => `
                     <div class="land ${land.unlocked ? "open" : "locked"}">
                         <h3>أرض ${land.id}</h3>
-                        <p>
-                            ${land.unlocked ? "🌿 متاحة" : "🔒 VIP"}
-                        </p>
+                        <p>${land.unlocked ? "🌿 متاحة" : "🔒 VIP"}</p>
                     </div>
                 `).join("")}
             </div>
         `;
     } catch (e) {
         console.error(e);
-        view.innerHTML = "❌ فشل تحميل الأراضي";
+        container.innerHTML = "❌ فشل تحميل الأراضي";
     }
 }
 
