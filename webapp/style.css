@@ -1,65 +1,101 @@
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: Tahoma, Arial;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
-  background: #0e0e0e;
-  color: #fff;
-  height: 100vh;
-  overflow: hidden;
+    background: #000;
+    color: #fff;
+    height: 100vh;
+    overflow: hidden;
 }
 
-.view {
-  height: calc(100vh - 90px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
+/* ====== Top Bar ====== */
+.top-bar {
+    text-align: center;
+    padding: 12px;
+    font-size: 20px;
+    border-bottom: 1px solid #222;
 }
 
+/* ====== Content ====== */
+#content {
+    padding: 20px;
+    padding-bottom: 90px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+}
+
+.page {
+    display: none;
+    animation: fade 0.3s ease;
+}
+
+.page.active {
+    display: block;
+}
+
+/* ====== Bottom Nav ====== */
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 90px;
-  background: #121212;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 8px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #111;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 4px;
+    border-top: 1px solid #222;
 }
 
-.bottom-nav button {
-  background: #e6e6e6;
-  border: none;
-  border-radius: 14px;
-  padding: 8px 10px;
-  min-width: 60px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.25s ease;
+.nav-btn {
+    background: #ddd;
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 10px;
+    font-size: 12px;
+    min-width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
-.bottom-nav .icon {
-  font-size: 18px;
+.nav-btn span {
+    font-size: 11px;
 }
 
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+/* ====== Active Button ====== */
+.nav-btn.active {
+    background: #ff004c;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 200, 0, 0.8);
+}
+
+/* ====== Play Button ====== */
 .play-btn {
-  background: #ff2d55;
-  color: white;
-  transform: scale(1.15);
+    transform: translateY(-12px);
+    padding: 12px 14px;
+    font-size: 14px;
 }
 
-.bottom-nav button.active {
-  box-shadow: 0 0 14px rgba(255, 215, 0, 0.7);
-}
-
-.bottom-nav button:active {
-  transform: scale(0.95);
+/* ====== Animations ====== */
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
