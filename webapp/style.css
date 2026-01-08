@@ -1,3 +1,4 @@
+/* ===== Reset ===== */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -16,26 +17,23 @@ body {
 .top-bar {
     text-align: center;
     padding: 14px;
-    font-size: 20px;
+    font-size: 18px;
     background: rgba(20,20,20,0.6);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-/* ===== Content ===== */
-#content {
+/* ===== View (SPA Container) ===== */
+#view {
     height: calc(100vh - 120px);
-    padding: 20px;
+    padding: 16px;
     overflow-y: auto;
-}
-
-.page {
-    display: none;
     animation: fade 0.35s ease;
 }
 
-.page.active {
-    display: block;
+/* ===== Pages Loaded Inside View ===== */
+.page {
+    animation: fade 0.35s ease;
 }
 
 /* ===== Bottom Navigation ===== */
@@ -50,9 +48,10 @@ body {
     background: rgba(15,15,15,0.65);
     backdrop-filter: blur(14px);
     border-top: 1px solid rgba(255,255,255,0.08);
+    z-index: 100;
 }
 
-/* ===== Buttons ===== */
+/* ===== Navigation Buttons ===== */
 .nav-btn {
     flex: 1;
     margin: 0 4px;
@@ -75,15 +74,15 @@ body {
     white-space: nowrap;
 }
 
-/* ===== Play Button ===== */
+/* ===== Play Button (مميز) ===== */
 .play-btn {
-    transform: translateY(-16px);
+    transform: translateY(-14px);
     padding: 12px 6px;
     font-size: 14px;
     font-weight: bold;
 }
 
-/* ===== Active (Neon) ===== */
+/* ===== Active Button (Neon Effect) ===== */
 .nav-btn.active {
     background: linear-gradient(135deg, #ff004c, #ffae00);
     color: #fff;
@@ -95,6 +94,30 @@ body {
 /* ===== Press Effect ===== */
 .nav-btn:active {
     transform: scale(0.95);
+}
+
+/* ===== Farm (مثال عام) ===== */
+.lands {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.land {
+    padding: 14px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.land.open {
+    background: linear-gradient(135deg, #00ff99, #00cc66);
+    color: #000;
+}
+
+.land.locked {
+    background: #333;
+    color: #aaa;
 }
 
 /* ===== Responsive ===== */
@@ -113,7 +136,7 @@ body {
     }
 }
 
-/* ===== Animation ===== */
+/* ===== Animations ===== */
 @keyframes fade {
     from {
         opacity: 0;
@@ -123,45 +146,4 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
-}
-/* ===== Splash Screen ===== */
-#splash {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at top, #111, #000);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    animation: splashFade 0.6s ease forwards;
-}
-
-.splash-content {
-    text-align: center;
-    animation: splashScale 1s ease infinite alternate;
-}
-
-.splash-content .logo {
-    font-size: 60px;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 15px gold);
-}
-
-.splash-content h1 {
-    font-size: 28px;
-    letter-spacing: 2px;
-}
-
-.splash-content p {
-    opacity: 0.7;
-    margin-top: 6px;
-}
-
-@keyframes splashScale {
-    from { transform: scale(1); }
-    to { transform: scale(1.05); }
-}
-
-@keyframes splashFade {
-    to { opacity: 0; visibility: hidden; }
-                 }
+        }
