@@ -2,24 +2,18 @@ const view = document.getElementById("view");
 const buttons = document.querySelectorAll(".bottom-nav button");
 
 function loadPage(page) {
-  view.style.opacity = "0";
-
-  fetch(`./pages/${page}/index.html`)
-    .then(res => res.text())
+  fetch(`pages/${page}/index.html`)
+    .then(res => {
+      if (!res.ok) throw new Error("Not Found");
+      return res.text();
+    })
     .then(html => {
-      setTimeout(() => {
-        view.innerHTML = html;
-        view.style.opacity = "1";
-      }, 200);
+      view.innerHTML = html;
     })
     .catch(() => {
-      view.innerHTML = "<h3>الصفحة غير موجودة</h3>";
-      view.style.opacity = "1";
+      view.innerHTML = "<h3>الصفحة غير متوفرة</h3>";
     });
 }
-
-// تحميل Play افتراضي
-loadPage("play");
 
 buttons.forEach(btn => {
   btn.addEventListener("click", () => {
@@ -28,3 +22,6 @@ buttons.forEach(btn => {
     loadPage(btn.dataset.page);
   });
 });
+
+// تحميل Play تلقائي
+loadPage("play");
