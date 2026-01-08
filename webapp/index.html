@@ -1,62 +1,33 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>Pram Points</title>
-
-    <!-- ربط CSS -->
-    <link rel="stylesheet" href="/webapp/style.css" />
+  <meta charset="UTF-8">
+  <title>Pram Points</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <!-- العنوان -->
-    <header class="header">
-        <h1 id="page-title">Play 🎮</h1>
-    </header>
+<!-- منطقة العرض -->
+<div id="view" class="view">
+  <h2>🎮 Play</h2>
+</div>
 
-    <!-- محتوى الصفحات -->
-    <main id="content" class="content show">
-        جاري التحميل...
-    </main>
+<!-- شريط القوائم -->
+<nav class="navbar">
+  <button data-page="profile">حسابي</button>
+  <button data-page="wallet">المحفظة</button>
+  <button data-page="vip">VIP</button>
 
-    <!-- شريط القوائم -->
-    <nav class="bottom-nav">
+  <button class="play active" data-page="play">Play</button>
 
-        <button class="nav-btn" data-page="history">
-            📜<span>سجل</span>
-        </button>
+  <button data-page="tasks">المهمات</button>
+  <button data-page="referral">الإحالة</button>
+  <button data-page="history">سجل</button>
+</nav>
 
-        <button class="nav-btn" data-page="referral">
-            👥<span>الإحالة</span>
-        </button>
+<link rel="stylesheet" href="/static/style.css">
 
-        <button class="nav-btn" data-page="tasks">
-            📝<span>المهام</span>
-        </button>
-
-        <button class="nav-btn play-btn" data-page="play">
-            🎮<span>Play</span>
-        </button>
-
-        <button class="nav-btn" data-page="vip">
-            💎<span>VIP</span>
-        </button>
-
-        <button class="nav-btn" data-page="wallet">
-            💰<span>المحفظة</span>
-        </button>
-
-        <button class="nav-btn" data-page="profile">
-            👤<span>حسابي</span>
-        </button>
-
-    </nav>
-
-    <!-- ربط JS (لازم في الآخر) -->
-    <script src="/webapp/app.js"></script>
-
+<script src="/static/auth.js"></script>
+<script src="/static/app.js"></script>
 </body>
-  </html>
+</html>
