@@ -45,7 +45,7 @@ def init_db():
     db.close()
 
 # =============================
-# تشغيل عند بدء السيرفر
+# Startup
 # =============================
 @app.on_event("startup")
 async def on_startup():
@@ -54,7 +54,7 @@ async def on_startup():
     bot.set_webhook(url=f"{APP_URL}/webhook")
 
 # =============================
-# Webhook Telegram
+# Telegram Webhook
 # =============================
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
@@ -64,7 +64,7 @@ async def telegram_webhook(request: Request):
     return JSONResponse({"ok": True})
 
 # =============================
-# أمر /start
+# /start
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -84,7 +84,7 @@ def start_handler(message):
     )
 
 # =============================
-# API: تسجيل المستخدم
+# API Auth
 # =============================
 @app.post("/api/auth")
 def auth_user(user: dict = Body(...)):
@@ -111,26 +111,23 @@ def auth_user(user: dict = Body(...)):
     return {"status": "ok"}
 
 # =============================
-# Web App (Static Files)
+# Static files (CSS / JS)
 # =============================
-app.mount("/webapp", StaticFiles(directory=WEBAPP_DIR), name="webapp")
+app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 # =============================
-# الصفحة الرئيسية
+# Main page
 # =============================
 @app.get("/")
 def serve_index():
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
 # =============================
-# Fallback (مهم جداً)
-# أي مسار غير معروف يرجّع index.html
+# Fallback (SPA)
 # =============================
 @app.get("/{path:path}")
 def fallback(path: str):
-    full_path = os.path.join(WEBAPP_DIR, path)
-
-    if os.path.isfile(full_path):
-        return FileResponse(full_path)
-
+    file_path = os.path.join(WEBAPP_DIR, path)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
