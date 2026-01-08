@@ -7,3 +7,4 @@ fetch("/api/farm/lands")
           div.innerHTML += `<div>${l.id} - ${l.locked ? "🔒" : "🌱"}</div>`;
       });
   });
+
