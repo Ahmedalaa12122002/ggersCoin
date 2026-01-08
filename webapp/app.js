@@ -49,3 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Default page
     showPage("play");
 });
+// Hide splash after load
+window.addEventListener("load", () => {
+    setTimeout(() => {
+        const splash = document.getElementById("splash");
+        if (splash) splash.remove();
+    }, 1200);
+});
