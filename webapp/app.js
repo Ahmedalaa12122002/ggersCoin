@@ -1,5 +1,6 @@
 const view = document.getElementById("view");
 const buttons = document.querySelectorAll(".nav-btn");
+const title = document.getElementById("page-title");
 
 buttons.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -14,12 +15,16 @@ function setActive(activeBtn) {
 }
 
 async function loadPage(page) {
+    title.innerText = activeTitle(page);
     view.innerHTML = "⏳ جاري التحميل...";
 
-    const res = await fetch(`/static/pages/${page}/${page}.html`);
-    view.innerHTML = await res.text();
-
-    loadAssets(page);
+    try {
+        const res = await fetch(`/static/pages/${page}/${page}.html`);
+        view.innerHTML = await res.text();
+        loadAssets(page);
+    } catch {
+        view.innerHTML = "⚠️ الصفحة غير متاحة";
+    }
 }
 
 function loadAssets(page) {
@@ -43,5 +48,19 @@ function removeOld(id) {
     if (el) el.remove();
 }
 
+function activeTitle(page) {
+    return {
+        play: "🎮 Play",
+        tasks: "📋 المهمات",
+        ref: "👥 الإحالة",
+        wallet: "💰 المحفظة",
+        vip: "💎 VIP",
+        profile: "👤 حسابي",
+        log: "🧾 سجل المعلومات"
+    }[page] || "GgersCoin";
+}
+
+/* Default */
+loadPage("play");
 // تحميل المزرعة افتراضيًا
 loadPage("farm");
