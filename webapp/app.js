@@ -1,48 +1,39 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll(".nav-btn");
+    const pages = document.querySelectorAll(".page");
+    const title = document.getElementById("page-title");
 
-  const buttons = document.querySelectorAll(".nav-btn");
-  const pages = document.querySelectorAll(".page");
-  const title = document.getElementById("page-title");
+    const titles = {
+        play: "Play 🎮",
+        tasks: "المهام 📋",
+        ref: "الإحالة 👥",
+        wallet: "المحفظة 💰",
+        vip: "VIP 💎",
+        profile: "حسابي 👤",
+        log: "سجل 🧾"
+    };
 
-  if (!buttons.length || !pages.length) {
-    console.error("Navigation elements not found");
-    return;
-  }
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const pageId = btn.dataset.page;
 
-  const titles = {
-    play: "Play 🎮",
-    tasks: "المهام 📋",
-    ref: "الإحالة 👥",
-    wallet: "المحفظة 💰",
-    vip: "VIP 💎",
-    profile: "حسابي 👤",
-    log: "السجل 🧾"
-  };
+            // إزالة التفعيل
+            buttons.forEach(b => b.classList.remove("active"));
+            pages.forEach(p => p.classList.remove("active"));
 
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const page = btn.dataset.page;
+            // تفعيل الزر
+            btn.classList.add("active");
 
-      // إخفاء كل الصفحات
-      pages.forEach(p => p.classList.remove("active"));
+            // إظهار الصفحة
+            const page = document.getElementById(pageId);
+            if (page) {
+                page.classList.add("active");
+            }
 
-      // إظهار الصفحة المطلوبة
-      const target = document.getElementById(page);
-      if (target) {
-        target.classList.add("active");
-      } else {
-        console.error("Page not found:", page);
-      }
-
-      // تفعيل الزر
-      buttons.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      // تغيير العنوان
-      if (title && titles[page]) {
-        title.textContent = titles[page];
-      }
+            // تغيير العنوان
+            if (titles[pageId]) {
+                title.textContent = titles[pageId];
+            }
+        });
     });
-  });
-
 });
