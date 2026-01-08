@@ -1,35 +1,16 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const buttons = document.querySelectorAll(".nav-btn");
-    const pages = document.querySelectorAll(".page");
-    const title = document.getElementById("page-title");
-
-    const titles = {
-        play: "Play 🎮",
-        tasks: "المهام 📋",
-        ref: "الإحالة 👥",
-        wallet: "المحفظة 💰",
-        vip: "VIP 💎",
-        profile: "حسابي 👤",
-        log: "سجل 🧾"
-    };
-
-    function showPage(pageId) {
-        pages.forEach(p => p.classList.remove("active"));
-        buttons.forEach(b => b.classList.remove("active"));
-
-        document.getElementById(pageId).classList.add("active");
-        document.querySelector(`[data-page="${pageId}"]`).classList.add("active");
-
-        title.textContent = titles[pageId] || "GgersCoin";
-    }
-
-    buttons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const page = btn.dataset.page;
-            showPage(page);
+function openPage(page) {
+    fetch(`/webapp/pages/${page}/${page}.html`)
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById("content").innerHTML = html;
+            loadPageJS(page);
         });
-    });
+}
 
-    // الصفحة الافتراضية
-    showPage("play");
-});
+function loadPageJS(page) {
+    const script = document.createElement("script");
+    script.src = `/webapp/pages/${page}/${page}.js`;
+    document.body.appendChild(script);
+}
+
+openPage("farm");
