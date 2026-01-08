@@ -1,23 +1,40 @@
+body {
+  background:#0d0d0d;
+  color:white;
+  font-family:Arial;
+  margin:0;
+}
+
+.nav {
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:#111;
+  padding:10px;
+}
+
+button {
+  background:#222;
+  color:white;
+  border:none;
+  padding:10px;
+  border-radius:10px;
+}
+
 .lands {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 15px;
+  display:grid;
+  grid-template-columns: repeat(2,1fr);
+  gap:10px;
+  padding:20px;
 }
 
 .land {
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
-    font-size: 14px;
+  padding:20px;
+  text-align:center;
+  border-radius:10px;
 }
 
-.land.open {
-    background: #2ecc71;
-    color: #000;
-}
-
-.land.locked {
-    background: #444;
-    color: #aaa;
-}
+.open { background:green; }
+.locked { background:#333; }
