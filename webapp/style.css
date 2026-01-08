@@ -6,7 +6,7 @@
 }
 
 body {
-    background: radial-gradient(circle at top, #111 0%, #000 70%);
+    background: radial-gradient(circle at top, #121212 0%, #000 70%);
     color: #fff;
     height: 100vh;
     overflow: hidden;
@@ -15,19 +15,35 @@ body {
 /* ===== Top Bar ===== */
 .top-bar {
     text-align: center;
-    padding: 14px;
-    font-size: 18px;
-    background: rgba(20,20,20,0.6);
-    backdrop-filter: blur(10px);
+    padding: 14px 10px;
+    background: rgba(20,20,20,0.65);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.top-bar h1 {
+    font-size: 20px;
+}
+
+.top-sub {
+    display: block;
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 4px;
 }
 
 /* ===== View ===== */
 #view {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 135px);
     padding: 16px;
     overflow-y: auto;
     animation: fade 0.35s ease;
+}
+
+.loader {
+    text-align: center;
+    padding: 40px;
+    opacity: 0.6;
 }
 
 /* ===== Bottom Nav ===== */
@@ -36,11 +52,11 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 8px 6px;
+    padding: 10px 6px;
     display: flex;
     justify-content: space-between;
-    background: rgba(15,15,15,0.7);
-    backdrop-filter: blur(14px);
+    background: rgba(12,12,12,0.85);
+    backdrop-filter: blur(16px);
     border-top: 1px solid rgba(255,255,255,0.08);
     z-index: 100;
 }
@@ -48,11 +64,11 @@ body {
 /* ===== Buttons ===== */
 .nav-btn {
     flex: 1;
-    margin: 0 3px;
-    background: rgba(255,255,255,0.85);
+    margin: 0 4px;
+    background: rgba(255,255,255,0.88);
     color: #000;
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 8px 4px;
     font-size: 12px;
     display: flex;
@@ -70,8 +86,8 @@ body {
 
 /* ===== Play Button ===== */
 .play-btn {
-    transform: translateY(-14px);
-    padding: 12px 6px;
+    transform: translateY(-16px);
+    padding: 14px 6px;
     font-size: 14px;
     font-weight: bold;
 }
@@ -81,23 +97,17 @@ body {
     background: linear-gradient(135deg, #ff004c, #ffae00);
     color: #fff;
     box-shadow:
-        0 0 10px rgba(255, 200, 0, 0.7),
-        0 0 25px rgba(255, 80, 0, 0.6);
+        0 0 12px rgba(255,180,0,0.8),
+        0 0 28px rgba(255,80,0,0.6);
 }
 
 /* ===== Press ===== */
 .nav-btn:active {
-    transform: scale(0.95);
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 380px) {
-    .nav-btn span { font-size: 9px; }
-    .play-btn { font-size: 13px; }
+    transform: scale(0.94);
 }
 
 /* ===== Anim ===== */
 @keyframes fade {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
-}
+                     }
