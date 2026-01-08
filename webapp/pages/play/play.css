@@ -1,25 +1,18 @@
-.lands-grid {
+.lands {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .land {
+    background: #1e1e1e;
+    border-radius: 12px;
     padding: 20px;
-    border-radius: 14px;
     text-align: center;
-    font-weight: bold;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-}
-
-.land.open {
-    background: linear-gradient(135deg, #00c853, #64dd17);
-    color: #000;
+    font-size: 14px;
 }
 
 .land.locked {
-    background: linear-gradient(135deg, #444, #222);
-    color: #aaa;
+    opacity: 0.4;
 }
