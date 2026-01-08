@@ -1,62 +1,62 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pram points</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="/style.css">
+    <title>Pram Points</title>
+
+    <!-- ربط CSS -->
+    <link rel="stylesheet" href="/webapp/style.css" />
 </head>
 
 <body>
 
-  <!-- محتوى الصفحات -->
-  <main id="view" class="view">
-    <h2>Play 🎮</h2>
-  </main>
+    <!-- العنوان -->
+    <header class="header">
+        <h1 id="page-title">Play 🎮</h1>
+    </header>
 
-  <!-- شريط القوائم -->
-  <nav class="bottom-nav">
+    <!-- محتوى الصفحات -->
+    <main id="content" class="content show">
+        جاري التحميل...
+    </main>
 
-    <button data-page="history">
-      <span class="icon">📜</span>
-      <span>سجل</span>
-    </button>
+    <!-- شريط القوائم -->
+    <nav class="bottom-nav">
 
-    <button data-page="referral">
-      <span class="icon">👥</span>
-      <span>الإحالة</span>
-    </button>
+        <button class="nav-btn" data-page="history">
+            📜<span>سجل</span>
+        </button>
 
-    <button data-page="tasks">
-      <span class="icon">📝</span>
-      <span>المهام</span>
-    </button>
+        <button class="nav-btn" data-page="referral">
+            👥<span>الإحالة</span>
+        </button>
 
-    <button class="play-btn active" data-page="play">
-      <span class="icon">🎮</span>
-      <span>Play</span>
-    </button>
+        <button class="nav-btn" data-page="tasks">
+            📝<span>المهام</span>
+        </button>
 
-    <button data-page="vip">
-      <span class="icon">💎</span>
-      <span>VIP</span>
-    </button>
+        <button class="nav-btn play-btn" data-page="play">
+            🎮<span>Play</span>
+        </button>
 
-    <button data-page="wallet">
-      <span class="icon">💰</span>
-      <span>المحفظة</span>
-    </button>
+        <button class="nav-btn" data-page="vip">
+            💎<span>VIP</span>
+        </button>
 
-    <button data-page="profile">
-      <span class="icon">👤</span>
-      <span>حسابي</span>
-    </button>
+        <button class="nav-btn" data-page="wallet">
+            💰<span>المحفظة</span>
+        </button>
 
-  </nav>
+        <button class="nav-btn" data-page="profile">
+            👤<span>حسابي</span>
+        </button>
 
-  <!-- JS (مهم جداً يكون آخر حاجة) -->
-  <script src="/app.js" defer></script>
+    </nav>
+
+    <!-- ربط JS (لازم في الآخر) -->
+    <script src="/webapp/app.js"></script>
+
 </body>
-</html>
+  </html>
