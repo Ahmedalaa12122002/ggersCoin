@@ -1,30 +1,48 @@
-const buttons = document.querySelectorAll(".nav-btn");
-const pages = document.querySelectorAll(".page");
-const title = document.getElementById("page-title");
+document.addEventListener("DOMContentLoaded", () => {
 
-const titles = {
-  play: "Play 🎮",
-  tasks: "المهام 📋",
-  ref: "الإحالة 👥",
-  wallet: "المحفظة 💰",
-  vip: "VIP 💎",
-  profile: "حسابي 👤",
-  log: "السجل 🧾"
-};
+  const buttons = document.querySelectorAll(".nav-btn");
+  const pages = document.querySelectorAll(".page");
+  const title = document.getElementById("page-title");
 
-buttons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const page = btn.dataset.page;
+  if (!buttons.length || !pages.length) {
+    console.error("Navigation elements not found");
+    return;
+  }
 
-    // تغيير الصفحة
-    pages.forEach(p => p.classList.remove("active"));
-    document.getElementById(page).classList.add("active");
+  const titles = {
+    play: "Play 🎮",
+    tasks: "المهام 📋",
+    ref: "الإحالة 👥",
+    wallet: "المحفظة 💰",
+    vip: "VIP 💎",
+    profile: "حسابي 👤",
+    log: "السجل 🧾"
+  };
 
-    // تفعيل الزر
-    buttons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const page = btn.dataset.page;
 
-    // تغيير العنوان
-    title.textContent = titles[page] || "GgersCoin";
+      // إخفاء كل الصفحات
+      pages.forEach(p => p.classList.remove("active"));
+
+      // إظهار الصفحة المطلوبة
+      const target = document.getElementById(page);
+      if (target) {
+        target.classList.add("active");
+      } else {
+        console.error("Page not found:", page);
+      }
+
+      // تفعيل الزر
+      buttons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      // تغيير العنوان
+      if (title && titles[page]) {
+        title.textContent = titles[page];
+      }
+    });
   });
+
 });
