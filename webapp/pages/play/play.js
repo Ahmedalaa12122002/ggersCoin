@@ -1,31 +1,24 @@
-document.addEventListener("DOMContentLoaded", loadLands);
-
-async function loadLands() {
+window.loadLands = async function () {
     const container = document.getElementById("lands");
+    container.innerHTML = "⏳ تحميل الأراضي...";
 
     try {
         const res = await fetch("/api/farm/lands");
         const data = await res.json();
 
         container.innerHTML = "";
-
         data.lands.forEach(land => {
             const div = document.createElement("div");
-            div.classList.add("land");
-
-            if (land.locked) {
-                div.classList.add("locked");
-                div.textContent = `أرض ${land.id} 🔒 (VIP)`;
-            } else {
-                div.classList.add("open");
-                div.textContent = `أرض ${land.id} 🌱`;
-            }
+            div.className = "land " + (land.locked ? "locked" : "open");
+            div.textContent = land.locked
+                ? `أرض ${land.id} 🔒 VIP`
+                : `أرض ${land.id} 🌱`;
 
             container.appendChild(div);
         });
 
-    } catch (e) {
-        container.innerHTML = "❌ فشل تحميل الأراضي";
-        console.error(e);
+    } catch (err) {
+        container.innerHTML = "❌ فشل الاتصال بالسيرفر";
+        console.error(err);
     }
-        }
+};
