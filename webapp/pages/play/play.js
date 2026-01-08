@@ -1,31 +1,39 @@
 async function loadFarmLands() {
-    const container = document.getElementById("play");
-    container.innerHTML = "🌱 جاري تحميل الأراضي...";
+    const view = document.getElementById("view");
+
+    view.innerHTML = `
+        <div id="farm">
+            🌱 جاري تحميل الأراضي...
+        </div>
+    `;
 
     try {
         const res = await fetch("/api/farm/lands");
-        if (!res.ok) throw new Error("API Error");
+        if (!res.ok) throw new Error("API error");
 
         const data = await res.json();
 
-        if (!data.lands || data.lands.length === 0) {
-            container.innerHTML = "❌ لا توجد أراضي";
+        if (!data.success) {
+            view.innerHTML = "❌ فشل تحميل الأراضي";
             return;
         }
 
-        container.innerHTML = `
+        view.innerHTML = `
+            <h2>🌱 المزرعة</h2>
             <div class="lands">
                 ${data.lands.map(land => `
-                    <div class="land ${land.unlocked ? 'open' : 'locked'}">
+                    <div class="land ${land.unlocked ? "open" : "locked"}">
                         <h3>أرض ${land.id}</h3>
-                        <p>${land.unlocked ? "🌱 مفتوحة" : "🔒 VIP"}</p>
+                        <p>
+                            ${land.unlocked ? "🌿 متاحة" : "🔒 VIP"}
+                        </p>
                     </div>
                 `).join("")}
             </div>
         `;
     } catch (e) {
-        container.innerHTML = "❌ فشل تحميل الأراضي";
         console.error(e);
+        view.innerHTML = "❌ فشل تحميل الأراضي";
     }
 }
 
