@@ -58,22 +58,43 @@ async def telegram_webhook(request: Request):
     return {"ok": True}
 
 # =============================
-# Telegram /start
+# Telegram /start (رسالة ترحيب جذّابة)
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
     keyboard = telebot.types.InlineKeyboardMarkup()
     keyboard.add(
         telebot.types.InlineKeyboardButton(
-            "🌱 ابدأ اللعب الآن",
+            "🚀 ابدأ اللعب الآن",
             web_app=telebot.types.WebAppInfo(url=APP_URL)
         )
     )
 
+    welcome_text = f"""
+🌱 *مرحبًا بك في {BOT_NAME}* 🌱
+
+🎮 هنا تبدأ رحلتك للربح واللعب في نفس الوقت!
+
+💰 كيف تكسب؟
+• افتح أرضك الأولى مجانًا
+• ازرع المحاصيل 🌾
+• انتظر وقت النمو ⏳
+• احصد وكسب نقاط 💎
+• طوّر حسابك وافتح أراضي أكثر
+• فعّل VIP لربح أسرع 🔥
+
+⚡ اللعب سهل – بدون تعقيد  
+📱 يعمل مباشرة من تيليجرام  
+🚀 كل دقيقة لعب = فرصة ربح
+
+👇 اضغط الزر بالأسفل وابدأ الآن
+"""
+
     bot.send_message(
         message.chat.id,
-        f"🌱 مرحبًا بك في {BOT_NAME}",
-        reply_markup=keyboard
+        welcome_text,
+        reply_markup=keyboard,
+        parse_mode="Markdown"
     )
 
 # =============================
