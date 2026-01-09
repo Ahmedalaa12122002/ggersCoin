@@ -77,24 +77,14 @@ body {
     align-items: center;
     gap: 4px;
     cursor: pointer;
-    transition:
-        transform 0.18s ease,
-        box-shadow 0.18s ease,
-        background 0.18s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .nav-btn span {
     font-size: 10px;
-    white-space: nowrap;
     opacity: 0.85;
 }
 
-/* ===== Hover ===== */
-.nav-btn:hover {
-    transform: translateY(-2px);
-}
-
-/* ===== Play Button ===== */
 .play-btn {
     transform: translateY(-18px);
     padding: 14px 6px;
@@ -102,71 +92,26 @@ body {
     font-weight: bold;
 }
 
-/* ===== Active – Yellow Glow ===== */
 .nav-btn.active {
     background: linear-gradient(180deg, #2a2400, #141000);
-    border: 1px solid rgba(255, 215, 0, 0.55);
+    border: 1px solid rgba(255,215,0,0.55);
     color: #ffe27a;
-    box-shadow:
-        0 0 8px rgba(255, 215, 0, 0.35),
-        0 0 16px rgba(255, 200, 0, 0.25),
-        inset 0 0 6px rgba(255, 230, 120, 0.25);
-    animation: glowPulse 2.4s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(255,215,0,0.35);
 }
 
-/* ===== Press ===== */
-.nav-btn:active {
-    transform: scale(0.94);
+/* ===== Light Mode ===== */
+body.light {
+    background: #f4f4f4;
+    color: #111;
 }
 
-/* ===== Ripple Effect ===== */
-.nav-btn::after {
-    content: "";
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: rgba(255, 215, 0, 0.35);
-    border-radius: 50%;
-    transform: scale(0);
-    opacity: 0;
-    pointer-events: none;
+body.light .top-bar,
+body.light .bottom-nav {
+    background: rgba(255,255,255,0.95);
+    color: #111;
 }
 
-.nav-btn.ripple::after {
-    animation: ripple 0.55s ease-out;
-}
-
-/* ===== Animations ===== */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes ripple {
-    from {
-        transform: scale(0);
-        opacity: 0.6;
-    }
-    to {
-        transform: scale(6);
-        opacity: 0;
-    }
-}
-
-@keyframes glowPulse {
-    0% {
-        box-shadow:
-            0 0 6px rgba(255, 215, 0, 0.25),
-            inset 0 0 6px rgba(255, 230, 120, 0.18);
-    }
-    50% {
-        box-shadow:
-            0 0 12px rgba(255, 215, 0, 0.45),
-            inset 0 0 10px rgba(255, 230, 120, 0.35);
-    }
-    100% {
-        box-shadow:
-            0 0 6px rgba(255, 215, 0, 0.25),
-            inset 0 0 6px rgba(255, 230, 120, 0.18);
-    }
+body.light .nav-btn {
+    background: linear-gradient(180deg, #ffffff, #eaeaea);
+    color: #111;
     }
