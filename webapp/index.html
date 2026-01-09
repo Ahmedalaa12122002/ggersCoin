@@ -3,104 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <title>GgersCoin</title>
-
-    <!-- FIXED viewport -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-    <!-- Telegram WebApp -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- Global Style -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<!-- ===== Top Bar ===== -->
 <header class="top-bar">
     <h1 id="page-title">🎮 Play</h1>
     <span class="top-sub">ازرع • احصد • اكسب نقاط 💰</span>
 </header>
 
-<!-- ===== SPA View ===== -->
 <main id="view">
-    <div class="loader">
-        ⏳ جاري تحميل التطبيق...
-    </div>
+    <div class="loader">⏳ جاري تحميل التطبيق...</div>
 </main>
 
-<!-- ===== Bottom Navigation ===== -->
 <nav class="bottom-nav">
-
-    <button class="nav-btn" data-page="log">
-        🧾 <span>السجل</span>
-    </button>
-
-    <button class="nav-btn" data-page="ref">
-        👥 <span>الإحالة</span>
-    </button>
-
-    <button class="nav-btn" data-page="tasks">
-        📋 <span>المهمات</span>
-    </button>
-
-    <button class="nav-btn play-btn active" data-page="play">
-        🎮 <span>Play</span>
-    </button>
-
-    <button class="nav-btn" data-page="vip">
-        💎 <span>VIP</span>
-    </button>
-
-    <button class="nav-btn" data-page="wallet">
-        💰 <span>المحفظة</span>
-    </button>
-
-    <button class="nav-btn" data-page="profile">
-        👤 <span>حسابي</span>
-    </button>
-
+    <button class="nav-btn" data-page="log">🧾 <span>السجل</span></button>
+    <button class="nav-btn" data-page="ref">👥 <span>الإحالة</span></button>
+    <button class="nav-btn" data-page="tasks">📋 <span>المهمات</span></button>
+    <button class="nav-btn play-btn active" data-page="play">🎮 <span>Play</span></button>
+    <button class="nav-btn" data-page="vip">💎 <span>VIP</span></button>
+    <button class="nav-btn" data-page="wallet">💰 <span>المحفظة</span></button>
+    <button class="nav-btn" data-page="profile">👤 <span>حسابي</span></button>
 </nav>
 
-<!-- ===== Telegram Auth ===== -->
 <script src="/static/auth.js"></script>
-
-<!-- ===== SPA Core ===== -->
 <script src="/static/app.js"></script>
 
-<!-- ===== Global Settings + Effects ===== -->
 <script>
-/* =========================
-   Global App Settings
-========================= */
 window.AppSettings = {
     vibration: localStorage.getItem("vibration") !== "off",
     theme: localStorage.getItem("theme") || "dark"
 };
 
-/* =========================
-   Apply Theme
-========================= */
-function applyTheme() {
-    if (window.AppSettings.theme === "light") {
-        document.body.classList.add("light");
-    } else {
-        document.body.classList.remove("light");
-    }
-}
-applyTheme();
+document.body.classList.toggle("light", window.AppSettings.theme === "light");
 
-/* =========================
-   Ripple + Vibration
-========================= */
 document.querySelectorAll(".nav-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-
-        // Ripple
         btn.classList.remove("ripple");
         void btn.offsetWidth;
         btn.classList.add("ripple");
 
-        // Vibration (if enabled)
         if (navigator.vibrate && window.AppSettings.vibration) {
             navigator.vibrate(15);
         }
