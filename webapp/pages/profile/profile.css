@@ -1,1 +1,56 @@
+.profile-page {
+    padding: 10px;
+}
 
+.profile-title {
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.profile-card {
+    background: linear-gradient(135deg, #1b1b1b, #0e0e0e);
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.profile-card .hint {
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+/* ===== Settings ===== */
+.settings {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px;
+    background: rgba(20,20,20,0.9);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ===== Toggle Button ===== */
+.toggle-btn {
+    min-width: 70px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    background: linear-gradient(135deg, #ffd000, #ffb700);
+    color: #000;
+}
+
+.toggle-btn.off {
+    background: #333;
+    color: #aaa;
+}
