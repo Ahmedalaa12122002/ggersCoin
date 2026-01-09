@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>GgersCoin</title>
+
+    <!-- FIXED viewport -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
     <!-- Telegram WebApp -->
@@ -59,24 +61,52 @@
 
 </nav>
 
+<!-- ===== Telegram Auth ===== -->
 <script src="/static/auth.js"></script>
+
+<!-- ===== SPA Core ===== -->
 <script src="/static/app.js"></script>
-    <script>
-/* Ripple + Vibration */
+
+<!-- ===== Global Settings + Effects ===== -->
+<script>
+/* =========================
+   Global App Settings
+========================= */
+window.AppSettings = {
+    vibration: localStorage.getItem("vibration") !== "off",
+    theme: localStorage.getItem("theme") || "dark"
+};
+
+/* =========================
+   Apply Theme
+========================= */
+function applyTheme() {
+    if (window.AppSettings.theme === "light") {
+        document.body.classList.add("light");
+    } else {
+        document.body.classList.remove("light");
+    }
+}
+applyTheme();
+
+/* =========================
+   Ripple + Vibration
+========================= */
 document.querySelectorAll(".nav-btn").forEach(btn => {
-    btn.addEventListener("click", e => {
+    btn.addEventListener("click", () => {
 
         // Ripple
         btn.classList.remove("ripple");
         void btn.offsetWidth;
         btn.classList.add("ripple");
 
-        // Vibration (لو مدعوم)
-        if (navigator.vibrate) {
+        // Vibration (if enabled)
+        if (navigator.vibrate && window.AppSettings.vibration) {
             navigator.vibrate(15);
         }
     });
 });
-    </script>
+</script>
+
 </body>
 </html>
