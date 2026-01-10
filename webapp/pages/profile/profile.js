@@ -21,17 +21,34 @@ function initProfilePage() {
         .then(settings => {
 
             // تحديث الإعدادات العامة
-            window.AppSettings.vibration = settings.vibration;
-            window.AppSettings.theme = settings.theme;
+            window.AppSettings.vibration = !!settings.vibration;
+            window.AppSettings.theme = settings.theme || "dark";
 
-            document.body.classList.toggle("light", settings.theme === "light");
+            // حفظ محلي (Fallback)
+            localStorage.setItem("vibration", window.AppSettings.vibration ? "on" : "off");
+            localStorage.setItem("theme", window.AppSettings.theme);
 
-            initVibration(settings.vibration);
-            initTheme(settings.theme);
+            // تطبيق الثيم
+            document.body.classList.toggle("light", window.AppSettings.theme === "light");
+
+            initVibration(window.AppSettings.vibration);
+            initTheme(window.AppSettings.theme);
 
         })
         .catch(err => {
-            console.error("❌ فشل تحميل الإعدادات", err);
+            console.error("❌ فشل تحميل الإعدادات من API", err);
+
+            // Fallback من LocalStorage
+            const vib = localStorage.getItem("vibration") !== "off";
+            const theme = localStorage.getItem("theme") || "dark";
+
+            window.AppSettings.vibration = vib;
+            window.AppSettings.theme = theme;
+
+            document.body.classList.toggle("light", theme === "light");
+
+            initVibration(vib);
+            initTheme(theme);
         });
 
     // ======================
@@ -48,9 +65,15 @@ function initProfilePage() {
             const newState = !window.AppSettings.vibration;
 
             window.AppSettings.vibration = newState;
+            localStorage.setItem("vibration", newState ? "on" : "off");
 
             vibBtn.textContent = newState ? "مفعّل" : "مُعطّل";
             vibBtn.classList.toggle("off", !newState);
+
+            // اختبار الاهتزاز فورًا
+            if (newState && navigator.vibrate) {
+                navigator.vibrate(20);
+            }
 
             saveSettings();
         };
@@ -69,8 +92,9 @@ function initProfilePage() {
             const newTheme = window.AppSettings.theme === "light" ? "dark" : "light";
 
             window.AppSettings.theme = newTheme;
-            document.body.classList.toggle("light", newTheme === "light");
+            localStorage.setItem("theme", newTheme);
 
+            document.body.classList.toggle("light", newTheme === "light");
             themeBtn.textContent = newTheme === "light" ? "فاتح" : "ليلي";
 
             saveSettings();
@@ -91,7 +115,7 @@ function initProfilePage() {
                 theme: window.AppSettings.theme
             })
         }).catch(err => {
-            console.error("❌ فشل حفظ الإعدادات", err);
+            console.error("❌ فشل حفظ الإعدادات في API", err);
         });
     }
 
@@ -102,6 +126,9 @@ function initProfilePage() {
     if (logoutBtn) {
         logoutBtn.onclick = () => {
 
+            // لا نحذف الإعدادات من السيرفر
+            localStorage.clear();
+
             if (window.Telegram && Telegram.WebApp) {
                 Telegram.WebApp.close();
             } else {
@@ -109,4 +136,4 @@ function initProfilePage() {
             }
         };
     }
-            }
+              }
