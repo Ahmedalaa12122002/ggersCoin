@@ -10,8 +10,26 @@
 
     <!-- Global Style -->
     <link rel="stylesheet" href="/static/style.css">
+
+    <!-- ===== Smart Hide Top Bar ===== -->
+    <style>
+        .top-bar {
+            display: none !important;
+        }
+
+        /* تعويض المساحة بدون كسر */
+        #view {
+            height: calc(100vh - 90px) !important;
+        }
+    </style>
 </head>
 <body>
+
+<!-- ===== Top Bar (Hidden Smartly) ===== -->
+<header class="top-bar">
+    <h1 id="page-title">🎮 Play</h1>
+    <span class="top-sub">ازرع • احصد • اكسب نقاط 💰</span>
+</header>
 
 <!-- ===== SPA View ===== -->
 <main id="view">
@@ -64,7 +82,7 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
         void btn.offsetWidth;
         btn.classList.add("ripple");
 
-        // Vibration (if enabled)
+        // Vibration
         if (navigator.vibrate && window.AppSettings.vibration) {
             navigator.vibrate(15);
         }
