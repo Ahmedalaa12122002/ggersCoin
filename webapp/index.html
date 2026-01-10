@@ -57,32 +57,36 @@
 <script>
 /* =========================
    Global App Settings
+   (القيم الفعلية يتم تحميلها من API داخل profile.js)
 ========================= */
-window.AppSettings = {
-    vibration: localStorage.getItem("vibration") !== "off",
-    theme: localStorage.getItem("theme") || "dark"
+window.AppSettings = window.AppSettings || {
+    vibration: true,
+    theme: "dark"
 };
 
 /* =========================
-   Apply Theme
+   Apply Theme (بعد أي تغيير)
 ========================= */
-document.body.classList.toggle(
-    "light",
-    window.AppSettings.theme === "light"
-);
+function applyTheme() {
+    document.body.classList.toggle(
+        "light",
+        window.AppSettings.theme === "light"
+    );
+}
+applyTheme();
 
 /* =========================
-   Ripple + Vibration
+   Ripple + Vibration (Global)
 ========================= */
 document.querySelectorAll(".nav-btn").forEach(btn => {
     btn.addEventListener("click", () => {
 
-        // Ripple
+        // Ripple Effect
         btn.classList.remove("ripple");
         void btn.offsetWidth;
         btn.classList.add("ripple");
 
-        // Vibration
+        // Vibration (لو مفعّل من الإعدادات)
         if (navigator.vibrate && window.AppSettings.vibration) {
             navigator.vibrate(15);
         }
@@ -91,4 +95,4 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
 </script>
 
 </body>
-</html>
+        </html>
