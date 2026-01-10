@@ -1,9 +1,13 @@
-from fastapi import FastAPI, Request, Body
+from fastapi import FastAPI, Request, Body, Header
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
 import sqlite3
 import os
+import hmac
+import hashlib
+import urllib.parse
+import time
 
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 APP_URL = "https://web-production-1ba0e.up.railway.app"
@@ -16,9 +20,9 @@ DB_NAME = os.path.join(BASE_DIR, "database.db")
 app = FastAPI(title="GgersCoin API")
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
-# =============================
+# ======================================================
 # Database
-# =============================
+# ======================================================
 def get_db():
     return sqlite3.connect(DB_NAME)
 
@@ -47,6 +51,16 @@ def init_db():
     )
     """)
 
+    # ===== Devices (Security) =====
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS devices (
+        device_id TEXT,
+        user_id INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(device_id, user_id)
+    )
+    """)
+
     db.commit()
     db.close()
 
@@ -59,9 +73,9 @@ async def on_startup():
     except Exception as e:
         print("Telegram error:", e)
 
-# =============================
+# ======================================================
 # Telegram Webhook
-# =============================
+# ======================================================
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
     data = await request.json()
@@ -69,9 +83,9 @@ async def telegram_webhook(request: Request):
     bot.process_new_updates([update])
     return {"ok": True}
 
-# =============================
+# ======================================================
 # Telegram /start
-# =============================
+# ======================================================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
     keyboard = telebot.types.InlineKeyboardMarkup()
@@ -85,17 +99,11 @@ def start_handler(message):
     welcome_text = f"""
 🌱 *مرحبًا بك في {BOT_NAME}* 🌱
 
-🎮 هنا تبدأ رحلتك للربح واللعب في نفس الوقت!
+🎮 العب واربح في نفس الوقت  
+💰 ازرع – احصد – اجمع نقاط  
+🔥 فعّل VIP لربح أسرع
 
-💰 كيف تكسب؟
-• افتح أرضك الأولى مجانًا
-• ازرع المحاصيل 🌾
-• انتظر وقت النمو ⏳
-• احصد وكسب نقاط 💎
-• طوّر حسابك وافتح أراضي أكثر
-• فعّل VIP لربح أسرع 🔥
-
-👇 اضغط الزر بالأسفل وابدأ الآن
+👇 اضغط الزر وابدأ الآن
 """
 
     bot.send_message(
@@ -105,13 +113,63 @@ def start_handler(message):
         parse_mode="Markdown"
     )
 
-# =============================
-# API Auth
-# =============================
+# ======================================================
+# Telegram WebApp initData verification
+# ======================================================
+def verify_telegram_init_data(init_data: str) -> dict | None:
+    try:
+        parsed = dict(urllib.parse.parse_qsl(init_data, strict_parsing=True))
+        hash_from_telegram = parsed.pop("hash", None)
+
+        data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(parsed.items()))
+        secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
+        calculated_hash = hmac.new(
+            secret_key,
+            data_check_string.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        if calculated_hash != hash_from_telegram:
+            return None
+
+        if "auth_date" in parsed:
+            if time.time() - int(parsed["auth_date"]) > 86400:
+                return None
+
+        return parsed
+    except Exception:
+        return None
+
+# ======================================================
+# API Auth (Protected)
+# ======================================================
 @app.post("/api/auth")
-def auth_user(user: dict = Body(...)):
+def auth_user(
+    user: dict = Body(...),
+    x_init_data: str = Header(None),
+    x_device_id: str = Header(None)
+):
+    if not x_init_data or not verify_telegram_init_data(x_init_data):
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+
+    if not x_device_id:
+        return JSONResponse({"error": "Device ID required"}, status_code=400)
+
     db = get_db()
     cursor = db.cursor()
+
+    # ===== Device limit (max 4 users) =====
+    cursor.execute(
+        "SELECT COUNT(DISTINCT user_id) FROM devices WHERE device_id = ?",
+        (x_device_id,)
+    )
+    count = cursor.fetchone()[0]
+    if count >= 4:
+        db.close()
+        return JSONResponse(
+            {"error": "Device limit reached (4 accounts max)"},
+            status_code=403
+        )
 
     cursor.execute("SELECT id FROM users WHERE id = ?", (user.get("id"),))
     if not cursor.fetchone():
@@ -131,14 +189,18 @@ def auth_user(user: dict = Body(...)):
         VALUES (?)
         """, (user.get("id"),))
 
-        db.commit()
+    cursor.execute("""
+    INSERT OR IGNORE INTO devices (device_id, user_id)
+    VALUES (?, ?)
+    """, (x_device_id, user.get("id")))
 
+    db.commit()
     db.close()
     return {"status": "ok"}
 
-# =============================
-# API Profile (NEW 🔥)
-# =============================
+# ======================================================
+# API Profile
+# ======================================================
 @app.get("/api/profile/{user_id}")
 def get_profile(user_id: int):
     db = get_db()
@@ -146,8 +208,7 @@ def get_profile(user_id: int):
 
     cursor.execute("""
     SELECT first_name, last_name, username
-    FROM users
-    WHERE id = ?
+    FROM users WHERE id = ?
     """, (user_id,))
     row = cursor.fetchone()
     db.close()
@@ -161,29 +222,9 @@ def get_profile(user_id: int):
         "username": row[2]
     }
 
-@app.post("/api/profile/{user_id}")
-def update_profile(user_id: int, data: dict = Body(...)):
-    first_name = data.get("first_name")
-    last_name = data.get("last_name")
-    username = data.get("username")
-
-    db = get_db()
-    cursor = db.cursor()
-
-    cursor.execute("""
-    UPDATE users
-    SET first_name = ?, last_name = ?, username = ?
-    WHERE id = ?
-    """, (first_name, last_name, username, user_id))
-
-    db.commit()
-    db.close()
-
-    return {"status": "ok"}
-
-# =============================
+# ======================================================
 # API Settings
-# =============================
+# ======================================================
 @app.get("/api/settings/{user_id}")
 def get_settings(user_id: int):
     db = get_db()
@@ -198,10 +239,7 @@ def get_settings(user_id: int):
     if not row:
         return {"vibration": True, "theme": "dark"}
 
-    return {
-        "vibration": bool(row[0]),
-        "theme": row[1]
-    }
+    return {"vibration": bool(row[0]), "theme": row[1]}
 
 @app.post("/api/settings/{user_id}")
 def update_settings(user_id: int, data: dict = Body(...)):
@@ -220,30 +258,29 @@ def update_settings(user_id: int, data: dict = Body(...)):
 
     db.commit()
     db.close()
-
     return {"status": "ok"}
 
-# =============================
+# ======================================================
 # Farm API
-# =============================
+# ======================================================
 from api.farm.lands import router as lands_router
 app.include_router(lands_router)
 
-# =============================
+# ======================================================
 # Static files
-# =============================
+# ======================================================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
-# =============================
+# ======================================================
 # Main page
-# =============================
+# ======================================================
 @app.get("/")
 def serve_index():
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
-# =============================
+# ======================================================
 # SPA fallback
-# =============================
+# ======================================================
 @app.get("/{path:path}")
 def spa_fallback(path: str):
     if path.startswith("api/"):
