@@ -9,8 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    let isLoading = false; // 🔥 منع الضغط المتكرر
-
     /* =========================
        DEVICE ID (Protection)
     ========================= */
@@ -34,6 +32,22 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /* =========================
+       NAVIGATION CONTROL (FIX)
+    ========================= */
+    let navigationLocked = false;
+    let currentRequestId = 0;
+
+    function lockNavigation() {
+        navigationLocked = true;
+        buttons.forEach(btn => btn.style.pointerEvents = "none");
+    }
+
+    function unlockNavigation() {
+        navigationLocked = false;
+        buttons.forEach(btn => btn.style.pointerEvents = "auto");
+    }
+
+    /* =========================
        LOAD SETTINGS FROM API
     ========================= */
     async function loadUserSettingsFromAPI() {
@@ -52,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const res = await fetch(`/api/settings/${userId}`, {
                 headers: {
-                    "X-Init-Data": Telegram.WebApp.initData,
+                    "X-Init-Data": Telegram.WebApp.initData || "",
                     "X-Device-Id": DEVICE_ID
                 }
             });
@@ -92,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // تحميل الإعدادات مرة واحدة
+    // تحميل الإعدادات مرة واحدة عند بدء التطبيق
     loadUserSettingsFromAPI();
 
     /* =========================
@@ -109,15 +123,18 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /* =========================
-       LOAD PAGE (ANTI FOUC)
+       LOAD PAGE (SAFE + FIX)
     ========================= */
     async function loadPage(pageKey) {
-        if (isLoading) return;
-        isLoading = true;
 
+        if (navigationLocked) return;
+        lockNavigation();
+
+        const requestId = ++currentRequestId;
         const page = pagesConfig[pageKey];
+
         if (!page) {
-            isLoading = false;
+            unlockNavigation();
             return;
         }
 
@@ -130,6 +147,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setTimeout(async () => {
 
+            if (requestId !== currentRequestId) return;
+
             try {
                 const res = await fetch(
                     `/static/pages/${page.path}/${page.path}.html`,
@@ -141,18 +160,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 );
 
-                view.innerHTML = await res.text();
+                if (!res.ok) throw new Error("HTML load failed");
+
+                const html = await res.text();
+                if (requestId !== currentRequestId) return;
+
+                view.innerHTML = html;
 
             } catch (e) {
-                view.innerHTML = "❌ فشل تحميل الصفحة";
                 console.error(e);
-                view.style.opacity = "1";
+                view.innerHTML = "❌ فشل تحميل الصفحة";
                 view.style.visibility = "visible";
-                isLoading = false;
+                view.style.opacity = "1";
+                unlockNavigation();
                 return;
             }
 
-            // CSS
+            // ===== CSS =====
             removeAsset("page-style");
             const css = document.createElement("link");
             css.rel = "stylesheet";
@@ -160,27 +184,30 @@ document.addEventListener("DOMContentLoaded", () => {
             css.id = "page-style";
 
             css.onload = () => {
-                requestAnimationFrame(() => {
-                    view.style.visibility = "visible";
-                    view.style.opacity = "1";
-                    view.classList.remove("page-hide");
-                    view.classList.add("page-show");
-                });
+                if (requestId !== currentRequestId) return;
+
+                view.style.visibility = "visible";
+                view.style.opacity = "1";
+                view.classList.remove("page-hide");
+                view.classList.add("page-show");
             };
 
             document.head.appendChild(css);
 
-            // JS
+            // ===== JS =====
             removeAsset("page-script");
             const js = document.createElement("script");
             js.src = `/static/pages/${page.path}/${page.path}.js`;
             js.id = "page-script";
 
             js.onload = () => {
+                if (requestId !== currentRequestId) return;
+
                 if (pageKey === "profile" && typeof initProfilePage === "function") {
                     initProfilePage();
                 }
-                isLoading = false;
+
+                unlockNavigation();
             };
 
             document.body.appendChild(js);
@@ -198,18 +225,20 @@ document.addEventListener("DOMContentLoaded", () => {
     ========================= */
     buttons.forEach(btn => {
         btn.addEventListener("click", () => {
-            const pageKey = btn.dataset.page;
 
+            if (navigationLocked) return;
+
+            const pageKey = btn.dataset.page;
             if (btn.classList.contains("active")) return;
 
             buttons.forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
 
-            loadPage(pageKey);
-
             if (navigator.vibrate && window.AppSettings.vibration) {
                 navigator.vibrate(15);
             }
+
+            loadPage(pageKey);
         });
     });
 
