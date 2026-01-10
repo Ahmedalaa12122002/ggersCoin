@@ -4,38 +4,74 @@ document.addEventListener("DOMContentLoaded", () => {
     const buttons = document.querySelectorAll(".nav-btn");
     const title = document.getElementById("page-title");
 
+    if (!view) {
+        console.error("❌ عنصر view غير موجود");
+        return;
+    }
+
     const pagesConfig = {
-        play: { title: "🎮 Play", path: "play" },
-        tasks: { title: "📋 المهمات", path: "tasks" },
-        ref: { title: "👥 الإحالة", path: "ref" },
-        wallet: { title: "💰 المحفظة", path: "wallet" },
-        vip: { title: "💎 VIP", path: "vip" },
-        profile: { title: "👤 حسابي", path: "profile" },
-        log: { title: "🧾 السجل", path: "log" }
+        play: {
+            title: "🎮 Play",
+            path: "play"
+        },
+        tasks: {
+            title: "📋 المهمات",
+            path: "tasks"
+        },
+        ref: {
+            title: "👥 الإحالة",
+            path: "ref"
+        },
+        wallet: {
+            title: "💰 المحفظة",
+            path: "wallet"
+        },
+        vip: {
+            title: "💎 VIP",
+            path: "vip"
+        },
+        profile: {
+            title: "👤 حسابي",
+            path: "profile"
+        },
+        log: {
+            title: "🧾 السجل",
+            path: "log"
+        }
     };
 
+    // =========================
+    // تحميل صفحة (مع Animation)
+    // =========================
     async function loadPage(pageKey) {
         const page = pagesConfig[pageKey];
         if (!page) return;
 
+        // العنوان
         title.textContent = page.title;
 
+        // Animation خروج
         view.classList.remove("page-show");
         view.classList.add("page-hide");
 
         setTimeout(async () => {
+
+            // تحميل HTML
+            view.innerHTML = "⏳ جاري التحميل...";
             try {
                 const res = await fetch(`/static/pages/${page.path}/${page.path}.html`);
                 view.innerHTML = await res.text();
-            } catch {
+            } catch (e) {
                 view.innerHTML = "❌ فشل تحميل الصفحة";
+                console.error(e);
                 return;
             }
 
+            // Animation دخول
             view.classList.remove("page-hide");
             view.classList.add("page-show");
 
-            // CSS
+            // تحميل CSS
             removeAsset("page-style");
             const css = document.createElement("link");
             css.rel = "stylesheet";
@@ -43,19 +79,22 @@ document.addEventListener("DOMContentLoaded", () => {
             css.id = "page-style";
             document.head.appendChild(css);
 
-            // JS
+            // تحميل JS
             removeAsset("page-script");
             const js = document.createElement("script");
             js.src = `/static/pages/${page.path}/${page.path}.js`;
             js.id = "page-script";
+
             js.onload = () => {
+                // 🔥 حل مشكلة حسابي (إعادة التهيئة)
                 if (pageKey === "profile" && typeof initProfilePage === "function") {
                     initProfilePage();
                 }
             };
+
             document.body.appendChild(js);
 
-        }, 200);
+        }, 180); // زمن الانتقال
     }
 
     function removeAsset(id) {
@@ -63,13 +102,25 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el) el.remove();
     }
 
+    // =========================
+    // ربط أزرار القوائم
+    // =========================
     buttons.forEach(btn => {
-        btn.onclick = () => {
+        btn.addEventListener("click", () => {
+            const pageKey = btn.dataset.page;
+
+            // تفعيل الزر
             buttons.forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
-            loadPage(btn.dataset.page);
-        };
+
+            // تحميل الصفحة
+            loadPage(pageKey);
+        });
     });
 
+    // =========================
+    // تحميل Play افتراضيًا
+    // =========================
     loadPage("play");
+
 });
