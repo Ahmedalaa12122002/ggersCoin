@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
+    let isLoading = false; // 🔥 منع الضغط المتكرر
+
     const pagesConfig = {
         play: {
             title: "🎮 Play",
@@ -41,30 +43,43 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // =========================
-    // تحميل صفحة (منع الوميض)
+    // تحميل صفحة (حل FOUC + الوميض)
     // =========================
     async function loadPage(pageKey) {
-        const page = pagesConfig[pageKey];
-        if (!page) return;
+        if (isLoading) return; // 🔒 قفل مؤقت
+        isLoading = true;
 
+        const page = pagesConfig[pageKey];
+        if (!page) {
+            isLoading = false;
+            return;
+        }
+
+        // العنوان (حتى لو مخفي)
         title.textContent = page.title;
 
-        // إخفاء آمن بدون كسر
+        // إخفاء المحتوى تمامًا قبل أي تغيير
         view.classList.remove("page-show");
         view.classList.add("page-hide");
+        view.style.visibility = "hidden";
+        view.style.opacity = "0";
 
         setTimeout(async () => {
 
+            // تحميل HTML
             try {
                 const res = await fetch(`/static/pages/${page.path}/${page.path}.html`);
                 view.innerHTML = await res.text();
             } catch (e) {
                 view.innerHTML = "❌ فشل تحميل الصفحة";
                 console.error(e);
+                view.style.opacity = "1";
+                view.style.visibility = "visible";
+                isLoading = false;
                 return;
             }
 
-            // تحميل CSS أولاً
+            // تحميل CSS أولًا (مهم جدًا)
             removeAsset("page-style");
             const css = document.createElement("link");
             css.rel = "stylesheet";
@@ -72,9 +87,13 @@ document.addEventListener("DOMContentLoaded", () => {
             css.id = "page-style";
 
             css.onload = () => {
-                // إظهار الصفحة بعد اكتمال الستايل
-                view.classList.remove("page-hide");
-                view.classList.add("page-show");
+                // إظهار المحتوى بعد جاهزية CSS
+                requestAnimationFrame(() => {
+                    view.style.visibility = "visible";
+                    view.style.opacity = "1";
+                    view.classList.remove("page-hide");
+                    view.classList.add("page-show");
+                });
             };
 
             document.head.appendChild(css);
@@ -84,9 +103,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const js = document.createElement("script");
             js.src = `/static/pages/${page.path}/${page.path}.js`;
             js.id = "page-script";
+
+            js.onload = () => {
+                // 🔥 إعادة تهيئة صفحة حسابي
+                if (pageKey === "profile" && typeof initProfilePage === "function") {
+                    initProfilePage();
+                }
+                isLoading = false; // 🔓 فك القفل
+            };
+
             document.body.appendChild(js);
 
-        }, 160);
+        }, 200); // زمن الانتقال المحسوب
     }
 
     function removeAsset(id) {
@@ -95,21 +123,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================
-    // أزرار القوائم
+    // ربط أزرار القوائم
     // =========================
     buttons.forEach(btn => {
         btn.addEventListener("click", () => {
             const pageKey = btn.dataset.page;
 
+            // منع إعادة تحميل نفس الصفحة
+            if (btn.classList.contains("active")) return;
+
+            // تفعيل الزر
             buttons.forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
 
+            // تحميل الصفحة
             loadPage(pageKey);
         });
     });
 
     // =========================
-    // تحميل Play افتراضيًا
+    // تحميل Play افتراضيًا (مرة واحدة)
     // =========================
     loadPage("play");
 
