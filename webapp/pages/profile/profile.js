@@ -1,14 +1,18 @@
 function initProfilePage() {
 
-    /* ===== Vibration ===== */
+    /* ======================
+       VIBRATION
+    ====================== */
     const vibBtn = document.getElementById("toggleVibration");
     if (vibBtn) {
         const vibEnabled = localStorage.getItem("vibration") !== "off";
+
         vibBtn.textContent = vibEnabled ? "مفعّل" : "مُعطّل";
         vibBtn.classList.toggle("off", !vibEnabled);
 
         vibBtn.onclick = () => {
             const enabled = localStorage.getItem("vibration") !== "off";
+
             if (enabled) {
                 localStorage.setItem("vibration", "off");
                 window.AppSettings.vibration = false;
@@ -23,7 +27,9 @@ function initProfilePage() {
         };
     }
 
-    /* ===== Theme ===== */
+    /* ======================
+       THEME
+    ====================== */
     const themeBtn = document.getElementById("toggleTheme");
     if (themeBtn) {
         const theme = localStorage.getItem("theme") || "dark";
@@ -31,6 +37,7 @@ function initProfilePage() {
 
         themeBtn.onclick = () => {
             const newTheme = localStorage.getItem("theme") === "light" ? "dark" : "light";
+
             localStorage.setItem("theme", newTheme);
             window.AppSettings.theme = newTheme;
             document.body.classList.toggle("light", newTheme === "light");
@@ -38,16 +45,19 @@ function initProfilePage() {
         };
     }
 
-    /* ===== Logout ===== */
+    /* ======================
+       LOGOUT
+    ====================== */
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
         logoutBtn.onclick = () => {
             localStorage.clear();
-            if (window.Telegram?.WebApp) {
+
+            if (window.Telegram && Telegram.WebApp) {
                 Telegram.WebApp.close();
             } else {
                 location.reload();
             }
         };
     }
-            }
+                }
