@@ -95,10 +95,6 @@ def start_handler(message):
 • طوّر حسابك وافتح أراضي أكثر
 • فعّل VIP لربح أسرع 🔥
 
-⚡ اللعب سهل – بدون تعقيد  
-📱 يعمل مباشرة من تيليجرام  
-🚀 كل دقيقة لعب = فرصة ربح
-
 👇 اضغط الزر بالأسفل وابدأ الآن
 """
 
@@ -130,7 +126,6 @@ def auth_user(user: dict = Body(...)):
             user.get("language")
         ))
 
-        # إنشاء إعدادات افتراضية للمستخدم
         cursor.execute("""
         INSERT OR IGNORE INTO user_settings (user_id)
         VALUES (?)
@@ -139,6 +134,51 @@ def auth_user(user: dict = Body(...)):
         db.commit()
 
     db.close()
+    return {"status": "ok"}
+
+# =============================
+# API Profile (NEW 🔥)
+# =============================
+@app.get("/api/profile/{user_id}")
+def get_profile(user_id: int):
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("""
+    SELECT first_name, last_name, username
+    FROM users
+    WHERE id = ?
+    """, (user_id,))
+    row = cursor.fetchone()
+    db.close()
+
+    if not row:
+        return JSONResponse({"error": "User not found"}, status_code=404)
+
+    return {
+        "first_name": row[0],
+        "last_name": row[1],
+        "username": row[2]
+    }
+
+@app.post("/api/profile/{user_id}")
+def update_profile(user_id: int, data: dict = Body(...)):
+    first_name = data.get("first_name")
+    last_name = data.get("last_name")
+    username = data.get("username")
+
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("""
+    UPDATE users
+    SET first_name = ?, last_name = ?, username = ?
+    WHERE id = ?
+    """, (first_name, last_name, username, user_id))
+
+    db.commit()
+    db.close()
+
     return {"status": "ok"}
 
 # =============================
@@ -156,10 +196,7 @@ def get_settings(user_id: int):
     db.close()
 
     if not row:
-        return {
-            "vibration": True,
-            "theme": "dark"
-        }
+        return {"vibration": True, "theme": "dark"}
 
     return {
         "vibration": bool(row[0]),
