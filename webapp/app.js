@@ -14,14 +14,19 @@ document.addEventListener("DOMContentLoaded", () => {
     /* =========================
        GLOBAL SETTINGS (API)
     ========================= */
-    window.AppSettings = {
+    window.AppSettings = window.AppSettings || {
         vibration: true,
         theme: "dark"
     };
 
     async function loadUserSettingsFromAPI() {
         try {
-            if (!window.Telegram || !Telegram.WebApp || !Telegram.WebApp.initDataUnsafe?.user) {
+            if (
+                !window.Telegram ||
+                !Telegram.WebApp ||
+                !Telegram.WebApp.initDataUnsafe ||
+                !Telegram.WebApp.initDataUnsafe.user
+            ) {
                 console.warn("⚠️ Telegram user غير متوفر");
                 return;
             }
@@ -32,16 +37,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await res.json();
 
-            window.AppSettings.vibration = data.vibration;
-            window.AppSettings.theme = data.theme;
+            window.AppSettings.vibration = !!data.vibration;
+            window.AppSettings.theme = data.theme || "dark";
 
-            document.body.classList.toggle("light", data.theme === "light");
+            // حفظ محلي (كاش ذكي)
+            localStorage.setItem(
+                "vibration",
+                window.AppSettings.vibration ? "on" : "off"
+            );
+            localStorage.setItem("theme", window.AppSettings.theme);
+
+            document.body.classList.toggle(
+                "light",
+                window.AppSettings.theme === "light"
+            );
 
         } catch (err) {
-            console.warn("⚠️ فشل تحميل الإعدادات من API – استخدام localStorage");
+            console.warn("⚠️ فشل تحميل الإعدادات من API – استخدام LocalStorage");
 
-            window.AppSettings.vibration = localStorage.getItem("vibration") !== "off";
-            window.AppSettings.theme = localStorage.getItem("theme") || "dark";
+            window.AppSettings.vibration =
+                localStorage.getItem("vibration") !== "off";
+
+            window.AppSettings.theme =
+                localStorage.getItem("theme") || "dark";
 
             document.body.classList.toggle(
                 "light",
@@ -97,8 +115,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // تحديث العنوان (حتى لو مخفي)
         title.textContent = page.title;
 
+        // إخفاء المحتوى تمامًا قبل التغيير
         view.classList.remove("page-show");
         view.classList.add("page-hide");
         view.style.visibility = "hidden";
@@ -106,6 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setTimeout(async () => {
 
+            // تحميل HTML
             try {
                 const res = await fetch(`/static/pages/${page.path}/${page.path}.html`);
                 view.innerHTML = await res.text();
@@ -118,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            // تحميل CSS أولاً
             removeAsset("page-style");
             const css = document.createElement("link");
             css.rel = "stylesheet";
@@ -135,12 +157,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             document.head.appendChild(css);
 
+            // تحميل JS
             removeAsset("page-script");
             const js = document.createElement("script");
             js.src = `/static/pages/${page.path}/${page.path}.js`;
             js.id = "page-script";
 
             js.onload = () => {
+                // إعادة تهيئة صفحة الحساب
                 if (pageKey === "profile" && typeof initProfilePage === "function") {
                     initProfilePage();
                 }
