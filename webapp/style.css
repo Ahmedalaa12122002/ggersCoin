@@ -37,9 +37,19 @@ body {
     height: calc(100vh - 138px);
     padding: 16px;
     overflow-y: auto;
-    animation: fadeIn 0.35s ease;
+
+    /* 🔥 حل الوميض الأبيض */
+    opacity: 0;
+    visibility: hidden;
 }
 
+/* عند إظهار الصفحة فقط */
+#view.page-show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Loader */
 .loader {
     text-align: center;
     padding: 40px;
@@ -137,11 +147,6 @@ body {
 }
 
 /* ===== Animations ===== */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
 @keyframes ripple {
     from {
         transform: scale(0);
@@ -171,27 +176,7 @@ body {
     }
 }
 
-/* ===== Light Mode (إضافة فقط) ===== */
-body.light {
-    background: #f4f4f4;
-    color: #111;
-}
-
-body.light .top-bar,
-body.light .bottom-nav {
-    background: rgba(255,255,255,0.95);
-    color: #111;
-}
-
-body.light .nav-btn {
-    background: linear-gradient(180deg, #ffffff, #eaeaea);
-    color: #111;
-}
-
-body.light .nav-btn.active {
-    background: linear-gradient(180deg, #fff4b0, #ffd84d);
-    color: #000;
-    }
+/* ===== Page Transitions ===== */
 .page-show {
     animation: pageIn 0.35s ease forwards;
 }
@@ -208,4 +193,34 @@ body.light .nav-btn.active {
 @keyframes pageOut {
     from { opacity: 1; transform: translateX(0); }
     to   { opacity: 0; transform: translateX(-20px); }
-} 
+}
+
+/* ===== Light Mode ===== */
+body.light {
+    background: #f4f4f4;
+    color: #111;
+}
+
+body.light .top-bar,
+body.light .bottom-nav {
+    background: rgba(255,255,255,0.95);
+    color: #111;
+}
+
+body.light #view {
+    color: #111;
+}
+
+body.light .nav-btn {
+    background: linear-gradient(180deg, #ffffff, #eaeaea);
+    color: #111;
+}
+
+body.light .nav-btn span {
+    color: #111;
+}
+
+body.light .nav-btn.active {
+    background: linear-gradient(180deg, #fff4b0, #ffd84d);
+    color: #000;
+    }
