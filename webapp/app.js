@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
             document.body.appendChild(js);
 
-        }, 180);
+        }, 200);
     }
 
     function removeAsset(id) {
