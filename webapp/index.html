@@ -73,11 +73,23 @@
 <!-- ===== SPA Core ===== -->
 <script src="/static/app.js"></script>
 
-<!-- ===== Global Settings + Effects ===== -->
+<!-- ===== Telegram Init + Global Settings ===== -->
 <script>
 /* =========================
+   Telegram WebApp Init
+========================= */
+if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
+} else {
+    // حماية: منع تشغيل الموقع خارج Telegram
+    document.body.innerHTML =
+        "<h3 style='text-align:center;margin-top:40px'>❌ هذا التطبيق يعمل من داخل تيليجرام فقط</h3>";
+}
+
+/* =========================
    Global App Settings
-   (القيم الحقيقية يتم تحميلها من API داخل profile.js)
+   (القيم الحقيقية يتم تحميلها من API)
 ========================= */
 window.AppSettings = window.AppSettings || {
     vibration: true,
@@ -112,6 +124,11 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
         }
     });
 });
+
+/* =========================
+   Basic Client Protection
+========================= */
+document.addEventListener("contextmenu", e => e.preventDefault());
 </script>
 
 </body>
