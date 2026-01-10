@@ -12,13 +12,30 @@ document.addEventListener("DOMContentLoaded", () => {
     let isLoading = false; // 🔥 منع الضغط المتكرر
 
     /* =========================
-       GLOBAL SETTINGS (API)
+       DEVICE ID (Protection)
+    ========================= */
+    function getDeviceId() {
+        let deviceId = localStorage.getItem("device_id");
+        if (!deviceId) {
+            deviceId = "dev-" + crypto.randomUUID();
+            localStorage.setItem("device_id", deviceId);
+        }
+        return deviceId;
+    }
+
+    const DEVICE_ID = getDeviceId();
+
+    /* =========================
+       GLOBAL SETTINGS
     ========================= */
     window.AppSettings = window.AppSettings || {
         vibration: true,
         theme: "dark"
     };
 
+    /* =========================
+       LOAD SETTINGS FROM API
+    ========================= */
     async function loadUserSettingsFromAPI() {
         try {
             if (
@@ -32,7 +49,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const userId = Telegram.WebApp.initDataUnsafe.user.id;
-            const res = await fetch(`/api/settings/${userId}`);
+
+            const res = await fetch(`/api/settings/${userId}`, {
+                headers: {
+                    "X-Init-Data": Telegram.WebApp.initData,
+                    "X-Device-Id": DEVICE_ID
+                }
+            });
+
             if (!res.ok) throw new Error("API error");
 
             const data = await res.json();
@@ -40,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.AppSettings.vibration = !!data.vibration;
             window.AppSettings.theme = data.theme || "dark";
 
-            // حفظ محلي (كاش ذكي)
+            // Cache ذكي
             localStorage.setItem(
                 "vibration",
                 window.AppSettings.vibration ? "on" : "off"
@@ -68,43 +92,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // تحميل الإعدادات مرة واحدة عند بدء التطبيق
+    // تحميل الإعدادات مرة واحدة
     loadUserSettingsFromAPI();
 
+    /* =========================
+       PAGES CONFIG
+    ========================= */
     const pagesConfig = {
-        play: {
-            title: "🎮 Play",
-            path: "play"
-        },
-        tasks: {
-            title: "📋 المهمات",
-            path: "tasks"
-        },
-        ref: {
-            title: "👥 الإحالة",
-            path: "ref"
-        },
-        wallet: {
-            title: "💰 المحفظة",
-            path: "wallet"
-        },
-        vip: {
-            title: "💎 VIP",
-            path: "vip"
-        },
-        profile: {
-            title: "👤 حسابي",
-            path: "profile"
-        },
-        log: {
-            title: "🧾 السجل",
-            path: "log"
-        }
+        play: { title: "🎮 Play", path: "play" },
+        tasks: { title: "📋 المهمات", path: "tasks" },
+        ref: { title: "👥 الإحالة", path: "ref" },
+        wallet: { title: "💰 المحفظة", path: "wallet" },
+        vip: { title: "💎 VIP", path: "vip" },
+        profile: { title: "👤 حسابي", path: "profile" },
+        log: { title: "🧾 السجل", path: "log" }
     };
 
-    // =========================
-    // تحميل صفحة (حل FOUC + الوميض)
-    // =========================
+    /* =========================
+       LOAD PAGE (ANTI FOUC)
+    ========================= */
     async function loadPage(pageKey) {
         if (isLoading) return;
         isLoading = true;
@@ -115,10 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // تحديث العنوان (حتى لو مخفي)
         title.textContent = page.title;
 
-        // إخفاء المحتوى تمامًا قبل التغيير
         view.classList.remove("page-show");
         view.classList.add("page-hide");
         view.style.visibility = "hidden";
@@ -126,10 +130,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setTimeout(async () => {
 
-            // تحميل HTML
             try {
-                const res = await fetch(`/static/pages/${page.path}/${page.path}.html`);
+                const res = await fetch(
+                    `/static/pages/${page.path}/${page.path}.html`,
+                    {
+                        headers: {
+                            "X-Init-Data": Telegram.WebApp?.initData || "",
+                            "X-Device-Id": DEVICE_ID
+                        }
+                    }
+                );
+
                 view.innerHTML = await res.text();
+
             } catch (e) {
                 view.innerHTML = "❌ فشل تحميل الصفحة";
                 console.error(e);
@@ -139,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // تحميل CSS أولاً
+            // CSS
             removeAsset("page-style");
             const css = document.createElement("link");
             css.rel = "stylesheet";
@@ -157,14 +170,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             document.head.appendChild(css);
 
-            // تحميل JS
+            // JS
             removeAsset("page-script");
             const js = document.createElement("script");
             js.src = `/static/pages/${page.path}/${page.path}.js`;
             js.id = "page-script";
 
             js.onload = () => {
-                // إعادة تهيئة صفحة الحساب
                 if (pageKey === "profile" && typeof initProfilePage === "function") {
                     initProfilePage();
                 }
@@ -181,9 +193,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el) el.remove();
     }
 
-    // =========================
-    // ربط أزرار القوائم
-    // =========================
+    /* =========================
+       NAV BUTTONS
+    ========================= */
     buttons.forEach(btn => {
         btn.addEventListener("click", () => {
             const pageKey = btn.dataset.page;
@@ -195,16 +207,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
             loadPage(pageKey);
 
-            // اهتزاز (لو مفعّل)
             if (navigator.vibrate && window.AppSettings.vibration) {
                 navigator.vibrate(15);
             }
         });
     });
 
-    // =========================
-    // تحميل Play افتراضيًا
-    // =========================
+    /* =========================
+       DEFAULT PAGE
+    ========================= */
     loadPage("play");
 
 });
