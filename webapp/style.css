@@ -42,12 +42,12 @@ body {
     padding: 16px;
     overflow-y: auto;
 
-    /* منع الوميض */
+    /* منع الوميض الأبيض */
     opacity: 0;
     visibility: hidden;
 
     /* منع تحريك layout */
-    will-change: opacity, transform;
+    will-change: opacity;
 }
 
 #view.page-show {
@@ -105,7 +105,7 @@ body {
 
     cursor: pointer;
 
-    /* ❌ لا تحريك مكاني */
+    /* ❌ منع أي تحريك مكاني */
     transform: none !important;
 
     transition:
