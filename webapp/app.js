@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // =========================
-    // تحميل صفحة (مع Animation)
+    // تحميل صفحة (حل FOUC)
     // =========================
     async function loadPage(pageKey) {
         const page = pagesConfig[pageKey];
@@ -50,6 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // العنوان
         title.textContent = page.title;
 
+        // إخفاء المحتوى مؤقتًا (حل الوميض)
+        view.style.opacity = "0";
+
         // Animation خروج
         view.classList.remove("page-show");
         view.classList.add("page-hide");
@@ -57,26 +60,32 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(async () => {
 
             // تحميل HTML
-            view.innerHTML = "⏳ جاري التحميل...";
             try {
                 const res = await fetch(`/static/pages/${page.path}/${page.path}.html`);
                 view.innerHTML = await res.text();
             } catch (e) {
                 view.innerHTML = "❌ فشل تحميل الصفحة";
                 console.error(e);
+                view.style.opacity = "1";
                 return;
             }
 
-            // Animation دخول
-            view.classList.remove("page-hide");
-            view.classList.add("page-show");
-
-            // تحميل CSS
+            // تحميل CSS أولًا
             removeAsset("page-style");
             const css = document.createElement("link");
             css.rel = "stylesheet";
             css.href = `/static/pages/${page.path}/${page.path}.css`;
             css.id = "page-style";
+
+            css.onload = () => {
+                // إظهار المحتوى بعد تحميل الـ CSS
+                view.style.opacity = "1";
+
+                // Animation دخول
+                view.classList.remove("page-hide");
+                view.classList.add("page-show");
+            };
+
             document.head.appendChild(css);
 
             // تحميل JS
@@ -86,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
             js.id = "page-script";
 
             js.onload = () => {
-                // 🔥 حل مشكلة حسابي (إعادة التهيئة)
+                // 🔥 إعادة تهيئة صفحة حسابي
                 if (pageKey === "profile" && typeof initProfilePage === "function") {
                     initProfilePage();
                 }
