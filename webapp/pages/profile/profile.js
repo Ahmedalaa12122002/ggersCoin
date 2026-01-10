@@ -1,57 +1,106 @@
 function initProfilePage() {
 
-    /* ======================
-       VIBRATION
-    ====================== */
-    const vibBtn = document.getElementById("toggleVibration");
-    if (vibBtn) {
-        const vibEnabled = localStorage.getItem("vibration") !== "off";
+    // ======================
+    // GET USER ID (Telegram)
+    // ======================
+    let userId = null;
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) {
+        userId = Telegram.WebApp.initDataUnsafe.user?.id || null;
+    }
 
-        vibBtn.textContent = vibEnabled ? "مفعّل" : "مُعطّل";
-        vibBtn.classList.toggle("off", !vibEnabled);
+    if (!userId) {
+        console.error("❌ لم يتم العثور على user_id");
+        return;
+    }
+
+    // ======================
+    // LOAD SETTINGS FROM API
+    // ======================
+    fetch(`/api/settings/${userId}`)
+        .then(res => res.json())
+        .then(settings => {
+
+            // تحديث الإعدادات العامة
+            window.AppSettings.vibration = settings.vibration;
+            window.AppSettings.theme = settings.theme;
+
+            document.body.classList.toggle("light", settings.theme === "light");
+
+            initVibration(settings.vibration);
+            initTheme(settings.theme);
+
+        })
+        .catch(err => {
+            console.error("❌ فشل تحميل الإعدادات", err);
+        });
+
+    // ======================
+    // VIBRATION
+    // ======================
+    function initVibration(isEnabled) {
+        const vibBtn = document.getElementById("toggleVibration");
+        if (!vibBtn) return;
+
+        vibBtn.textContent = isEnabled ? "مفعّل" : "مُعطّل";
+        vibBtn.classList.toggle("off", !isEnabled);
 
         vibBtn.onclick = () => {
-            const enabled = localStorage.getItem("vibration") !== "off";
+            const newState = !window.AppSettings.vibration;
 
-            if (enabled) {
-                localStorage.setItem("vibration", "off");
-                window.AppSettings.vibration = false;
-                vibBtn.textContent = "مُعطّل";
-                vibBtn.classList.add("off");
-            } else {
-                localStorage.setItem("vibration", "on");
-                window.AppSettings.vibration = true;
-                vibBtn.textContent = "مفعّل";
-                vibBtn.classList.remove("off");
-            }
+            window.AppSettings.vibration = newState;
+
+            vibBtn.textContent = newState ? "مفعّل" : "مُعطّل";
+            vibBtn.classList.toggle("off", !newState);
+
+            saveSettings();
         };
     }
 
-    /* ======================
-       THEME
-    ====================== */
-    const themeBtn = document.getElementById("toggleTheme");
-    if (themeBtn) {
-        const theme = localStorage.getItem("theme") || "dark";
-        themeBtn.textContent = theme === "light" ? "فاتح" : "ليلي";
+    // ======================
+    // THEME
+    // ======================
+    function initTheme(currentTheme) {
+        const themeBtn = document.getElementById("toggleTheme");
+        if (!themeBtn) return;
+
+        themeBtn.textContent = currentTheme === "light" ? "فاتح" : "ليلي";
 
         themeBtn.onclick = () => {
-            const newTheme = localStorage.getItem("theme") === "light" ? "dark" : "light";
+            const newTheme = window.AppSettings.theme === "light" ? "dark" : "light";
 
-            localStorage.setItem("theme", newTheme);
             window.AppSettings.theme = newTheme;
             document.body.classList.toggle("light", newTheme === "light");
+
             themeBtn.textContent = newTheme === "light" ? "فاتح" : "ليلي";
+
+            saveSettings();
         };
     }
 
-    /* ======================
-       LOGOUT
-    ====================== */
+    // ======================
+    // SAVE SETTINGS TO API
+    // ======================
+    function saveSettings() {
+        fetch(`/api/settings/${userId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                vibration: window.AppSettings.vibration,
+                theme: window.AppSettings.theme
+            })
+        }).catch(err => {
+            console.error("❌ فشل حفظ الإعدادات", err);
+        });
+    }
+
+    // ======================
+    // LOGOUT
+    // ======================
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
         logoutBtn.onclick = () => {
-            localStorage.clear();
 
             if (window.Telegram && Telegram.WebApp) {
                 Telegram.WebApp.close();
@@ -60,4 +109,4 @@ function initProfilePage() {
             }
         };
     }
-                }
+            }
