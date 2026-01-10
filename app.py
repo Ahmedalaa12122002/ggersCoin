@@ -26,6 +26,7 @@ def init_db():
     db = get_db()
     cursor = db.cursor()
 
+    # ===== Users =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
@@ -37,7 +38,7 @@ def init_db():
     )
     """)
 
-    # 🔥 جدول إعدادات المستخدم
+    # ===== User Settings =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS user_settings (
         user_id INTEGER PRIMARY KEY,
@@ -69,7 +70,7 @@ async def telegram_webhook(request: Request):
     return {"ok": True}
 
 # =============================
-# Telegram /start (رسالة ترحيب جذّابة)
+# Telegram /start
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -129,7 +130,7 @@ def auth_user(user: dict = Body(...)):
             user.get("language")
         ))
 
-        # إنشاء إعدادات افتراضية
+        # إنشاء إعدادات افتراضية للمستخدم
         cursor.execute("""
         INSERT OR IGNORE INTO user_settings (user_id)
         VALUES (?)
@@ -141,7 +142,7 @@ def auth_user(user: dict = Body(...)):
     return {"status": "ok"}
 
 # =============================
-# 🔧 API Settings (NEW)
+# API Settings
 # =============================
 @app.get("/api/settings/{user_id}")
 def get_settings(user_id: int):
@@ -155,7 +156,10 @@ def get_settings(user_id: int):
     db.close()
 
     if not row:
-        return {"vibration": True, "theme": "dark"}
+        return {
+            "vibration": True,
+            "theme": "dark"
+        }
 
     return {
         "vibration": bool(row[0]),
@@ -183,7 +187,7 @@ def update_settings(user_id: int, data: dict = Body(...)):
     return {"status": "ok"}
 
 # =============================
-# 🔥 Farm API (قبل fallback)
+# Farm API
 # =============================
 from api.farm.lands import router as lands_router
 app.include_router(lands_router)
@@ -201,7 +205,7 @@ def serve_index():
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
 # =============================
-# SPA fallback (بدون API)
+# SPA fallback
 # =============================
 @app.get("/{path:path}")
 def spa_fallback(path: str):
