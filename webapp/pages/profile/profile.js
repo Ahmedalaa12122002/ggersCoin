@@ -156,10 +156,8 @@ function initProfilePage() {
         logoutBtn.onclick = () => {
 
             const confirmLogout = confirm("هل أنت متأكد من تسجيل الخروج؟");
-
             if (!confirmLogout) return;
 
-            // لا نحذف الإعدادات من السيرفر
             localStorage.removeItem("vibration");
             localStorage.removeItem("theme");
 
@@ -170,4 +168,4 @@ function initProfilePage() {
             }
         };
     }
-        }
+}
