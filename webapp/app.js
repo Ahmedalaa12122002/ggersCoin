@@ -41,36 +41,30 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // =========================
-    // تحميل صفحة (حل FOUC)
+    // تحميل صفحة (منع الوميض)
     // =========================
     async function loadPage(pageKey) {
         const page = pagesConfig[pageKey];
         if (!page) return;
 
-        // العنوان
         title.textContent = page.title;
 
-        // إخفاء المحتوى مؤقتًا (حل الوميض)
-        view.style.opacity = "0";
-
-        // Animation خروج
+        // إخفاء آمن بدون كسر
         view.classList.remove("page-show");
         view.classList.add("page-hide");
 
         setTimeout(async () => {
 
-            // تحميل HTML
             try {
                 const res = await fetch(`/static/pages/${page.path}/${page.path}.html`);
                 view.innerHTML = await res.text();
             } catch (e) {
                 view.innerHTML = "❌ فشل تحميل الصفحة";
                 console.error(e);
-                view.style.opacity = "1";
                 return;
             }
 
-            // تحميل CSS أولًا
+            // تحميل CSS أولاً
             removeAsset("page-style");
             const css = document.createElement("link");
             css.rel = "stylesheet";
@@ -78,10 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
             css.id = "page-style";
 
             css.onload = () => {
-                // إظهار المحتوى بعد تحميل الـ CSS
-                view.style.opacity = "1";
-
-                // Animation دخول
+                // إظهار الصفحة بعد اكتمال الستايل
                 view.classList.remove("page-hide");
                 view.classList.add("page-show");
             };
@@ -93,17 +84,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const js = document.createElement("script");
             js.src = `/static/pages/${page.path}/${page.path}.js`;
             js.id = "page-script";
-
-            js.onload = () => {
-                // 🔥 إعادة تهيئة صفحة حسابي
-                if (pageKey === "profile" && typeof initProfilePage === "function") {
-                    initProfilePage();
-                }
-            };
-
             document.body.appendChild(js);
 
-        }, 180); // زمن الانتقال
+        }, 160);
     }
 
     function removeAsset(id) {
@@ -112,17 +95,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================
-    // ربط أزرار القوائم
+    // أزرار القوائم
     // =========================
     buttons.forEach(btn => {
         btn.addEventListener("click", () => {
             const pageKey = btn.dataset.page;
 
-            // تفعيل الزر
             buttons.forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
 
-            // تحميل الصفحة
             loadPage(pageKey);
         });
     });
