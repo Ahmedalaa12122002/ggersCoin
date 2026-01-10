@@ -5,106 +5,209 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     background: radial-gradient(circle at top, #141414 0%, #000 70%);
     color: #fff;
-    height: 100vh;
-    overflow: hidden;
+}
+
+/* ===== Top Bar ===== */
+.top-bar {
+    text-align: center;
+    padding: 14px 10px;
+    background: rgba(18,18,18,0.75);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.top-bar h1 {
+    font-size: 20px;
+}
+
+.top-sub {
+    display: block;
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 4px;
 }
 
 /* ===== View ===== */
 #view {
-    height: calc(100vh - 90px);
+    height: calc(100vh - 138px);
     padding: 16px;
     overflow-y: auto;
+
+    /* منع الوميض */
     opacity: 0;
     visibility: hidden;
+
+    /* منع تحريك layout */
+    will-change: opacity, transform;
 }
 
 #view.page-show {
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.25s ease;
 }
 
-#view.page-hide {
-    opacity: 0;
+/* Loader */
+.loader {
+    text-align: center;
+    padding: 40px;
+    opacity: 0.6;
 }
 
-/* ===== Bottom Nav (ثابت 100%) ===== */
+/* ===== Bottom Nav ===== */
 .bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 90px;
-    padding: 12px 6px;
+
     display: flex;
     gap: 6px;
-    background: rgba(10,10,10,0.95);
+    padding: 12px 6px;
+
+    background: rgba(10,10,10,0.88);
     backdrop-filter: blur(18px);
     border-top: 1px solid rgba(255,255,255,0.08);
-    z-index: 999;
+
+    z-index: 1000;
+
+    /* 🔒 تثبيت كامل */
+    transform: translateZ(0);
 }
 
 /* ===== Buttons ===== */
 .nav-btn {
+    position: relative;
+    overflow: hidden;
     flex: 1;
+
     background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
     color: #eee;
+
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 16px;
+
     padding: 10px 4px;
     font-size: 12px;
+
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 4px;
+
     cursor: pointer;
 
-    /* 🔒 منع الحركة */
+    /* ❌ لا تحريك مكاني */
     transform: none !important;
+
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        color 0.2s ease;
 }
 
 .nav-btn span {
     font-size: 10px;
+    white-space: nowrap;
     opacity: 0.85;
 }
 
 /* ===== Play Button ===== */
 .play-btn {
-    margin-top: -12px;
+    padding: 14px 6px;
     font-size: 14px;
     font-weight: bold;
 }
 
-/* ===== Active ===== */
+/* ===== Active – Yellow Glow ===== */
 .nav-btn.active {
     background: linear-gradient(180deg, #2a2400, #141000);
+    border: 1px solid rgba(255, 215, 0, 0.55);
     color: #ffe27a;
+
     box-shadow:
-        0 0 8px rgba(255,215,0,0.35),
-        inset 0 0 6px rgba(255,230,120,0.25);
+        0 0 8px rgba(255, 215, 0, 0.35),
+        inset 0 0 6px rgba(255, 230, 120, 0.25);
 }
 
-/* ===== Light Mode ===== */
+/* ===== Press (بدون تحريك) ===== */
+.nav-btn:active {
+    filter: brightness(0.9);
+}
+
+/* ===== Ripple Effect ===== */
+.nav-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,215,0,0.35) 10%, transparent 11%);
+    opacity: 0;
+}
+
+.nav-btn.ripple::after {
+    animation: ripple 0.55s ease-out;
+}
+
+@keyframes ripple {
+    from { opacity: 0.6; }
+    to   { opacity: 0; }
+}
+
+/* ===== Page Transitions ===== */
+.page-show {
+    animation: pageIn 0.3s ease forwards;
+}
+
+.page-hide {
+    animation: pageOut 0.2s ease forwards;
+}
+
+@keyframes pageIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes pageOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+/* ===============================
+   🌙 Light Mode (ذكي ومتباين)
+================================ */
 body.light {
     background: #f4f4f4;
     color: #111;
 }
 
-body.light #view {
+body.light #view,
+body.light p,
+body.light h1,
+body.light h2,
+body.light h3,
+body.light span,
+body.light div {
     color: #111;
 }
 
+body.light .top-bar,
 body.light .bottom-nav {
-    background: rgba(255,255,255,0.95);
+    background: rgba(255,255,255,0.96);
+    color: #111;
 }
 
 body.light .nav-btn {
     background: linear-gradient(180deg, #ffffff, #eaeaea);
     color: #111;
+    border-color: rgba(0,0,0,0.08);
 }
 
 body.light .nav-btn span {
@@ -114,4 +217,4 @@ body.light .nav-btn span {
 body.light .nav-btn.active {
     background: linear-gradient(180deg, #fff4b0, #ffd84d);
     color: #000;
-}
+    }
