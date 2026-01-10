@@ -25,6 +25,7 @@ def get_db():
 def init_db():
     db = get_db()
     cursor = db.cursor()
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
@@ -35,6 +36,16 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+
+    # 🔥 جدول إعدادات المستخدم
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS user_settings (
+        user_id INTEGER PRIMARY KEY,
+        vibration INTEGER DEFAULT 1,
+        theme TEXT DEFAULT 'dark'
+    )
+    """)
+
     db.commit()
     db.close()
 
@@ -104,6 +115,7 @@ def start_handler(message):
 def auth_user(user: dict = Body(...)):
     db = get_db()
     cursor = db.cursor()
+
     cursor.execute("SELECT id FROM users WHERE id = ?", (user.get("id"),))
     if not cursor.fetchone():
         cursor.execute("""
@@ -116,8 +128,58 @@ def auth_user(user: dict = Body(...)):
             user.get("username"),
             user.get("language")
         ))
+
+        # إنشاء إعدادات افتراضية
+        cursor.execute("""
+        INSERT OR IGNORE INTO user_settings (user_id)
+        VALUES (?)
+        """, (user.get("id"),))
+
         db.commit()
+
     db.close()
+    return {"status": "ok"}
+
+# =============================
+# 🔧 API Settings (NEW)
+# =============================
+@app.get("/api/settings/{user_id}")
+def get_settings(user_id: int):
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("""
+    SELECT vibration, theme FROM user_settings WHERE user_id = ?
+    """, (user_id,))
+    row = cursor.fetchone()
+    db.close()
+
+    if not row:
+        return {"vibration": True, "theme": "dark"}
+
+    return {
+        "vibration": bool(row[0]),
+        "theme": row[1]
+    }
+
+@app.post("/api/settings/{user_id}")
+def update_settings(user_id: int, data: dict = Body(...)):
+    vibration = 1 if data.get("vibration", True) else 0
+    theme = data.get("theme", "dark")
+
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("""
+    INSERT INTO user_settings (user_id, vibration, theme)
+    VALUES (?, ?, ?)
+    ON CONFLICT(user_id)
+    DO UPDATE SET vibration = ?, theme = ?
+    """, (user_id, vibration, theme, vibration, theme))
+
+    db.commit()
+    db.close()
+
     return {"status": "ok"}
 
 # =============================
