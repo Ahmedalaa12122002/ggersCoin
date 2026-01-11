@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /* =========================
-       NAVIGATION CONTROL (FIX)
+       NAVIGATION CONTROL (ANTI SPAM)
     ========================= */
     let navigationLocked = false;
     let currentRequestId = 0;
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // تحميل الإعدادات مرة واحدة
+    // تحميل الإعدادات مرة واحدة عند بدء التطبيق
     loadUserSettingsFromAPI();
 
     /* =========================
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /* =========================
-       LOAD PAGE (SAFE + FIX)
+       LOAD PAGE (SAFE + RACE FIX)
     ========================= */
     async function loadPage(pageKey) {
 
