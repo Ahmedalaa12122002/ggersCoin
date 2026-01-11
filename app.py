@@ -30,6 +30,7 @@ def init_db():
     db = get_db()
     cursor = db.cursor()
 
+    # ===== Users =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
@@ -41,6 +42,7 @@ def init_db():
     )
     """)
 
+    # ===== User Settings =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS user_settings (
         user_id INTEGER PRIMARY KEY,
@@ -49,6 +51,7 @@ def init_db():
     )
     """)
 
+    # ===== Devices (Security) =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS devices (
         device_id TEXT,
@@ -64,8 +67,11 @@ def init_db():
 @app.on_event("startup")
 async def on_startup():
     init_db()
-    bot.remove_webhook()
-    bot.set_webhook(url=f"{APP_URL}/webhook")
+    try:
+        bot.remove_webhook()
+        bot.set_webhook(url=f"{APP_URL}/webhook")
+    except Exception as e:
+        print("Telegram error:", e)
 
 # ======================================================
 # Telegram Webhook
@@ -78,22 +84,33 @@ async def telegram_webhook(request: Request):
     return {"ok": True}
 
 # ======================================================
-# Telegram /start
+# Telegram /start (رسالة الترحيب)
 # ======================================================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
-    kb = telebot.types.InlineKeyboardMarkup()
-    kb.add(
+    keyboard = telebot.types.InlineKeyboardMarkup()
+    keyboard.add(
         telebot.types.InlineKeyboardButton(
             "🚀 ابدأ اللعب الآن",
             web_app=telebot.types.WebAppInfo(url=APP_URL)
         )
     )
 
+    welcome_text = f"""
+🌱 *مرحبًا بك في {BOT_NAME}* 🌱
+
+🎮 العب واربح في نفس الوقت  
+💰 ازرع • احصد • اجمع نقاط  
+🔥 فعّل VIP لربح أسرع
+
+👇 اضغط الزر وابدأ الآن
+"""
+
     bot.send_message(
         message.chat.id,
-        f"🌱 مرحبًا بك في {BOT_NAME}\n\nاضغط وابدأ اللعب 👇",
-        reply_markup=kb
+        welcome_text,
+        reply_markup=keyboard,
+        parse_mode="Markdown"
     )
 
 # ======================================================
@@ -127,13 +144,17 @@ def verify_telegram_init_data(init_data: str) -> bool:
         return False
 
 # ======================================================
-# 🔒 API SECURITY ONLY
+# 🔒 API SECURITY (API فقط – بدون كسر WebView)
 # ======================================================
 @app.middleware("http")
-async def api_protection(request: Request, call_next):
+async def api_security_middleware(request: Request, call_next):
     path = request.url.path
 
-    # حماية API فقط
+    # 🔓 السماح للواجهة والملفات
+    if path == "/" or path.startswith("/static"):
+        return await call_next(request)
+
+    # 🔐 حماية الـ API فقط
     if path.startswith("/api"):
         init_data = request.headers.get("X-Init-Data")
         if not init_data or not verify_telegram_init_data(init_data):
@@ -159,13 +180,17 @@ def auth_user(
     db = get_db()
     cursor = db.cursor()
 
+    # ===== Device limit (4 users max) =====
     cursor.execute(
         "SELECT COUNT(DISTINCT user_id) FROM devices WHERE device_id = ?",
         (x_device_id,)
     )
     if cursor.fetchone()[0] >= 4:
         db.close()
-        return JSONResponse({"error": "Device limit reached"}, status_code=403)
+        return JSONResponse(
+            {"error": "Device limit reached (4 accounts max)"},
+            status_code=403
+        )
 
     cursor.execute("SELECT id FROM users WHERE id = ?", (user["id"],))
     if not cursor.fetchone():
@@ -201,6 +226,7 @@ def auth_user(
 def get_settings(user_id: int):
     db = get_db()
     cursor = db.cursor()
+
     cursor.execute(
         "SELECT vibration, theme FROM user_settings WHERE user_id = ?",
         (user_id,)
@@ -241,7 +267,7 @@ def update_settings(user_id: int, data: dict = Body(...)):
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 # ======================================================
-# Frontend
+# Frontend (SPA)
 # ======================================================
 @app.get("/")
 def serve_index():
