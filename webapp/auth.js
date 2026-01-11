@@ -1,8 +1,36 @@
 // =====================================
-// Telegram WebApp Auth
+// Telegram WebApp Auth (STRICT MODE)
 // =====================================
-const tg = window.Telegram.WebApp;
 
+// ❌ منع التشغيل خارج تيليجرام نهائيًا
+if (
+    !window.Telegram ||
+    !Telegram.WebApp ||
+    typeof Telegram.WebApp.initData !== "string" ||
+    Telegram.WebApp.initData.length === 0
+) {
+    document.body.innerHTML = `
+        <div style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            height:100vh;
+            background:#000;
+            color:#fff;
+            font-family:sans-serif;
+            text-align:center;
+            padding:20px;
+        ">
+            <div>
+                <h2>🚫 غير مسموح</h2>
+                <p>يجب فتح التطبيق من داخل تيليجرام فقط</p>
+            </div>
+        </div>
+    `;
+    throw new Error("Blocked: Not running inside Telegram");
+}
+
+const tg = Telegram.WebApp;
 tg.ready();
 
 // =====================================
@@ -24,49 +52,112 @@ const DEVICE_ID = getDeviceId();
 // =====================================
 const user = tg.initDataUnsafe?.user;
 
-if (!user) {
-    console.warn("⚠️ Telegram user not found");
-} else {
-
-    const authUser = {
-        id: user.id,
-        first_name: user.first_name || "",
-        last_name: user.last_name || "",
-        username: user.username || "",
-        language: user.language_code || "en"
-    };
-
-    // حفظ بيانات المستخدم محليًا (Cache)
-    localStorage.setItem("tg_user", JSON.stringify(authUser));
-
-    console.log("✅ Telegram User:", authUser);
-    console.log("📱 Device ID:", DEVICE_ID);
-
-    // =====================================
-    // Send Auth Request (Protected)
-    // =====================================
-    fetch("/api/auth", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-
-            // 🔐 Telegram Security
-            "X-Init-Data": tg.initData,
-
-            // 📱 Device Protection
-            "X-Device-Id": DEVICE_ID
-        },
-        body: JSON.stringify(authUser)
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            console.error("❌ Auth Error:", data.error);
-        } else {
-            console.log("✅ Auth Success");
-        }
-    })
-    .catch(err => {
-        console.error("❌ Auth Request Failed:", err);
-    });
+if (!user || !user.id) {
+    console.error("❌ Telegram user not found");
+    document.body.innerHTML = `
+        <div style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            height:100vh;
+            background:#000;
+            color:#fff;
+            font-family:sans-serif;
+            text-align:center;
+            padding:20px;
+        ">
+            <div>
+                <h2>⚠️ خطأ</h2>
+                <p>فشل التحقق من حساب تيليجرام</p>
+            </div>
+        </div>
+    `;
+    throw new Error("Telegram user missing");
 }
+
+// =====================================
+// Prepare Auth Payload
+// =====================================
+const authUser = {
+    id: user.id,
+    first_name: user.first_name || "",
+    last_name: user.last_name || "",
+    username: user.username || "",
+    language: user.language_code || "en"
+};
+
+// Cache محلي
+localStorage.setItem("tg_user", JSON.stringify(authUser));
+
+console.log("✅ Telegram User:", authUser);
+console.log("📱 Device ID:", DEVICE_ID);
+
+// =====================================
+// Send Auth Request (SECURED)
+// =====================================
+fetch("/api/auth", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+
+        // 🔐 Telegram verification
+        "X-Init-Data": tg.initData,
+
+        // 📱 Device protection
+        "X-Device-Id": DEVICE_ID
+    },
+    body: JSON.stringify(authUser)
+})
+.then(res => res.json())
+.then(data => {
+
+    if (data.error) {
+        console.error("❌ Auth Error:", data.error);
+
+        document.body.innerHTML = `
+            <div style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                height:100vh;
+                background:#000;
+                color:#fff;
+                font-family:sans-serif;
+                text-align:center;
+                padding:20px;
+            ">
+                <div>
+                    <h2>🚫 تم حظر الوصول</h2>
+                    <p>${data.error}</p>
+                </div>
+            </div>
+        `;
+
+        throw new Error("Auth failed");
+    }
+
+    console.log("✅ Auth Success");
+
+})
+.catch(err => {
+    console.error("❌ Auth Request Failed:", err);
+
+    document.body.innerHTML = `
+        <div style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            height:100vh;
+            background:#000;
+            color:#fff;
+            font-family:sans-serif;
+            text-align:center;
+            padding:20px;
+        ">
+            <div>
+                <h2>⚠️ خطأ اتصال</h2>
+                <p>فشل الاتصال بالخادم</p>
+            </div>
+        </div>
+    `;
+});
