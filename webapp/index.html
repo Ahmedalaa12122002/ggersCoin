@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
     <!-- =========================
-         Telegram WebApp (MUST BE FIRST)
+         Telegram WebApp SDK
+         ⚠️ لازم ييجي قبل أي JS
     ========================= -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -84,53 +85,20 @@
 </nav>
 
 <!-- =========================
-     Telegram Auth (STRICT)
-     ⚠️ لازم ييجي قبل app.js
+     Telegram Auth
+     ✅ هو المسؤول الوحيد عن الحماية
 ========================= -->
-<script src="/static/auth.js"></script>
+<script src="/static/auth.js" defer></script>
 
 <!-- =========================
      SPA Core
 ========================= -->
-<script src="/static/app.js"></script>
+<script src="/static/app.js" defer></script>
 
 <!-- =========================
-     Telegram Init + Global UI
+     UI Helpers (بدون منع)
 ========================= -->
 <script>
-/* =========================
-   Telegram WebApp Init
-========================= */
-if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.ready();
-    Telegram.WebApp.expand();
-} else {
-    document.documentElement.innerHTML = `
-        <html lang="ar" dir="rtl">
-        <head>
-            <meta charset="UTF-8">
-            <title>غير مسموح</title>
-        </head>
-        <body style="
-            margin:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            height:100vh;
-            background:#000;
-            color:#fff;
-            font-family:system-ui,sans-serif;
-            text-align:center;
-        ">
-            <div>
-                <h2>🚫 غير مسموح</h2>
-                <p>هذا التطبيق يعمل من داخل تيليجرام فقط</p>
-            </div>
-        </body>
-        </html>
-    `;
-}
-
 /* =========================
    Global App Settings
 ========================= */
@@ -140,7 +108,7 @@ window.AppSettings = window.AppSettings || {
 };
 
 /* =========================
-   Apply Theme (مركزي)
+   Apply Theme
 ========================= */
 function applyTheme() {
     document.body.classList.toggle(
@@ -151,17 +119,15 @@ function applyTheme() {
 applyTheme();
 
 /* =========================
-   Ripple + Vibration (Global)
+   Ripple + Vibration
 ========================= */
 document.querySelectorAll(".nav-btn").forEach(btn => {
     btn.addEventListener("click", () => {
 
-        // Ripple
         btn.classList.remove("ripple");
         void btn.offsetWidth;
         btn.classList.add("ripple");
 
-        // Vibration
         if (navigator.vibrate && window.AppSettings.vibration) {
             navigator.vibrate(15);
         }
@@ -175,4 +141,4 @@ document.addEventListener("contextmenu", e => e.preventDefault());
 </script>
 
 </body>
-    </html>
+</html>
