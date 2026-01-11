@@ -5,32 +5,38 @@
 // ❌ منع التشغيل خارج تيليجرام نهائيًا
 if (
     !window.Telegram ||
-    !Telegram.WebApp ||
-    typeof Telegram.WebApp.initData !== "string" ||
-    Telegram.WebApp.initData.length === 0
+    !window.Telegram.WebApp ||
+    typeof window.Telegram.WebApp.initData !== "string" ||
+    window.Telegram.WebApp.initData.length === 0
 ) {
-    document.body.innerHTML = `
-        <div style="
+    document.documentElement.innerHTML = `
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>غير مسموح</title>
+        </head>
+        <body style="
+            margin:0;
             display:flex;
             align-items:center;
             justify-content:center;
             height:100vh;
             background:#000;
             color:#fff;
-            font-family:sans-serif;
+            font-family:system-ui,sans-serif;
             text-align:center;
-            padding:20px;
         ">
             <div>
                 <h2>🚫 غير مسموح</h2>
                 <p>يجب فتح التطبيق من داخل تيليجرام فقط</p>
             </div>
-        </div>
+        </body>
+        </html>
     `;
     throw new Error("Blocked: Not running inside Telegram");
 }
 
-const tg = Telegram.WebApp;
+const tg = window.Telegram.WebApp;
 tg.ready();
 
 // =====================================
@@ -53,24 +59,29 @@ const DEVICE_ID = getDeviceId();
 const user = tg.initDataUnsafe?.user;
 
 if (!user || !user.id) {
-    console.error("❌ Telegram user not found");
-    document.body.innerHTML = `
-        <div style="
+    document.documentElement.innerHTML = `
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>خطأ</title>
+        </head>
+        <body style="
+            margin:0;
             display:flex;
             align-items:center;
             justify-content:center;
             height:100vh;
             background:#000;
             color:#fff;
-            font-family:sans-serif;
+            font-family:system-ui,sans-serif;
             text-align:center;
-            padding:20px;
         ">
             <div>
                 <h2>⚠️ خطأ</h2>
                 <p>فشل التحقق من حساب تيليجرام</p>
             </div>
-        </div>
+        </body>
+        </html>
     `;
     throw new Error("Telegram user missing");
 }
@@ -112,27 +123,30 @@ fetch("/api/auth", {
 .then(data => {
 
     if (data.error) {
-        console.error("❌ Auth Error:", data.error);
-
-        document.body.innerHTML = `
-            <div style="
+        document.documentElement.innerHTML = `
+            <html lang="ar" dir="rtl">
+            <head>
+                <meta charset="UTF-8">
+                <title>تم الحظر</title>
+            </head>
+            <body style="
+                margin:0;
                 display:flex;
                 align-items:center;
                 justify-content:center;
                 height:100vh;
                 background:#000;
                 color:#fff;
-                font-family:sans-serif;
+                font-family:system-ui,sans-serif;
                 text-align:center;
-                padding:20px;
             ">
                 <div>
                     <h2>🚫 تم حظر الوصول</h2>
                     <p>${data.error}</p>
                 </div>
-            </div>
+            </body>
+            </html>
         `;
-
         throw new Error("Auth failed");
     }
 
@@ -140,24 +154,29 @@ fetch("/api/auth", {
 
 })
 .catch(err => {
-    console.error("❌ Auth Request Failed:", err);
-
-    document.body.innerHTML = `
-        <div style="
+    document.documentElement.innerHTML = `
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>خطأ اتصال</title>
+        </head>
+        <body style="
+            margin:0;
             display:flex;
             align-items:center;
             justify-content:center;
             height:100vh;
             background:#000;
             color:#fff;
-            font-family:sans-serif;
+            font-family:system-ui,sans-serif;
             text-align:center;
-            padding:20px;
         ">
             <div>
                 <h2>⚠️ خطأ اتصال</h2>
                 <p>فشل الاتصال بالخادم</p>
             </div>
-        </div>
+        </body>
+        </html>
     `;
+    console.error(err);
 });
