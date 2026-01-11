@@ -106,20 +106,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // تحميل الإعدادات مرة واحدة عند بدء التطبيق
+    // تحميل الإعدادات مرة واحدة
     loadUserSettingsFromAPI();
 
     /* =========================
        PAGES CONFIG
     ========================= */
     const pagesConfig = {
-        play: { title: "🎮 Play", path: "play" },
-        tasks: { title: "📋 المهمات", path: "tasks" },
-        ref: { title: "👥 الإحالة", path: "ref" },
-        wallet: { title: "💰 المحفظة", path: "wallet" },
-        vip: { title: "💎 VIP", path: "vip" },
-        profile: { title: "👤 حسابي", path: "profile" },
-        log: { title: "🧾 السجل", path: "log" }
+        play:    { title: "🎮 Play",    path: "play" },
+        tasks:   { title: "📋 المهمات", path: "tasks" },
+        ref:     { title: "👥 الإحالة", path: "ref" },
+        wallet:  { title: "💰 المحفظة", path: "wallet" },
+        vip:     { title: "💎 VIP",     path: "vip" },
+        profile: { title: "👤 حسابي",   path: "profile" },
+        log:     { title: "🧾 السجل",   path: "log" }
     };
 
     /* =========================
@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // ===== CSS =====
+            /* ===== CSS ===== */
             removeAsset("page-style");
             const css = document.createElement("link");
             css.rel = "stylesheet";
@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             document.head.appendChild(css);
 
-            // ===== JS =====
+            /* ===== JS ===== */
             removeAsset("page-script");
             const js = document.createElement("script");
             js.src = `/static/pages/${page.path}/${page.path}.js`;
