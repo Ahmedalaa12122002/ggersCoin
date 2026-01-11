@@ -102,18 +102,30 @@
                 window.AppSettings.vibration = !!data.vibration;
                 window.AppSettings.theme = data.theme || "dark";
 
-                localStorage.setItem("vibration", window.AppSettings.vibration ? "on" : "off");
+                localStorage.setItem(
+                    "vibration",
+                    window.AppSettings.vibration ? "on" : "off"
+                );
                 localStorage.setItem("theme", window.AppSettings.theme);
 
-                document.body.classList.toggle("light", window.AppSettings.theme === "light");
+                document.body.classList.toggle(
+                    "light",
+                    window.AppSettings.theme === "light"
+                );
 
             } catch (err) {
                 console.warn("⚠️ استخدام LocalStorage");
 
-                window.AppSettings.vibration = localStorage.getItem("vibration") !== "off";
-                window.AppSettings.theme = localStorage.getItem("theme") || "dark";
+                window.AppSettings.vibration =
+                    localStorage.getItem("vibration") !== "off";
 
-                document.body.classList.toggle("light", window.AppSettings.theme === "light");
+                window.AppSettings.theme =
+                    localStorage.getItem("theme") || "dark";
+
+                document.body.classList.toggle(
+                    "light",
+                    window.AppSettings.theme === "light"
+                );
             }
         }
 
