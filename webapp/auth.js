@@ -36,11 +36,14 @@ if (
     typeof window.Telegram.WebApp.initData !== "string" ||
     window.Telegram.WebApp.initData.length === 0
 ) {
+
     showBlockMessage(
         "🚫 غير مسموح",
         "يجب فتح التطبيق من داخل تيليجرام فقط"
     );
+
     console.warn("Blocked: Not running inside Telegram");
+
 } else {
 
     // =====================================
@@ -70,11 +73,14 @@ if (
     const user = tg.initDataUnsafe?.user;
 
     if (!user || !user.id) {
+
         showBlockMessage(
             "⚠️ خطأ",
             "فشل التحقق من حساب تيليجرام"
         );
+
         console.error("Telegram user missing");
+
     } else {
 
         // =====================================
@@ -135,5 +141,6 @@ if (
                 "تعذر الاتصال بالخادم، تأكد من الإنترنت"
             );
         });
+
     }
-            }
+}
