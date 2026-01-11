@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             document.body.appendChild(js);
 
-        }, 200);
+        }, 180); // زمن آمن لـ Telegram WebView
     }
 
     function removeAsset(id) {
