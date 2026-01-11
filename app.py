@@ -114,14 +114,17 @@ def start_handler(message):
     )
 
 # ======================================================
-# Telegram WebApp initData verification
+# Telegram initData verification
 # ======================================================
-def verify_telegram_init_data(init_data: str) -> dict | None:
+def verify_telegram_init_data(init_data: str) -> bool:
     try:
-        parsed = dict(urllib.parse.parse_qsl(init_data, strict_parsing=True))
+        parsed = dict(urllib.parse.parse_qsl(init_data))
         hash_from_telegram = parsed.pop("hash", None)
 
-        data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(parsed.items()))
+        data_check_string = "\n".join(
+            f"{k}={v}" for k, v in sorted(parsed.items())
+        )
+
         secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
         calculated_hash = hmac.new(
             secret_key,
@@ -130,15 +133,37 @@ def verify_telegram_init_data(init_data: str) -> dict | None:
         ).hexdigest()
 
         if calculated_hash != hash_from_telegram:
-            return None
+            return False
 
         if "auth_date" in parsed:
             if time.time() - int(parsed["auth_date"]) > 86400:
-                return None
+                return False
 
-        return parsed
+        return True
     except Exception:
-        return None
+        return False
+
+# ======================================================
+# 🔒 GLOBAL SECURITY MIDDLEWARE
+# ======================================================
+@app.middleware("http")
+async def telegram_only_middleware(request: Request, call_next):
+    path = request.url.path
+
+    # السماح للويبهوك والستاتيك
+    if path.startswith("/webhook") or path.startswith("/static"):
+        return await call_next(request)
+
+    # السماح للـ API فقط لو فيه initData
+    if path.startswith("/api"):
+        init_data = request.headers.get("X-Init-Data")
+        if not init_data or not verify_telegram_init_data(init_data):
+            return JSONResponse(
+                {"error": "Forbidden – Telegram only"},
+                status_code=403
+            )
+
+    return await call_next(request)
 
 # ======================================================
 # API Auth (Protected)
@@ -272,19 +297,30 @@ app.include_router(lands_router)
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 # ======================================================
-# Main page
+# Main page (Telegram only)
 # ======================================================
 @app.get("/")
-def serve_index():
+def serve_index(request: Request):
+    if not request.headers.get("X-Init-Data"):
+        return JSONResponse(
+            {"error": "Telegram WebApp only"},
+            status_code=403
+        )
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
 # ======================================================
 # SPA fallback
 # ======================================================
 @app.get("/{path:path}")
-def spa_fallback(path: str):
+def spa_fallback(path: str, request: Request):
     if path.startswith("api/"):
         return JSONResponse({"error": "Not Found"}, status_code=404)
+
+    if not request.headers.get("X-Init-Data"):
+        return JSONResponse(
+            {"error": "Telegram WebApp only"},
+            status_code=403
+        )
 
     file_path = os.path.join(WEBAPP_DIR, path)
     if os.path.isfile(file_path):
