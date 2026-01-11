@@ -1,185 +1,139 @@
 // =====================================
-// Telegram WebApp Auth (STRICT MODE)
+// Telegram WebApp Auth (SAFE + STRICT)
 // =====================================
 
-// ❌ منع التشغيل خارج تيليجرام نهائيًا
+// =====================================
+// Helper: Show Block Message (بدون كسر)
+// =====================================
+function showBlockMessage(title, message) {
+    document.body.innerHTML = `
+        <div style="
+            margin:0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            height:100vh;
+            background:#000;
+            color:#fff;
+            font-family:system-ui,sans-serif;
+            text-align:center;
+            padding:20px;
+        ">
+            <div>
+                <h2>${title}</h2>
+                <p>${message}</p>
+            </div>
+        </div>
+    `;
+}
+
+// =====================================
+// Telegram Availability Check
+// =====================================
 if (
     !window.Telegram ||
     !window.Telegram.WebApp ||
     typeof window.Telegram.WebApp.initData !== "string" ||
     window.Telegram.WebApp.initData.length === 0
 ) {
-    document.documentElement.innerHTML = `
-        <html lang="ar" dir="rtl">
-        <head>
-            <meta charset="UTF-8">
-            <title>غير مسموح</title>
-        </head>
-        <body style="
-            margin:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            height:100vh;
-            background:#000;
-            color:#fff;
-            font-family:system-ui,sans-serif;
-            text-align:center;
-        ">
-            <div>
-                <h2>🚫 غير مسموح</h2>
-                <p>يجب فتح التطبيق من داخل تيليجرام فقط</p>
-            </div>
-        </body>
-        </html>
-    `;
-    throw new Error("Blocked: Not running inside Telegram");
-}
+    showBlockMessage(
+        "🚫 غير مسموح",
+        "يجب فتح التطبيق من داخل تيليجرام فقط"
+    );
+    console.warn("Blocked: Not running inside Telegram");
+} else {
 
-const tg = window.Telegram.WebApp;
+    // =====================================
+    // Telegram WebApp Init
+    // =====================================
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
 
-// تهيئة WebApp
-tg.ready();
-tg.expand(); // 📱 توسيع التطبيق داخل تيليجرام
-
-// =====================================
-// Generate / Get Device ID (ثابت للجهاز)
-// =====================================
-function getDeviceId() {
-    let deviceId = localStorage.getItem("device_id");
-    if (!deviceId) {
-        deviceId = "dev-" + crypto.randomUUID();
-        localStorage.setItem("device_id", deviceId);
-    }
-    return deviceId;
-}
-
-const DEVICE_ID = getDeviceId();
-
-// =====================================
-// Get Telegram User
-// =====================================
-const user = tg.initDataUnsafe?.user;
-
-if (!user || !user.id) {
-    document.documentElement.innerHTML = `
-        <html lang="ar" dir="rtl">
-        <head>
-            <meta charset="UTF-8">
-            <title>خطأ</title>
-        </head>
-        <body style="
-            margin:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            height:100vh;
-            background:#000;
-            color:#fff;
-            font-family:system-ui,sans-serif;
-            text-align:center;
-        ">
-            <div>
-                <h2>⚠️ خطأ</h2>
-                <p>فشل التحقق من حساب تيليجرام</p>
-            </div>
-        </body>
-        </html>
-    `;
-    throw new Error("Telegram user missing");
-}
-
-// =====================================
-// Prepare Auth Payload
-// =====================================
-const authUser = {
-    id: user.id,
-    first_name: user.first_name || "",
-    last_name: user.last_name || "",
-    username: user.username || "",
-    language: user.language_code || "en"
-};
-
-// Cache محلي
-localStorage.setItem("tg_user", JSON.stringify(authUser));
-
-console.log("✅ Telegram User:", authUser);
-console.log("📱 Device ID:", DEVICE_ID);
-
-// =====================================
-// Send Auth Request (SECURED)
-// =====================================
-fetch("/api/auth", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-
-        // 🔐 Telegram verification
-        "X-Init-Data": tg.initData,
-
-        // 📱 Device protection
-        "X-Device-Id": DEVICE_ID
-    },
-    body: JSON.stringify(authUser)
-})
-.then(res => res.json())
-.then(data => {
-
-    if (data.error) {
-        document.documentElement.innerHTML = `
-            <html lang="ar" dir="rtl">
-            <head>
-                <meta charset="UTF-8">
-                <title>تم الحظر</title>
-            </head>
-            <body style="
-                margin:0;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                height:100vh;
-                background:#000;
-                color:#fff;
-                font-family:system-ui,sans-serif;
-                text-align:center;
-            ">
-                <div>
-                    <h2>🚫 تم حظر الوصول</h2>
-                    <p>${data.error}</p>
-                </div>
-            </body>
-            </html>
-        `;
-        throw new Error("Auth failed");
+    // =====================================
+    // Generate / Get Device ID (ثابت للجهاز)
+    // =====================================
+    function getDeviceId() {
+        let deviceId = localStorage.getItem("device_id");
+        if (!deviceId) {
+            deviceId = "dev-" + crypto.randomUUID();
+            localStorage.setItem("device_id", deviceId);
+        }
+        return deviceId;
     }
 
-    console.log("✅ Auth Success");
+    const DEVICE_ID = getDeviceId();
 
-})
-.catch(err => {
-    document.documentElement.innerHTML = `
-        <html lang="ar" dir="rtl">
-        <head>
-            <meta charset="UTF-8">
-            <title>خطأ اتصال</title>
-        </head>
-        <body style="
-            margin:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            height:100vh;
-            background:#000;
-            color:#fff;
-            font-family:system-ui,sans-serif;
-            text-align:center;
-        ">
-            <div>
-                <h2>⚠️ خطأ اتصال</h2>
-                <p>فشل الاتصال بالخادم</p>
-            </div>
-        </body>
-        </html>
-    `;
-    console.error(err);
-});
+    // =====================================
+    // Get Telegram User
+    // =====================================
+    const user = tg.initDataUnsafe?.user;
+
+    if (!user || !user.id) {
+        showBlockMessage(
+            "⚠️ خطأ",
+            "فشل التحقق من حساب تيليجرام"
+        );
+        console.error("Telegram user missing");
+    } else {
+
+        // =====================================
+        // Prepare Auth Payload
+        // =====================================
+        const authUser = {
+            id: user.id,
+            first_name: user.first_name || "",
+            last_name: user.last_name || "",
+            username: user.username || "",
+            language: user.language_code || "en"
+        };
+
+        // Cache محلي
+        localStorage.setItem("tg_user", JSON.stringify(authUser));
+
+        console.log("✅ Telegram User:", authUser);
+        console.log("📱 Device ID:", DEVICE_ID);
+
+        // =====================================
+        // Send Auth Request (SECURED + SAFE)
+        // =====================================
+        fetch("/api/auth", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+
+                // 🔐 Telegram verification
+                "X-Init-Data": tg.initData,
+
+                // 📱 Device protection
+                "X-Device-Id": DEVICE_ID
+            },
+            body: JSON.stringify(authUser)
+        })
+        .then(async res => {
+            let data = {};
+            try {
+                data = await res.json();
+            } catch (e) {}
+
+            if (!res.ok || data.error) {
+                console.warn("Auth failed:", data.error || res.status);
+                showBlockMessage(
+                    "⚠️ تنبيه",
+                    data.error || "تعذر التحقق من الحساب"
+                );
+                return;
+            }
+
+            console.log("✅ Auth Success");
+            // لا نفعل شيء – التطبيق يكمل طبيعي
+        })
+        .catch(err => {
+            console.error("Auth request error:", err);
+            showBlockMessage(
+                "⚠️ خطأ اتصال",
+                "تعذر الاتصال بالخادم، تأكد من الإنترنت"
+            );
+        });
+    }
+            }
