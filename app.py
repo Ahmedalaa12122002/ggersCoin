@@ -64,11 +64,6 @@ def init_db():
 @app.on_event("startup")
 async def on_startup():
     init_db()
-    try:
-        bot.remove_webhook()
-        bot.set_webhook(url=f"{APP_URL}/webhook")
-    except Exception as e:
-        print("Telegram error:", e)
 
 # ======================================================
 # Telegram Webhook
@@ -81,7 +76,7 @@ async def telegram_webhook(request: Request):
     return {"ok": True}
 
 # ======================================================
-# Telegram /start (رسالة الترحيب)
+# Telegram /start
 # ======================================================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -99,8 +94,6 @@ def start_handler(message):
 🎮 العب واربح في نفس الوقت  
 💰 ازرع • احصد • اجمع نقاط  
 🔥 فعّل VIP لربح أسرع
-
-👇 اضغط الزر وابدأ الآن
 """
 
     bot.send_message(
@@ -111,7 +104,7 @@ def start_handler(message):
     )
 
 # ======================================================
-# Telegram initData verification (يُستخدم فقط في auth)
+# Telegram initData verification
 # ======================================================
 def verify_telegram_init_data(init_data: str) -> bool:
     try:
@@ -141,7 +134,7 @@ def verify_telegram_init_data(init_data: str) -> bool:
         return False
 
 # ======================================================
-# API Auth (الحماية هنا فقط)
+# API Auth
 # ======================================================
 @app.post("/api/auth")
 def auth_user(
@@ -188,9 +181,7 @@ def auth_user(
         )
 
     cursor.execute(
-        "INSERT OR IGNORE INTO devices (device_id, user_id)
-        VALUES (?, ?)
-        """,
+        "INSERT OR IGNORE INTO devices (device_id, user_id) VALUES (?, ?)",
         (x_device_id, user["id"])
     )
 
@@ -246,7 +237,7 @@ def update_settings(user_id: int, data: dict = Body(...)):
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 # ======================================================
-# Frontend (SPA)
+# Frontend
 # ======================================================
 @app.get("/")
 def serve_index():
