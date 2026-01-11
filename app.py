@@ -30,7 +30,6 @@ def init_db():
     db = get_db()
     cursor = db.cursor()
 
-    # ===== Users =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
@@ -42,7 +41,6 @@ def init_db():
     )
     """)
 
-    # ===== User Settings =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS user_settings (
         user_id INTEGER PRIMARY KEY,
@@ -51,7 +49,6 @@ def init_db():
     )
     """)
 
-    # ===== Devices (Security) =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS devices (
         device_id TEXT,
@@ -67,11 +64,8 @@ def init_db():
 @app.on_event("startup")
 async def on_startup():
     init_db()
-    try:
-        bot.remove_webhook()
-        bot.set_webhook(url=f"{APP_URL}/webhook")
-    except Exception as e:
-        print("Telegram error:", e)
+    bot.remove_webhook()
+    bot.set_webhook(url=f"{APP_URL}/webhook")
 
 # ======================================================
 # Telegram Webhook
@@ -88,29 +82,18 @@ async def telegram_webhook(request: Request):
 # ======================================================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
-    keyboard = telebot.types.InlineKeyboardMarkup()
-    keyboard.add(
+    kb = telebot.types.InlineKeyboardMarkup()
+    kb.add(
         telebot.types.InlineKeyboardButton(
             "🚀 ابدأ اللعب الآن",
             web_app=telebot.types.WebAppInfo(url=APP_URL)
         )
     )
 
-    welcome_text = f"""
-🌱 *مرحبًا بك في {BOT_NAME}* 🌱
-
-🎮 العب واربح في نفس الوقت  
-💰 ازرع – احصد – اجمع نقاط  
-🔥 فعّل VIP لربح أسرع
-
-👇 اضغط الزر وابدأ الآن
-"""
-
     bot.send_message(
         message.chat.id,
-        welcome_text,
-        reply_markup=keyboard,
-        parse_mode="Markdown"
+        f"🌱 مرحبًا بك في {BOT_NAME}\n\nاضغط وابدأ اللعب 👇",
+        reply_markup=kb
     )
 
 # ======================================================
@@ -144,29 +127,25 @@ def verify_telegram_init_data(init_data: str) -> bool:
         return False
 
 # ======================================================
-# 🔒 GLOBAL SECURITY MIDDLEWARE
+# 🔒 API SECURITY ONLY
 # ======================================================
 @app.middleware("http")
-async def telegram_only_middleware(request: Request, call_next):
+async def api_protection(request: Request, call_next):
     path = request.url.path
 
-    # السماح للويبهوك والستاتيك
-    if path.startswith("/webhook") or path.startswith("/static"):
-        return await call_next(request)
-
-    # السماح للـ API فقط لو فيه initData
+    # حماية API فقط
     if path.startswith("/api"):
         init_data = request.headers.get("X-Init-Data")
         if not init_data or not verify_telegram_init_data(init_data):
             return JSONResponse(
-                {"error": "Forbidden – Telegram only"},
+                {"error": "Telegram WebApp only"},
                 status_code=403
             )
 
     return await call_next(request)
 
 # ======================================================
-# API Auth (Protected)
+# API Auth
 # ======================================================
 @app.post("/api/auth")
 def auth_user(
@@ -174,78 +153,46 @@ def auth_user(
     x_init_data: str = Header(None),
     x_device_id: str = Header(None)
 ):
-    if not x_init_data or not verify_telegram_init_data(x_init_data):
-        return JSONResponse({"error": "Unauthorized"}, status_code=401)
-
     if not x_device_id:
         return JSONResponse({"error": "Device ID required"}, status_code=400)
 
     db = get_db()
     cursor = db.cursor()
 
-    # ===== Device limit (max 4 users) =====
     cursor.execute(
         "SELECT COUNT(DISTINCT user_id) FROM devices WHERE device_id = ?",
         (x_device_id,)
     )
-    count = cursor.fetchone()[0]
-    if count >= 4:
+    if cursor.fetchone()[0] >= 4:
         db.close()
-        return JSONResponse(
-            {"error": "Device limit reached (4 accounts max)"},
-            status_code=403
-        )
+        return JSONResponse({"error": "Device limit reached"}, status_code=403)
 
-    cursor.execute("SELECT id FROM users WHERE id = ?", (user.get("id"),))
+    cursor.execute("SELECT id FROM users WHERE id = ?", (user["id"],))
     if not cursor.fetchone():
         cursor.execute("""
         INSERT INTO users (id, first_name, last_name, username, language)
         VALUES (?, ?, ?, ?, ?)
         """, (
-            user.get("id"),
-            user.get("first_name"),
-            user.get("last_name"),
-            user.get("username"),
-            user.get("language")
+            user["id"],
+            user["first_name"],
+            user["last_name"],
+            user["username"],
+            user["language"]
         ))
 
-        cursor.execute("""
-        INSERT OR IGNORE INTO user_settings (user_id)
-        VALUES (?)
-        """, (user.get("id"),))
+        cursor.execute(
+            "INSERT OR IGNORE INTO user_settings (user_id) VALUES (?)",
+            (user["id"],)
+        )
 
-    cursor.execute("""
-    INSERT OR IGNORE INTO devices (device_id, user_id)
-    VALUES (?, ?)
-    """, (x_device_id, user.get("id")))
+    cursor.execute(
+        "INSERT OR IGNORE INTO devices (device_id, user_id) VALUES (?, ?)",
+        (x_device_id, user["id"])
+    )
 
     db.commit()
     db.close()
     return {"status": "ok"}
-
-# ======================================================
-# API Profile
-# ======================================================
-@app.get("/api/profile/{user_id}")
-def get_profile(user_id: int):
-    db = get_db()
-    cursor = db.cursor()
-
-    cursor.execute("""
-    SELECT first_name, last_name, username
-    FROM users WHERE id = ?
-    """, (user_id,))
-    row = cursor.fetchone()
-    db.close()
-
-    if not row:
-        return JSONResponse({"error": "User not found"}, status_code=404)
-
-    return {
-        "first_name": row[0],
-        "last_name": row[1],
-        "username": row[2]
-    }
 
 # ======================================================
 # API Settings
@@ -254,23 +201,20 @@ def get_profile(user_id: int):
 def get_settings(user_id: int):
     db = get_db()
     cursor = db.cursor()
-
-    cursor.execute("""
-    SELECT vibration, theme FROM user_settings WHERE user_id = ?
-    """, (user_id,))
+    cursor.execute(
+        "SELECT vibration, theme FROM user_settings WHERE user_id = ?",
+        (user_id,)
+    )
     row = cursor.fetchone()
     db.close()
 
-    if not row:
-        return {"vibration": True, "theme": "dark"}
-
-    return {"vibration": bool(row[0]), "theme": row[1]}
+    return {
+        "vibration": bool(row[0]) if row else True,
+        "theme": row[1] if row else "dark"
+    }
 
 @app.post("/api/settings/{user_id}")
 def update_settings(user_id: int, data: dict = Body(...)):
-    vibration = 1 if data.get("vibration", True) else 0
-    theme = data.get("theme", "dark")
-
     db = get_db()
     cursor = db.cursor()
 
@@ -278,18 +222,18 @@ def update_settings(user_id: int, data: dict = Body(...)):
     INSERT INTO user_settings (user_id, vibration, theme)
     VALUES (?, ?, ?)
     ON CONFLICT(user_id)
-    DO UPDATE SET vibration = ?, theme = ?
-    """, (user_id, vibration, theme, vibration, theme))
+    DO UPDATE SET vibration=?, theme=?
+    """, (
+        user_id,
+        int(data.get("vibration", True)),
+        data.get("theme", "dark"),
+        int(data.get("vibration", True)),
+        data.get("theme", "dark")
+    ))
 
     db.commit()
     db.close()
     return {"status": "ok"}
-
-# ======================================================
-# Farm API
-# ======================================================
-from api.farm.lands import router as lands_router
-app.include_router(lands_router)
 
 # ======================================================
 # Static files
@@ -297,33 +241,15 @@ app.include_router(lands_router)
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 # ======================================================
-# Main page (Telegram only)
+# Frontend
 # ======================================================
 @app.get("/")
-def serve_index(request: Request):
-    if not request.headers.get("X-Init-Data"):
-        return JSONResponse(
-            {"error": "Telegram WebApp only"},
-            status_code=403
-        )
+def serve_index():
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
-# ======================================================
-# SPA fallback
-# ======================================================
 @app.get("/{path:path}")
-def spa_fallback(path: str, request: Request):
-    if path.startswith("api/"):
-        return JSONResponse({"error": "Not Found"}, status_code=404)
-
-    if not request.headers.get("X-Init-Data"):
-        return JSONResponse(
-            {"error": "Telegram WebApp only"},
-            status_code=403
-        )
-
+def spa_fallback(path: str):
     file_path = os.path.join(WEBAPP_DIR, path)
     if os.path.isfile(file_path):
         return FileResponse(file_path)
-
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
