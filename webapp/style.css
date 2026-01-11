@@ -42,14 +42,14 @@ body {
     padding: 16px;
     overflow-y: auto;
 
-    /* منع الوميض الأبيض */
-    opacity: 0;
-    visibility: hidden;
+    /* ✅ FIX: خلي المحتوى ظاهر افتراضيًا */
+    opacity: 1;
+    visibility: visible;
 
-    /* منع تحريك layout */
     will-change: opacity;
 }
 
+/* يظهر مع الأنيميشن */
 #view.page-show {
     opacity: 1;
     visibility: visible;
@@ -79,7 +79,6 @@ body {
 
     z-index: 1000;
 
-    /* 🔒 تثبيت كامل */
     transform: translateZ(0);
 }
 
@@ -105,7 +104,6 @@ body {
 
     cursor: pointer;
 
-    /* ❌ منع أي تحريك مكاني */
     transform: none !important;
 
     transition:
@@ -138,7 +136,7 @@ body {
         inset 0 0 6px rgba(255, 230, 120, 0.25);
 }
 
-/* ===== Press (بدون تحريك) ===== */
+/* ===== Press ===== */
 .nav-btn:active {
     filter: brightness(0.9);
 }
@@ -181,7 +179,7 @@ body {
 }
 
 /* ===============================
-   🌙 Light Mode (ذكي ومتباين)
+   🌙 Light Mode
 ================================ */
 body.light {
     background: #f4f4f4;
