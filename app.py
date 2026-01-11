@@ -30,7 +30,6 @@ def init_db():
     db = get_db()
     cursor = db.cursor()
 
-    # ===== Users =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
@@ -42,7 +41,6 @@ def init_db():
     )
     """)
 
-    # ===== User Settings =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS user_settings (
         user_id INTEGER PRIMARY KEY,
@@ -51,7 +49,6 @@ def init_db():
     )
     """)
 
-    # ===== Devices (Security) =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS devices (
         device_id TEXT,
@@ -114,7 +111,7 @@ def start_handler(message):
     )
 
 # ======================================================
-# Telegram initData verification
+# Telegram initData verification (يُستخدم فقط في auth)
 # ======================================================
 def verify_telegram_init_data(init_data: str) -> bool:
     try:
@@ -144,29 +141,7 @@ def verify_telegram_init_data(init_data: str) -> bool:
         return False
 
 # ======================================================
-# 🔒 API SECURITY (API فقط – بدون كسر WebView)
-# ======================================================
-@app.middleware("http")
-async def api_security_middleware(request: Request, call_next):
-    path = request.url.path
-
-    # 🔓 السماح للواجهة والملفات
-    if path == "/" or path.startswith("/static"):
-        return await call_next(request)
-
-    # 🔐 حماية الـ API فقط
-    if path.startswith("/api"):
-        init_data = request.headers.get("X-Init-Data")
-        if not init_data or not verify_telegram_init_data(init_data):
-            return JSONResponse(
-                {"error": "Telegram WebApp only"},
-                status_code=403
-            )
-
-    return await call_next(request)
-
-# ======================================================
-# API Auth
+# API Auth (الحماية هنا فقط)
 # ======================================================
 @app.post("/api/auth")
 def auth_user(
@@ -174,13 +149,15 @@ def auth_user(
     x_init_data: str = Header(None),
     x_device_id: str = Header(None)
 ):
+    if not x_init_data or not verify_telegram_init_data(x_init_data):
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+
     if not x_device_id:
         return JSONResponse({"error": "Device ID required"}, status_code=400)
 
     db = get_db()
     cursor = db.cursor()
 
-    # ===== Device limit (4 users max) =====
     cursor.execute(
         "SELECT COUNT(DISTINCT user_id) FROM devices WHERE device_id = ?",
         (x_device_id,)
@@ -211,7 +188,9 @@ def auth_user(
         )
 
     cursor.execute(
-        "INSERT OR IGNORE INTO devices (device_id, user_id) VALUES (?, ?)",
+        "INSERT OR IGNORE INTO devices (device_id, user_id)
+        VALUES (?, ?)
+        """,
         (x_device_id, user["id"])
     )
 
