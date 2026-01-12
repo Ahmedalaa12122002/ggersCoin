@@ -22,16 +22,16 @@ async def start(message: types.Message):
     )
 
     welcome_text = (
-        "🌱 **أهلاً بيك في لعبة المزرعة الذكية!**\n\n"
-        "ازرع 🌾 واحصد 🧺 وكبّر مزرعتك.\n"
+        "🌱 أهلاً بيك في لعبة المزرعة الذكية!\n\n"
+        "ازرع 🌾، احصد 🧺، وكبّر مزرعتك خطوة بخطوة.\n"
         "كل لعب = نقاط 💰\n"
-        "وتقدر تسحب أموال حقيقية 💸\n\n"
+        "وتقدر تحولها لأموال حقيقية 💸\n\n"
         "🔐 نظام آمن 100%\n\n"
-        "👇 اضغط وابدأ اللعب"
+        "👇 اضغط على الزر وابدأ اللعب"
     )
 
-    await message.answer(welcome_text, reply_markup=keyboard, parse_mode="Markdown")
+    await message.answer(welcome_text, reply_markup=keyboard)
 
 if __name__ == "__main__":
-    print("Bot is running...")
+    print("🤖 Bot is running...")
     executor.start_polling(dp, skip_updates=True)
