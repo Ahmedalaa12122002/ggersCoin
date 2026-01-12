@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Farm Game</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+<h3>🔐 جاري تأمين حسابك...</h3>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+
+fetch("/auth/telegram", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ initData: tg.initData })
+})
+.then(r => r.json())
+.then(data => {
+    localStorage.setItem("token", data.token);
+    document.body.innerHTML = "<h2>🌱 تم تأمين حسابك – ابدأ اللعب</h2>";
+})
+.catch(() => {
+    document.body.innerHTML = "<h2>❌ افتح اللعبة من Telegram فقط</h2>";
+});
+</script>
+
+</body>
+</html>
