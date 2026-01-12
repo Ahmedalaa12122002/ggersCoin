@@ -9,7 +9,6 @@ import os
 # =========================
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 APP_URL = "https://web-production-1ba0e.up.railway.app"
-BOT_NAME = "GgersCoin Bot"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
@@ -21,32 +20,29 @@ app = FastAPI()
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
 # =========================
-# STARTUP (IMPORTANT)
+# STARTUP → WEBHOOK (مهم جدًا)
 # =========================
 @app.on_event("startup")
-async def on_startup():
-    try:
-        bot.remove_webhook()
-        bot.set_webhook(url=f"{APP_URL}/webhook")
-        print("✅ Webhook set successfully")
-    except Exception as e:
-        print("❌ Webhook error:", e)
+async def startup():
+    bot.remove_webhook()
+    bot.set_webhook(url=f"{APP_URL}/webhook")
+    print("✅ Webhook connected")
 
 # =========================
 # TELEGRAM WEBHOOK
 # =========================
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    data = await request.json()
-    update = telebot.types.Update.de_json(data)
+    json_data = await request.json()
+    update = telebot.types.Update.de_json(json_data)
     bot.process_new_updates([update])
     return {"ok": True}
 
 # =========================
-# TELEGRAM /start
+# /start MESSAGE
 # =========================
 @bot.message_handler(commands=["start"])
-def start_handler(message):
+def start(message):
     keyboard = telebot.types.InlineKeyboardMarkup()
     keyboard.add(
         telebot.types.InlineKeyboardButton(
@@ -55,19 +51,19 @@ def start_handler(message):
         )
     )
 
-    welcome_text = f"""
-🌱 مرحبًا بك في {BOT_NAME}
+    text = """
+🌱 مرحبًا بك في GgersCoin 🌱
 
 🎮 العب واربح نقاط  
-💰 كل ما تلعب أكتر تكسب أكتر  
-🔥 فعّل VIP لربح أسرع  
+💰 كل دقيقة لعب = مكسب  
+🔥 فعّل VIP لمكافآت أكبر  
 
-👇 اضغط الزر وابدأ اللعب
+👇 اضغط الزر وابدأ
 """
 
     bot.send_message(
         message.chat.id,
-        welcome_text,
+        text,
         reply_markup=keyboard
     )
 
