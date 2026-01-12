@@ -1,17 +1,31 @@
-from fastapi import FastAPI, HTTPException
+import asyncio
+import logging
+import os
+import threading
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from jose import jwt
-import hashlib, hmac, time, urllib.parse
 
-BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
-JWT_SECRET = "CHANGE_THIS_SECRET_123"
-JWT_ALG = "HS256"
+from aiogram import Bot, Dispatcher, types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.utils import executor
 
+# ======================
+# CONFIG
+# ======================
+BOT_TOKEN = os.getenv("BOT_TOKEN") or "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
+WEB_APP_URL = "https://web-production-1ba0e.up.railway.app/"
+
+logging.basicConfig(level=logging.INFO)
+
+# ======================
+# FASTAPI (WEB)
+# ======================
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # نضيّقها لاحقًا
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -19,52 +33,39 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "Backend is running"}
+    return {"status": "ok", "message": "Web + Bot running together"}
 
-def verify_init_data(init_data: str):
-    parsed = dict(urllib.parse.parse_qsl(init_data))
-    hash_telegram = parsed.pop("hash", None)
+# ======================
+# TELEGRAM BOT
+# ======================
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher(bot)
 
-    if not hash_telegram:
-        raise HTTPException(status_code=401, detail="No hash")
+@dp.message_handler(commands=["start"])
+async def start(message: types.Message):
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(
+        InlineKeyboardButton(
+            text="🌱 Play Now | ابدأ اللعب",
+            web_app=WebAppInfo(url=WEB_APP_URL)
+        )
+    )
 
-    data_check = "\n".join(f"{k}={v}" for k, v in sorted(parsed.items()))
-    secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
+    await message.answer(
+        "🌱 أهلاً بيك في لعبة المزرعة!\n\n"
+        "ازرع 🌾 واحصد 🧺 وكسب نقاط 💰\n"
+        "النقاط = أموال حقيقية 💸\n\n"
+        "👇 اضغط Play وابدأ",
+        reply_markup=keyboard
+    )
 
-    calculated_hash = hmac.new(
-        secret_key,
-        data_check.encode(),
-        hashlib.sha256
-    ).hexdigest()
+# ======================
+# RUN BOT IN BACKGROUND
+# ======================
+def run_bot():
+    executor.start_polling(dp, skip_updates=True)
 
-    if calculated_hash != hash_telegram:
-        raise HTTPException(status_code=401, detail="Invalid Telegram auth")
-
-    auth_date = int(parsed.get("auth_date", 0))
-    if time.time() - auth_date > 86400:
-        raise HTTPException(status_code=401, detail="Auth expired")
-
-    return eval(parsed["user"])
-
-@app.post("/auth/telegram")
-def auth(data: dict):
-    init_data = data.get("initData")
-    if not init_data:
-        raise HTTPException(status_code=400, detail="Missing initData")
-
-    user = verify_init_data(init_data)
-
-    payload = {
-        "user_id": user["id"],
-        "exp": int(time.time()) + 86400
-    }
-
-    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
-
-    return {
-        "token": token,
-        "user": {
-            "id": user["id"],
-            "username": user.get("username")
-        }
-  }
+@app.on_event("startup")
+async def startup_event():
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, run_bot)
