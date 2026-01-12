@@ -1,61 +1,72 @@
-import logging
-from fastapi import FastAPI, Request
-from aiogram import Bot, Dispatcher, types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+import telebot
+import os
 
-# ======================
-# الإعدادات
-# ======================
+# =========================
+# CONFIG
+# =========================
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
+APP_URL = "https://web-production-1ba0e.up.railway.app"
+BOT_NAME = "GgersCoin Bot"
 
-# ⚠️ حط رابط Railway بعد النشر
-BASE_URL = "https://web-production-1ba0e.up.railway.app"
-WEBHOOK_PATH = "/telegram/webhook"
-WEBHOOK_URL = BASE_URL + WEBHOOK_PATH
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
 
-WEB_APP_URL = BASE_URL  # الويب نفسه
+# =========================
+# APP & BOT
+# =========================
+app = FastAPI()
+bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
-logging.basicConfig(level=logging.INFO)
-
-# ======================
-# Telegram Bot
-# ======================
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher(bot)
-
-@dp.message_handler(commands=["start"])
-async def start_handler(message: types.Message):
-    keyboard = InlineKeyboardMarkup()
+# =========================
+# TELEGRAM /start
+# =========================
+@bot.message_handler(commands=["start"])
+def start_handler(message):
+    keyboard = telebot.types.InlineKeyboardMarkup()
     keyboard.add(
-        InlineKeyboardButton(
-            text="🚀 دخول اللعبة",
-            web_app=WebAppInfo(url=WEB_APP_URL)
+        telebot.types.InlineKeyboardButton(
+            "🚀 ابدأ اللعب الآن",
+            web_app=telebot.types.WebAppInfo(url=APP_URL)
         )
     )
 
-    await message.answer(
-        "👋 أهلاً بيك في لعبة المزرعة 🌱\n\n"
-        "اضغط على الزر وابدأ اللعب 👇",
+    welcome_text = f"""
+🌱 مرحبًا بك في {BOT_NAME}
+
+🎮 العب واربح نقاط  
+💰 كل ما تلعب أكتر تكسب أكتر  
+🔥 ترقية VIP لربح أسرع  
+
+👇 اضغط الزر وابدأ
+"""
+
+    bot.send_message(
+        message.chat.id,
+        welcome_text,
         reply_markup=keyboard
     )
 
-# ======================
-# FastAPI
-# ======================
-app = FastAPI()
-
-@app.get("/")
-async def root():
-    return {"status": "ok", "message": "Bot + WebApp running"}
-
-@app.post(WEBHOOK_PATH)
-async def telegram_webhook(request: Request):
+# =========================
+# WEBHOOK
+# =========================
+@app.post("/webhook")
+async def telegram_webhook(request):
     data = await request.json()
-    update = types.Update(**data)
-    await dp.process_update(update)
+    update = telebot.types.Update.de_json(data)
+    bot.process_new_updates([update])
     return {"ok": True}
 
-@app.on_event("startup")
-async def on_startup():
-    await bot.set_webhook(WEBHOOK_URL)
-    logging.info(f"Webhook set to {WEBHOOK_URL}")
+# =========================
+# STATIC FILES
+# =========================
+app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
+
+# =========================
+# FRONTEND
+# =========================
+@app.get("/")
+def index():
+    return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
