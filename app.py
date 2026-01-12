@@ -1,46 +1,35 @@
 import os
-import threading
 import logging
+import hashlib
+import hmac
+import json
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
-from aiogram.utils import executor
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.utils.executor import start_webhook
 
 # ======================
 # CONFIG
 # ======================
-BOT_TOKEN = os.getenv("BOT_TOKEN") or "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
+BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 WEB_APP_URL = "https://web-production-1ba0e.up.railway.app/"
+WEBHOOK_PATH = "/telegram/webhook"
+WEBHOOK_URL = WEB_APP_URL.rstrip("/") + WEBHOOK_PATH
 
 logging.basicConfig(level=logging.INFO)
 
 # ======================
-# FASTAPI (WEB)
-# ======================
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
-def root():
-    return {"status": "ok", "message": "Web is running"}
-
-# ======================
-# TELEGRAM BOT
+# BOT
 # ======================
 bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=MemoryStorage())
 
 @dp.message_handler(commands=["start"])
-async def start(message: types.Message):
+async def start_cmd(message: types.Message):
     keyboard = InlineKeyboardMarkup()
     keyboard.add(
         InlineKeyboardButton(
@@ -58,13 +47,36 @@ async def start(message: types.Message):
     )
 
 # ======================
-# RUN BOT IN THREAD
+# FASTAPI
 # ======================
-def run_bot():
-    executor.start_polling(dp, skip_updates=True)
+app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Web + Bot via Webhook running"}
+
+@app.post(WEBHOOK_PATH)
+async def telegram_webhook(req: Request):
+    data = await req.json()
+    update = types.Update(**data)
+    await dp.process_update(update)
+    return {"ok": True}
+
+# ======================
+# STARTUP / SHUTDOWN
+# ======================
 @app.on_event("startup")
-def on_startup():
-    thread = threading.Thread(target=run_bot)
-    thread.daemon = True
-    thread.start()
+async def on_startup():
+    await bot.set_webhook(WEBHOOK_URL)
+    logging.info("Webhook set")
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    await bot.delete_webhook()
