@@ -1,5 +1,5 @@
 import os
-import asyncio
+import threading
 import logging
 
 from fastapi import FastAPI
@@ -7,18 +7,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.utils import executor
 
-# =====================
+# ======================
 # CONFIG
-# =====================
+# ======================
 BOT_TOKEN = os.getenv("BOT_TOKEN") or "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 WEB_APP_URL = "https://web-production-1ba0e.up.railway.app/"
 
 logging.basicConfig(level=logging.INFO)
 
-# =====================
-# FASTAPI
-# =====================
+# ======================
+# FASTAPI (WEB)
+# ======================
 app = FastAPI()
 
 app.add_middleware(
@@ -29,26 +30,23 @@ app.add_middleware(
 )
 
 @app.get("/")
-async def root():
-    return {"status": "ok", "message": "Web + Bot running"}
+def root():
+    return {"status": "ok", "message": "Web is running"}
 
-# =====================
+# ======================
 # TELEGRAM BOT
-# =====================
+# ======================
 bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
+dp = Dispatcher(bot)
 
-@dp.message(commands=["start"])
-async def start_cmd(message: types.Message):
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="🌱 Play Now | ابدأ اللعب",
-                    web_app=WebAppInfo(url=WEB_APP_URL)
-                )
-            ]
-        ]
+@dp.message_handler(commands=["start"])
+async def start(message: types.Message):
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(
+        InlineKeyboardButton(
+            text="🌱 Play Now | ابدأ اللعب",
+            web_app=WebAppInfo(url=WEB_APP_URL)
+        )
     )
 
     await message.answer(
@@ -59,12 +57,14 @@ async def start_cmd(message: types.Message):
         reply_markup=keyboard
     )
 
-# =====================
-# START BOT SAFELY
-# =====================
-async def start_bot():
-    await dp.start_polling(bot)
+# ======================
+# RUN BOT IN THREAD
+# ======================
+def run_bot():
+    executor.start_polling(dp, skip_updates=True)
 
 @app.on_event("startup")
-async def on_startup():
-    asyncio.create_task(start_bot())
+def on_startup():
+    thread = threading.Thread(target=run_bot)
+    thread.daemon = True
+    thread.start()
