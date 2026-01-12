@@ -2,58 +2,46 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
-import os
 
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
-APP_URL = "https://web-production-1ba0e.up.railway.app"
+APP_URL   = "https://web-production-1ba0e.up.railway.app"
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
+BOT_NAME = "GgersCoin Bot"
 
+bot = telebot.TeleBot(BOT_TOKEN)
 app = FastAPI()
 
-# 🔴 مهم جدًا
-bot = telebot.TeleBot(BOT_TOKEN, threaded=True)
-
-@app.on_event("startup")
-async def startup():
-    bot.remove_webhook()
-    bot.set_webhook(url=f"{APP_URL}/webhook")
-    print("✅ Webhook connected and app alive")
-
+# ===== Telegram Webhook =====
 @app.post("/webhook")
-async def telegram_webhook(request: Request):
-    data = await request.json()
-    update = telebot.types.Update.de_json(data)
+async def telegram_webhook(req: Request):
+    update = telebot.types.Update.de_json(await req.json())
     bot.process_new_updates([update])
     return {"ok": True}
 
 @bot.message_handler(commands=["start"])
-def start(message):
-    keyboard = telebot.types.InlineKeyboardMarkup()
-    keyboard.add(
+def start_handler(message):
+    kb = telebot.types.InlineKeyboardMarkup()
+    kb.add(
         telebot.types.InlineKeyboardButton(
-            "🚀 ابدأ اللعب الآن",
+            "🚀 دخول التطبيق",
             web_app=telebot.types.WebAppInfo(url=APP_URL)
         )
     )
-
     bot.send_message(
         message.chat.id,
-        """
-🌱 مرحبًا بك في GgersCoin 🌱
-
-🎮 العب واربح نقاط
-💰 كل دقيقة لعب = مكسب
-🔥 فعّل VIP لمكافآت أكبر
-
-👇 اضغط الزر وابدأ
-""",
-        reply_markup=keyboard
+        f"👋 أهلاً بك في *{BOT_NAME}*\n\nاضغط الزر للدخول إلى التطبيق",
+        reply_markup=kb,
+        parse_mode="Markdown"
     )
 
-app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
+@app.on_event("startup")
+async def on_startup():
+    bot.remove_webhook()
+    bot.set_webhook(url=f"{APP_URL}/webhook")
+
+# ===== Web App =====
+app.mount("/static", StaticFiles(directory="webapp"), name="static")
 
 @app.get("/")
-def index():
-    return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
+def home():
+    return FileResponse("webapp/index.html")
