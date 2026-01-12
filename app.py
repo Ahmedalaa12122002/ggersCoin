@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
@@ -21,6 +21,28 @@ app = FastAPI()
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
 # =========================
+# STARTUP (IMPORTANT)
+# =========================
+@app.on_event("startup")
+async def on_startup():
+    try:
+        bot.remove_webhook()
+        bot.set_webhook(url=f"{APP_URL}/webhook")
+        print("✅ Webhook set successfully")
+    except Exception as e:
+        print("❌ Webhook error:", e)
+
+# =========================
+# TELEGRAM WEBHOOK
+# =========================
+@app.post("/webhook")
+async def telegram_webhook(request: Request):
+    data = await request.json()
+    update = telebot.types.Update.de_json(data)
+    bot.process_new_updates([update])
+    return {"ok": True}
+
+# =========================
 # TELEGRAM /start
 # =========================
 @bot.message_handler(commands=["start"])
@@ -38,9 +60,9 @@ def start_handler(message):
 
 🎮 العب واربح نقاط  
 💰 كل ما تلعب أكتر تكسب أكتر  
-🔥 ترقية VIP لربح أسرع  
+🔥 فعّل VIP لربح أسرع  
 
-👇 اضغط الزر وابدأ
+👇 اضغط الزر وابدأ اللعب
 """
 
     bot.send_message(
@@ -48,16 +70,6 @@ def start_handler(message):
         welcome_text,
         reply_markup=keyboard
     )
-
-# =========================
-# WEBHOOK
-# =========================
-@app.post("/webhook")
-async def telegram_webhook(request):
-    data = await request.json()
-    update = telebot.types.Update.de_json(data)
-    bot.process_new_updates([update])
-    return {"ok": True}
 
 # =========================
 # STATIC FILES
