@@ -9,7 +9,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 
 # ⚠️ حط رابط Railway بعد النشر
-BASE_URL = "https://YOUR-PROJECT.up.railway.app"
+BASE_URL = "https://web-production-1ba0e.up.railway.app"
 WEBHOOK_PATH = "/telegram/webhook"
 WEBHOOK_URL = BASE_URL + WEBHOOK_PATH
 
