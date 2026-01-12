@@ -69,3 +69,4 @@ def run_bot():
 async def startup_event():
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, run_bot)
+
