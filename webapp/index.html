@@ -1,11 +1,48 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>GgersCoin</title>
+<meta charset="UTF-8">
+<title>GgersCoin</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <h1>✅ التطبيق يعمل</h1>
-  <p>واجهة القوائم ستظهر هنا</p>
+
+<h3>🔐 جاري التحقق...</h3>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+
+// إنشاء Device ID ثابت
+let deviceId = localStorage.getItem("device_id");
+if (!deviceId) {
+  deviceId = crypto.randomUUID();
+  localStorage.setItem("device_id", deviceId);
+}
+
+fetch("/api/auth", {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({
+    initData: tg.initData,
+    device_id: deviceId
+  })
+})
+.then(r => r.json())
+.then(res => {
+  if (res.error) {
+    document.body.innerHTML = `<h2>❌ ${res.error}</h2>`;
+  } else {
+    document.body.innerHTML = `
+      <h2>🎉 مرحبًا ${res.username || ""}</h2>
+      <p>تم تأمين حسابك بنجاح</p>
+    `;
+  }
+})
+.catch(() => {
+  document.body.innerHTML = "<h2>❌ افتح التطبيق من Telegram فقط</h2>";
+});
+</script>
+
 </body>
 </html>
