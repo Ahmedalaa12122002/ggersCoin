@@ -5,7 +5,7 @@ import telebot
 import os
 
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
-APP_URL   = "https://web-production-1ba0e.up.railway.app"
+APP_URL   = "https://web-production-2f18d.up.railway.app/"
 BOT_NAME  = "GgersCoin Bot"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
