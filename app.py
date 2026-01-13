@@ -4,6 +4,13 @@ from fastapi.staticfiles import StaticFiles
 import telebot
 import os, time, hashlib, hmac, urllib.parse
 
+from database import (
+    init_db,
+    get_users_for_device,
+    add_user,
+    bind_device
+)
+
 # =============================
 # الإعدادات
 # =============================
@@ -11,18 +18,13 @@ BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 APP_URL   = "https://web-production-2f18d.up.railway.app"
 BOT_NAME  = "GgersCoin Bot"
 
+MAX_USERS_PER_DEVICE = 2
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
 
 bot = telebot.TeleBot(BOT_TOKEN, threaded=True)
 app = FastAPI()
-
-# =============================
-# تخزين مؤقت (لاحقًا DB)
-# device_id => set(user_ids)
-# =============================
-DEVICE_USERS = {}
-MAX_USERS_PER_DEVICE = 2
 
 # =============================
 # Telegram initData verify
@@ -63,7 +65,7 @@ async def telegram_webhook(req: Request):
     return {"ok": True}
 
 # =============================
-# /start رسالة + زر WebApp
+# /start
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -80,18 +82,16 @@ def start_handler(message):
         f"""
 👋 أهلاً بك في *{BOT_NAME}*
 
-🎮 العب واربح نقاط  
-💰 نظام مكافآت حقيقي  
-🔐 حماية كاملة ضد الغش  
-
-👇 اضغط الزر وابدأ
+🔐 حسابك مؤمَّن  
+🎮 العب واربح  
+👇 اضغط وابدأ
 """,
         reply_markup=kb,
         parse_mode="Markdown"
     )
 
 # =============================
-# Auth + Device limit
+# Auth + Device limit (DB)
 # =============================
 @app.post("/api/auth")
 async def auth(data: dict):
@@ -103,8 +103,9 @@ async def auth(data: dict):
 
     user = verify_init_data(init_data)
     user_id = user["id"]
+    username = user.get("username")
 
-    users = DEVICE_USERS.get(device_id, set())
+    users = get_users_for_device(device_id)
 
     if user_id not in users and len(users) >= MAX_USERS_PER_DEVICE:
         return JSONResponse(
@@ -112,13 +113,13 @@ async def auth(data: dict):
             content={"error": "❌ هذا الجهاز وصل للحد الأقصى (2 حساب فقط)"}
         )
 
-    users.add(user_id)
-    DEVICE_USERS[device_id] = users
+    add_user(user_id, username)
+    bind_device(device_id, user_id)
 
     return {
         "status": "ok",
         "user_id": user_id,
-        "username": user.get("username")
+        "username": username
     }
 
 # =============================
@@ -126,33 +127,22 @@ async def auth(data: dict):
 # =============================
 @app.on_event("startup")
 async def on_startup():
+    init_db()
     bot.remove_webhook()
     bot.set_webhook(url=f"{APP_URL}/webhook")
-    print("✅ Webhook set and running")
+    print("✅ DB + Webhook ready")
 
 # =============================
-# WebApp static
+# WebApp
 # =============================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
-# =============================
-# 🔐 Protected Home (الأهم)
-# =============================
 @app.get("/")
 def protected_home(initData: str = Query(None)):
-    # أي متصفح عادي
     if not initData:
         return HTMLResponse(
-            """
-            <html>
-            <body style="text-align:center;margin-top:50px;font-family:sans-serif">
-                <h2>❌ هذا التطبيق يعمل من داخل Telegram فقط</h2>
-                <p>👉 افتح البوت وادخل من زر 🚀 دخول التطبيق</p>
-            </body>
-            </html>
-            """,
+            "<h2 style='text-align:center;margin-top:50px'>❌ افتح التطبيق من Telegram فقط</h2>",
             status_code=403
         )
 
-    # Telegram WebApp فقط
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
