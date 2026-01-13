@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import FastAPI, Request, HTTPException, Query
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
 import os, time, hashlib, hmac, urllib.parse
@@ -18,11 +18,10 @@ bot = telebot.TeleBot(BOT_TOKEN, threaded=True)
 app = FastAPI()
 
 # =============================
-# تخزين بسيط (لاحقًا DB)
+# تخزين مؤقت (لاحقًا DB)
 # device_id => set(user_ids)
 # =============================
 DEVICE_USERS = {}
-
 MAX_USERS_PER_DEVICE = 2
 
 # =============================
@@ -54,7 +53,7 @@ def verify_init_data(init_data: str):
     return eval(parsed["user"])
 
 # =============================
-# Webhook
+# Telegram Webhook
 # =============================
 @app.post("/webhook")
 async def telegram_webhook(req: Request):
@@ -110,7 +109,7 @@ async def auth(data: dict):
     if user_id not in users and len(users) >= MAX_USERS_PER_DEVICE:
         return JSONResponse(
             status_code=403,
-            content={"error": "هذا الجهاز وصل للحد الأقصى (2 حساب فقط)"}
+            content={"error": "❌ هذا الجهاز وصل للحد الأقصى (2 حساب فقط)"}
         )
 
     users.add(user_id)
@@ -129,13 +128,31 @@ async def auth(data: dict):
 async def on_startup():
     bot.remove_webhook()
     bot.set_webhook(url=f"{APP_URL}/webhook")
-    print("✅ Webhook set")
+    print("✅ Webhook set and running")
 
 # =============================
-# WebApp
+# WebApp static
 # =============================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
+# =============================
+# 🔐 Protected Home (الأهم)
+# =============================
 @app.get("/")
-def home():
+def protected_home(initData: str = Query(None)):
+    # أي متصفح عادي
+    if not initData:
+        return HTMLResponse(
+            """
+            <html>
+            <body style="text-align:center;margin-top:50px;font-family:sans-serif">
+                <h2>❌ هذا التطبيق يعمل من داخل Telegram فقط</h2>
+                <p>👉 افتح البوت وادخل من زر 🚀 دخول التطبيق</p>
+            </body>
+            </html>
+            """,
+            status_code=403
+        )
+
+    # Telegram WebApp فقط
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
