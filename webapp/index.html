@@ -2,108 +2,18 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>GgersCoin</title>
-
-<!-- Telegram WebApp SDK -->
+<title>WebApp</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    color: #fff;
-    text-align: center;
-    padding-top: 60px;
-}
-.box {
-    background: #020617;
-    padding: 25px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 420px;
-    margin: auto;
-}
-.error {
-    color: #ff4d4d;
-}
-.success {
-    color: #4ade80;
-}
-</style>
 </head>
+<body style="text-align:center;margin-top:50px;font-family:sans-serif">
 
-<body>
-
-<div class="box" id="content">
-    <h3>🔐 جاري التحقق...</h3>
-</div>
+<h2>✅ WebApp شغال</h2>
+<p>تم فتح التطبيق من Telegram بنجاح</p>
 
 <script>
-/* ============================
-   Telegram Check
-============================ */
 if (!window.Telegram || !Telegram.WebApp) {
-    document.body.innerHTML = `
-        <h2 style="margin-top:50px">
-        ❌ هذا التطبيق يعمل من داخل Telegram فقط
-        </h2>
-    `;
-    throw new Error("Not Telegram");
+    document.body.innerHTML = "<h2>❌ افتح التطبيق من Telegram فقط</h2>";
 }
-
-const tg = Telegram.WebApp;
-tg.ready();
-
-/* ============================
-   Device ID (limit accounts)
-============================ */
-let deviceId = localStorage.getItem("device_id");
-if (!deviceId) {
-    deviceId = crypto.randomUUID();
-    localStorage.setItem("device_id", deviceId);
-}
-
-/* ============================
-   Auth Request
-============================ */
-fetch("/api/auth", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        initData: tg.initData,
-        device_id: deviceId
-    })
-})
-.then(res => res.json())
-.then(data => {
-
-    if (data.error) {
-        document.getElementById("content").innerHTML = `
-            <h3 class="error">❌ ${data.error}</h3>
-        `;
-        return;
-    }
-
-    document.getElementById("content").innerHTML = `
-        <h2 class="success">🎉 مرحبًا ${data.username || ""}</h2>
-        <p>✅ تم تأمين حسابك بنجاح</p>
-
-        <hr style="margin:20px 0">
-
-        <p>🌱 لعبة المزرعة قيد التطوير</p>
-        <p>🔥 قريبًا أنظمة لعب وربح</p>
-    `;
-})
-.catch(() => {
-    document.getElementById("content").innerHTML = `
-        <h3 class="error">
-        ❌ فشل التحقق<br>
-        افتح التطبيق من Telegram فقط
-        </h3>
-    `;
-});
 </script>
 
 </body>
