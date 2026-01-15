@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Request, HTTPException, Query
-from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
 import os, time, hashlib, hmac, urllib.parse
@@ -14,7 +14,7 @@ from database import (
 # =============================
 # الإعدادات
 # =============================
-BOT_TOKEN = "8283096353:AAEJhU6xnnZtlzake_gdUM0Zd24-5XepAxw"
+BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
 APP_URL   = "https://web-production-2f18d.up.railway.app"
 BOT_NAME  = "GgersCoin Bot"
 
@@ -65,7 +65,7 @@ async def telegram_webhook(req: Request):
     return {"ok": True}
 
 # =============================
-# /start (رسالة آمنة 100%)
+# /start (رسالة آمنة)
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -79,7 +79,7 @@ def start_handler(message):
 
     bot.send_message(
         message.chat.id,
-        f"""
+        """
 👋 أهلاً بك!
 
 هذا التطبيق عبارة عن لعبة تفاعلية تعتمد على المهام والتقدّم داخل التجربة.
@@ -136,16 +136,10 @@ async def on_startup():
     print("✅ DB + Webhook ready")
 
 # =============================
-# WebApp
+# WebApp (افتح الصفحة عادي)
 # =============================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 @app.get("/")
-def protected_home(initData: str = Query(None)):
-    if not initData:
-        return HTMLResponse(
-            "<h2 style='text-align:center;margin-top:50px'>❌ افتح التطبيق من Telegram فقط</h2>",
-            status_code=403
-        )
-
+def home():
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
