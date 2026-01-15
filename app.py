@@ -42,8 +42,8 @@ def start_handler(message):
 # تشغيل البوت (Polling)
 # ======================
 def run_bot():
+    bot.remove_webhook()
     bot.infinity_polling(skip_pending=True)
-
 # ======================
 # Web App
 # ======================
