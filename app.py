@@ -65,7 +65,7 @@ async def telegram_webhook(req: Request):
     return {"ok": True}
 
 # =============================
-# /start
+# /start (رسالة آمنة 100%)
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -79,7 +79,7 @@ def start_handler(message):
 
     bot.send_message(
         message.chat.id,
-        """
+        f"""
 👋 أهلاً بك!
 
 هذا التطبيق عبارة عن لعبة تفاعلية تعتمد على المهام والتقدّم داخل التجربة.
@@ -131,20 +131,21 @@ async def auth(data: dict):
 @app.on_event("startup")
 async def on_startup():
     init_db()
-    bot.remove_webhook()
-    bot.set_webhook(url=f"{APP_URL}/webhook")
-    print("✅ DB + Webhook ready")
+    try:
+        bot.delete_webhook(drop_pending_updates=True)
+        bot.set_webhook(url=f"{APP_URL}/webhook")
+        print("✅ Webhook set successfully")
+    except Exception as e:
+        print("⚠️ Webhook setup skipped due to:", e)
 
 # =============================
-# WebApp (FIXED)
+# WebApp (حماية من المتصفح)
 # =============================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 @app.get("/")
 def protected_home(request: Request, initData: str = Query(None)):
     user_agent = request.headers.get("user-agent", "").lower()
-
-    # السماح فقط لتيليجرام
     if "telegram" not in user_agent:
         return HTMLResponse(
             "<h2 style='text-align:center;margin-top:50px'>❌ افتح التطبيق من Telegram فقط</h2>",
