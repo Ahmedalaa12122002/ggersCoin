@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
-import os, time, hashlib, hmac, urllib.parse
+import os, time, hashlib, hmac, urllib.parse, threading
 
 from database import (
     init_db,
@@ -23,7 +23,7 @@ MAX_USERS_PER_DEVICE = 2
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
 
-bot = telebot.TeleBot(BOT_TOKEN, threaded=True)
+bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 app = FastAPI()
 
 # =============================
@@ -131,12 +131,19 @@ async def auth(data: dict):
 @app.on_event("startup")
 async def on_startup():
     init_db()
+
     try:
         bot.delete_webhook(drop_pending_updates=True)
         bot.set_webhook(url=f"{APP_URL}/webhook")
         print("✅ Webhook set successfully")
     except Exception as e:
-        print("⚠️ Webhook setup skipped due to:", e)
+        print("⚠️ Webhook error:", e)
+
+    # 🔥 تشغيل Telebot في Thread مستقل (الحل الأساسي)
+    def bot_thread():
+        print("🤖 Bot thread running")
+
+    threading.Thread(target=bot_thread, daemon=True).start()
 
 # =============================
 # WebApp (حماية من المتصفح)
@@ -144,7 +151,7 @@ async def on_startup():
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 @app.get("/")
-def protected_home(request: Request, initData: str = Query(None)):
+def protected_home(request: Request):
     user_agent = request.headers.get("user-agent", "").lower()
     if "telegram" not in user_agent:
         return HTMLResponse(
