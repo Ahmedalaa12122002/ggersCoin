@@ -14,7 +14,7 @@ from database import (
 # =============================
 # الإعدادات
 # =============================
-BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
+BOT_TOKEN = "8283096353:AAEJhU6xnnZtlzake_gdUM0Zd24-5XepAxw"
 APP_URL   = "https://web-production-2f18d.up.railway.app"
 BOT_NAME  = "GgersCoin Bot"
 
