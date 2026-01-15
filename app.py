@@ -136,7 +136,7 @@ async def on_startup():
     print("✅ DB + Webhook ready")
 
 # =============================
-# WebApp (افتح الصفحة عادي)
+# WebApp (بدون منع الصفحة)
 # =============================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
