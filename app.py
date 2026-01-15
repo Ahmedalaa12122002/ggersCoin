@@ -1,67 +1,62 @@
+import threading
 import os
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.responses import FileResponse
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
-from aiogram.filters import CommandStart
+from fastapi.staticfiles import StaticFiles
+import telebot
 
-# =============================
+# ======================
 # الإعدادات
-# =============================
+# ======================
 BOT_TOKEN = "8088771179:AAHE_OhI7Hgq1sXZfHCdYtHd2prBvHzg_rQ"
-APP_URL   = "https://web-production-2f18d.up.railway.app"
+APP_URL = "https://web-production-2f18d.up.railway.app"
 
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
+
+bot = telebot.TeleBot(BOT_TOKEN)
 app = FastAPI()
 
-# =============================
-# رسالة /start + زر WebApp
-# =============================
-@dp.message(CommandStart())
-async def start_handler(message: Message):
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="🚀 دخول التطبيق",
-                    web_app=WebAppInfo(url=APP_URL)
-                )
-            ]
-        ]
+# ======================
+# رسالة /start + زر الويب
+# ======================
+@bot.message_handler(commands=["start"])
+def start_handler(message):
+    keyboard = telebot.types.InlineKeyboardMarkup()
+    keyboard.add(
+        telebot.types.InlineKeyboardButton(
+            text="🚀 دخول التطبيق",
+            web_app=telebot.types.WebAppInfo(url=APP_URL)
+        )
     )
 
-    await message.answer(
-        """👋 أهلاً بك!
-
-هذا التطبيق عبارة عن تجربة تفاعلية داخل Telegram.
-
-👇 اضغط على الزر بالأسفل للدخول إلى التطبيق.
-""",
-        reply_markup=kb
+    bot.send_message(
+        message.chat.id,
+        "👋 أهلاً بك\n\n"
+        "🎮 لعبة ويب تفاعلية\n"
+        "👇 اضغط الزر للدخول",
+        reply_markup=keyboard
     )
 
-# =============================
-# Webhook من Telegram
-# =============================
-@app.post("/webhook")
-async def telegram_webhook(request: Request):
-    update = await request.json()
-    await dp.feed_webhook_update(bot, update)
-    return {"ok": True}
+# ======================
+# تشغيل البوت (Polling)
+# ======================
+def run_bot():
+    bot.infinity_polling(skip_pending=True)
 
-# =============================
-# WebApp
-# =============================
+# ======================
+# Web App
+# ======================
+app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
+
 @app.get("/")
-async def home():
-    return FileResponse("webapp/index.html")
+def home():
+    return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
 
-# =============================
-# Startup
-# =============================
-@app.on_event("startup")
-async def on_startup():
-    await bot.delete_webhook(drop_pending_updates=True)
-    await bot.set_webhook(f"{APP_URL}/webhook")
-    print("✅ Bot webhook set")
+# ======================
+# تشغيل الكل
+# ======================
+if __name__ == "__main__":
+    threading.Thread(target=run_bot).start()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
