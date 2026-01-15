@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import FastAPI, Request, HTTPException, Query
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
 import os, time, hashlib, hmac, urllib.parse
@@ -65,7 +65,7 @@ async def telegram_webhook(req: Request):
     return {"ok": True}
 
 # =============================
-# /start (رسالة آمنة)
+# /start
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -136,10 +136,19 @@ async def on_startup():
     print("✅ DB + Webhook ready")
 
 # =============================
-# WebApp (بدون منع الصفحة)
+# WebApp (FIXED)
 # =============================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 @app.get("/")
-def home():
+def protected_home(request: Request, initData: str = Query(None)):
+    user_agent = request.headers.get("user-agent", "").lower()
+
+    # السماح فقط لتيليجرام
+    if "telegram" not in user_agent:
+        return HTMLResponse(
+            "<h2 style='text-align:center;margin-top:50px'>❌ افتح التطبيق من Telegram فقط</h2>",
+            status_code=403
+        )
+
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
