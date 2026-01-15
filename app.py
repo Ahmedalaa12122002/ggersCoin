@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
-import os, time, hashlib, hmac, urllib.parse, json
+import os, time, hashlib, hmac, urllib.parse
 
 from database import (
     init_db,
@@ -55,17 +55,17 @@ def verify_init_data(init_data: str):
     return eval(parsed["user"])
 
 # =============================
-# Telegram Webhook (✔ FIXED)
+# Telegram Webhook ✅ (الحل هنا)
 # =============================
 @app.post("/webhook")
-def telegram_webhook(req: Request):
-    body = json.loads(req.body())
-    update = telebot.types.Update.de_json(body)
-    bot.process_new_updates([update])
+async def telegram_webhook(req: Request):
+    data = await req.json()              # ✅ await صحيح
+    update = telebot.types.Update.de_json(data)
+    bot.process_new_updates([update])    # ✅ handlers تعمل
     return {"ok": True}
 
 # =============================
-# /start (رسالة آمنة 100%)
+# /start (رسالة + زر)
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -96,7 +96,7 @@ def start_handler(message):
 # Auth + Device limit (DB)
 # =============================
 @app.post("/api/auth")
-def auth(data: dict):
+async def auth(data: dict):
     init_data = data.get("initData")
     device_id = data.get("device_id")
 
@@ -128,11 +128,11 @@ def auth(data: dict):
 # Startup
 # =============================
 @app.on_event("startup")
-def on_startup():
+async def on_startup():
     init_db()
     try:
         bot.delete_webhook(drop_pending_updates=True)
-        bot.set_webhook(f"{APP_URL}/webhook")
+        bot.set_webhook(url=f"{APP_URL}/webhook")
         print("✅ Webhook set successfully")
     except Exception as e:
         print("⚠️ Webhook setup skipped:", e)
@@ -144,8 +144,8 @@ app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 @app.get("/")
 def protected_home(request: Request, initData: str = Query(None)):
-    user_agent = request.headers.get("user-agent", "").lower()
-    if "telegram" not in user_agent:
+    ua = request.headers.get("user-agent", "").lower()
+    if "telegram" not in ua:
         return HTMLResponse(
             "<h2 style='text-align:center;margin-top:50px'>❌ افتح التطبيق من Telegram فقط</h2>",
             status_code=403
