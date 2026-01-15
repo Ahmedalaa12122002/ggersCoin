@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
 import os, time, hashlib, hmac, urllib.parse
+import threading
 
 from database import (
     init_db,
@@ -23,7 +24,7 @@ MAX_USERS_PER_DEVICE = 2
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
 
-bot = telebot.TeleBot(BOT_TOKEN, threaded=True)
+bot = telebot.TeleBot(BOT_TOKEN)
 app = FastAPI()
 
 # =============================
@@ -55,17 +56,7 @@ def verify_init_data(init_data: str):
     return eval(parsed["user"])
 
 # =============================
-# Telegram Webhook ✅ (الحل هنا)
-# =============================
-@app.post("/webhook")
-async def telegram_webhook(req: Request):
-    data = await req.json()              # ✅ await صحيح
-    update = telebot.types.Update.de_json(data)
-    bot.process_new_updates([update])    # ✅ handlers تعمل
-    return {"ok": True}
-
-# =============================
-# /start (رسالة + زر)
+# /start (الرسالة + الزر)
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -96,7 +87,7 @@ def start_handler(message):
 # Auth + Device limit (DB)
 # =============================
 @app.post("/api/auth")
-async def auth(data: dict):
+def auth(data: dict):
     init_data = data.get("initData")
     device_id = data.get("device_id")
 
@@ -128,14 +119,15 @@ async def auth(data: dict):
 # Startup
 # =============================
 @app.on_event("startup")
-async def on_startup():
+def on_startup():
     init_db()
-    try:
-        bot.delete_webhook(drop_pending_updates=True)
-        bot.set_webhook(url=f"{APP_URL}/webhook")
-        print("✅ Webhook set successfully")
-    except Exception as e:
-        print("⚠️ Webhook setup skipped:", e)
+
+    # ❗ الحل النهائي: تشغيل البوت Polling
+    def run_bot():
+        bot.infinity_polling(skip_pending=True)
+
+    threading.Thread(target=run_bot, daemon=True).start()
+    print("✅ Bot polling started")
 
 # =============================
 # WebApp (حماية من المتصفح)
@@ -143,7 +135,7 @@ async def on_startup():
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 @app.get("/")
-def protected_home(request: Request, initData: str = Query(None)):
+def protected_home(request: Request):
     ua = request.headers.get("user-agent", "").lower()
     if "telegram" not in ua:
         return HTMLResponse(
