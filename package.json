@@ -1,7 +1,6 @@
 {
-  "name": "telegram-pro-bot",
+  "name": "telegram-web-app-pro",
   "version": "1.0.0",
-  "description": "Telegram Web App on Railway",
   "main": "dist/bot.js",
   "scripts": {
     "build": "tsc",
