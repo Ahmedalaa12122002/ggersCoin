@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Croply</title>
-
-    <!-- مهم جداً -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -13,45 +10,36 @@
     <style>
         body {
             margin: 0;
-            padding: 0;
-            background: #0f0f0f;
-            color: #ffffff;
+            background: #0e0e0e;
+            color: #fff;
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             text-align: center;
         }
 
         .container {
-            max-width: 320px;
+            margin-top: 60px;
         }
 
-        .error {
-            color: #ff4d4d;
-            font-size: 18px;
-        }
-
-        .title {
-            font-size: 22px;
-            margin-bottom: 10px;
+        h1 {
+            font-size: 26px;
         }
 
         .user {
             margin-top: 10px;
-            font-size: 16px;
-            opacity: 0.8;
+            font-size: 18px;
+            color: #b5ffb5;
         }
     </style>
 </head>
 <body>
 
-<div class="container" id="app">
-    <div class="title">🌱 مرحباً بك</div>
-    <div class="user" id="username">جارٍ التحميل...</div>
-</div>
+    <div class="container">
+        <h1>🌱 مرحباً بك</h1>
+        <div class="user" id="username">...</div>
+    </div>
 
-<script src="app.js"></script>
+    <!-- ⚠️ مهم جدًا: app.js بعد HTML -->
+    <script src="/static/app.js"></script>
+
 </body>
 </html>
