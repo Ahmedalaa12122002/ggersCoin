@@ -1,46 +1,46 @@
-document.addEventListener("DOMContentLoaded", function () {
+const tg = window.Telegram?.WebApp;
 
-    // =========================
-    // تأكيد أننا داخل Telegram
-    // =========================
-    if (typeof Telegram === "undefined" || !Telegram.WebApp) {
-        document.body.innerHTML = `
-            <h2 style="color:red;margin-top:50px">
-                ❌ افتح التطبيق من Telegram فقط
-            </h2>
-        `;
-        return;
-    }
+// ❌ لو مش داخل Telegram
+if (!tg || !tg.initData) {
+  document.getElementById("blocked").style.display = "block";
+  throw new Error("Not Telegram WebApp");
+}
 
-    const tg = Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+// لازم نعمل ready
+tg.ready();
 
-    // =========================
-    // قراءة بيانات المستخدم
-    // =========================
-    const data = tg.initDataUnsafe || {};
-    const user = data.user || {};
+// بيانات المستخدم
+const user = tg.initDataUnsafe?.user;
 
-    let displayName = "لاعب";
+// لو مفيش user
+if (!user) {
+  document.getElementById("blocked").style.display = "block";
+  throw new Error("No user data");
+}
 
-    if (user.first_name) {
-        displayName = user.first_name;
-    } else if (user.username) {
-        displayName = user.username;
-    } else if (user.id) {
-        displayName = "ID " + user.id;
-    }
+// إظهار الواجهة
+document.getElementById("app").style.display = "block";
+document.getElementById("username").innerText = user.first_name;
 
-    // =========================
-    // عرض الاسم
-    // =========================
-    const el = document.getElementById("username");
-
-    if (el) {
-        el.innerText = displayName;
-    } else {
-        console.error("username element not found");
-    }
-
+// 🔐 إرسال auth للـ Backend
+fetch("/api/auth", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    initData: tg.initData,
+    device_id: tg.platform + "-" + navigator.userAgent
+  })
+})
+.then(res => res.json())
+.then(data => {
+  if (data.error) {
+    alert(data.error);
+    tg.close();
+  }
+})
+.catch(err => {
+  console.error(err);
+  tg.close();
 });
