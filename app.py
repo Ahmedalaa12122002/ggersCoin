@@ -19,13 +19,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
 
 # =====================
-# تخزين مؤقت (لاحقًا DB)
-# device_id -> set(user_ids)
+#s تخزين مؤقت (لاحقًا DB)
 # =====================
 DEVICE_USERS = {}
 
 # =====================
-# verify initData (أمان Telegram)
+# verify initData
 # =====================
 def verify_init_data(init_data: str):
     parsed = dict(urllib.parse.parse_qsl(init_data))
@@ -63,7 +62,7 @@ async def telegram_webhook(request: Request):
     return {"ok": True}
 
 # =====================
-# /start رسالة + زر
+# /start
 # =====================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -78,20 +77,19 @@ def start_handler(message):
     bot.send_message(
         message.chat.id,
         """
-👋 أهلاً بك في تجربة تفاعلية جديدة 🌱
+👋 أهلاً بك في تجربة تفاعلية 🌱
 
-🎮 العب وشارك في مهام ممتعة  
-⭐ طوّر مستواك خطوة بخطوة  
-🎁 احصل على نقاط ومكافآت داخلية  
-📈 تقدّم، استكشف، ونافس الآخرين  
+🎮 العب وأنجز مهام
+⭐ طوّر مستواك
+🎁 مكافآت داخلية
 
-👇 اضغط على الزر وابدأ الآن
+👇 اضغط وابدأ
 """,
         reply_markup=kb
     )
 
 # =====================
-# API Auth + حد الجهاز
+# API Auth (الحماية هنا فقط)
 # =====================
 @app.post("/api/auth")
 async def auth(data: dict):
@@ -115,10 +113,7 @@ async def auth(data: dict):
     users.add(user_id)
     DEVICE_USERS[device_id] = users
 
-    return {
-        "status": "ok",
-        "user_id": user_id
-    }
+    return {"status": "ok", "user_id": user_id}
 
 # =====================
 # Startup
