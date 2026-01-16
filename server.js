@@ -1,74 +1,61 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const TelegramBot = require("node-telegram-bot-api");
-const crypto = require("crypto");
+const bodyParser = require("body-parser");
 const path = require("path");
 
-// ==================
-// الإعدادات
-// ==================
-const BOT_TOKEN = "8283096353:AAEJhU6xnnZtlzake_gdUM0Zd24-5XepAxw";
-const APP_URL = "https://ggerscoin-production.up.railway.app";
-
 const app = express();
-const bot = new TelegramBot(BOT_TOKEN);
 
-// ==================
-// Middleware
-// ==================
+// ====== ENV ======
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const APP_URL = process.env.APP_URL;
+const PORT = process.env.PORT || 3000;
+
+// ====== BOT ======
+const bot = new TelegramBot(BOT_TOKEN, { webHook: true });
+
+// ====== MIDDLEWARE ======
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "webapp")));
+app.use("/static", express.static(path.join(__dirname, "webapp")));
 
-// ==================
-// Webhook
-// ==================
-app.post(`/webhook`, (req, res) => {
+// ====== WEBHOOK ======
+app.post(`/bot${BOT_TOKEN}`, (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
 });
 
-// ==================
-// رسالة /start + زر WebApp
-// ==================
+// ====== START MESSAGE ======
 bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(
-    msg.chat.id,
-    `🌱 أهلاً بك في تجربة تفاعلية ممتعة
+  bot.sendMessage(msg.chat.id,
+`👋 أهلاً بك في تجربة تفاعلية جديدة 🌱
 
-🎮 العب وشارك في مهام داخل اللعبة  
-⭐ طوّر مستواك واكتشف مزايا جديدة  
+🎮 العب وشارك في مهام ممتعة  
+⭐ طوّر مستواك خطوة بخطوة  
 🎁 احصل على نقاط ومكافآت داخلية  
 
-👇 اضغط على الزر وابدأ الآن`,
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "🚀 دخول التطبيق",
-              web_app: { url: APP_URL }
-            }
-          ]
-        ]
-      }
+👇 اضغط الزر وابدأ الآن`,
+  {
+    reply_markup: {
+      inline_keyboard: [[
+        {
+          text: "🚀 دخول التطبيق",
+          web_app: { url: APP_URL }
+        }
+      ]]
     }
-  );
+  });
 });
 
-// ==================
-// الصفحة الرئيسية (WebApp)
-// ==================
+// ====== WEBAPP ======
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "webapp", "index.html"));
 });
 
-// ==================
-// تشغيل السيرفر + Webhook
-// ==================
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, async () => {
+// ====== LISTEN (ده أهم سطر) ======
+app.listen(PORT, () => {
   console.log("✅ Server running on port", PORT);
-  await bot.setWebHook(`${APP_URL}/webhook`);
-  console.log("✅ Webhook connected");
 });
+
+// ====== SET WEBHOOK ======
+bot.setWebHook(`${APP_URL}/bot${BOT_TOKEN}`)
+  .then(() => console.log("✅ Webhook connected"))
+  .catch(err => console.error("Webhook error:", err));
