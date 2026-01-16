@@ -9,13 +9,6 @@ app.mount("/static", StaticFiles(directory="webapp"), name="static")
 @app.get("/")
 def home():
     return HTMLResponse("""
-    <html>
-    <head>
-        <title>Web App</title>
-    </head>
-    <body style="text-align:center;margin-top:50px">
-        <h1>✅ الويب شغال</h1>
-        <p>تم فتح التطبيق بنجاح</p>
-    </body>
-    </html>
+    <h1>✅ الويب شغال</h1>
+    <p>تم تشغيل Web App بنجاح</p>
     """)
