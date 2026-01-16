@@ -1,11 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <title>Telegram WebApp</title>
+<meta charset="UTF-8">
+<title>WebApp</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+    background:#111;
+    color:#fff;
+    font-family:Arial;
+    text-align:center;
+    padding-top:50px;
+}
+</style>
 </head>
-<body style="text-align:center;margin-top:50px">
-    <h2>🎮 مرحبًا بك</h2>
-    <p>دي صفحة الويب</p>
+<body>
+
+<h2>⏳ جاري التحقق...</h2>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+const initData = tg.initData;
+const deviceId = localStorage.getItem("device_id") || crypto.randomUUID();
+localStorage.setItem("device_id", deviceId);
+
+fetch("/api/auth", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+        initData: initData,
+        device_id: deviceId
+    })
+})
+.then(res => res.json())
+.then(data => {
+    if (data.status !== "ok") {
+        document.body.innerHTML = "<h2>❌ غير مسموح بالدخول</h2>";
+    } else {
+        document.body.innerHTML = "<h2>✅ تم التحقق بنجاح</h2>";
+    }
+})
+.catch(() => {
+    document.body.innerHTML = "<h2>❌ خطأ في الاتصال</h2>";
+});
+</script>
+
 </body>
 </html>
