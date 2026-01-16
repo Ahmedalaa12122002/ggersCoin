@@ -1,62 +1,67 @@
-import threading
-import os
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Request
 import telebot
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+import os
 
-# ======================
+# =============================
 # الإعدادات
-# ======================
+# =============================
 BOT_TOKEN = "8283096353:AAEJhU6xnnZtlzake_gdUM0Zd24-5XepAxw"
-APP_URL = "https://web-production-2f18d.up.railway.app"
+APP_URL = "https://web-production-2f18d.up.railway.app"  # رابط الويب
+BOT_NAME = "GgersCoin Bot"
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
-
-bot = telebot.TeleBot(BOT_TOKEN)
+bot = telebot.TeleBot(BOT_TOKEN, threaded=True)
 app = FastAPI()
 
-# ======================
+# =============================
+# Telegram Webhook
+# =============================
+@app.post("/webhook")
+async def telegram_webhook(req: Request):
+    data = await req.json()
+    update = telebot.types.Update.de_json(data)
+    bot.process_new_updates([update])
+    return {"ok": True}
+
+# =============================
 # رسالة /start + زر الويب
-# ======================
+# =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
-    keyboard = telebot.types.InlineKeyboardMarkup()
+    keyboard = InlineKeyboardMarkup()
     keyboard.add(
-        telebot.types.InlineKeyboardButton(
-            text="🚀 دخول التطبيق",
-            web_app=telebot.types.WebAppInfo(url=APP_URL)
+        InlineKeyboardButton(
+            text="🚀 دخول اللعبة",
+            web_app=WebAppInfo(url=APP_URL)
         )
     )
 
     bot.send_message(
         message.chat.id,
-        "👋 أهلاً بك\n\n"
-        "🎮 لعبة ويب تفاعلية\n"
-        "👇 اضغط الزر للدخول",
+        f"""
+👋 أهلاً بك في {BOT_NAME}
+
+🎮 لعبة تفاعلية
+⭐ تقدّم ومكافآت داخلية
+🔐 تجربة آمنة داخل Telegram
+
+👇 اضغط على الزر وابدأ
+""",
         reply_markup=keyboard
     )
 
-# ======================
-# تشغيل البوت (Polling)
-# ======================
-def run_bot():
-    bot.remove_webhook()
-    bot.infinity_polling(skip_pending=True)
-# ======================
-# Web App
-# ======================
-app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
-
+# =============================
+# صفحة اختبار للويب
+# =============================
 @app.get("/")
 def home():
-    return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
+    return {"status": "ok", "message": "Web app is running"}
 
-# ======================
-# تشغيل الكل
-# ======================
-if __name__ == "__main__":
-    threading.Thread(target=run_bot).start()
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
+# =============================
+# Startup
+# =============================
+@app.on_event("startup")
+async def on_startup():
+    bot.delete_webhook(drop_pending_updates=True)
+    bot.set_webhook(f"{APP_URL}/webhook")
+    print("✅ Bot webhook set successfully")
