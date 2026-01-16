@@ -1,38 +1,29 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
-import os
+import threading
+import time
 
 # =============================
 # الإعدادات
 # =============================
 BOT_TOKEN = "8283096353:AAEJhU6xnnZtlzake_gdUM0Zd24-5XepAxw"
-APP_URL = "https://web-production-2f18d.up.railway.app"  # رابط الويب
+WEB_APP_URL = "https://web-production-2f18d.up.railway.app"
 BOT_NAME = "GgersCoin Bot"
 
-bot = telebot.TeleBot(BOT_TOKEN, threaded=True)
+bot = telebot.TeleBot(BOT_TOKEN)
 app = FastAPI()
 
 # =============================
-# Telegram Webhook
-# =============================
-@app.post("/webhook")
-async def telegram_webhook(req: Request):
-    data = await req.json()
-    update = telebot.types.Update.de_json(data)
-    bot.process_new_updates([update])
-    return {"ok": True}
-
-# =============================
-# رسالة /start + زر الويب
+# /start رسالة + زر
 # =============================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
-    keyboard = InlineKeyboardMarkup()
-    keyboard.add(
+    kb = InlineKeyboardMarkup()
+    kb.add(
         InlineKeyboardButton(
-            text="🚀 دخول اللعبة",
-            web_app=WebAppInfo(url=APP_URL)
+            text="🚀 دخول التطبيق",
+            web_app=WebAppInfo(url=WEB_APP_URL)
         )
     )
 
@@ -41,27 +32,37 @@ def start_handler(message):
         f"""
 👋 أهلاً بك في {BOT_NAME}
 
-🎮 لعبة تفاعلية
-⭐ تقدّم ومكافآت داخلية
-🔐 تجربة آمنة داخل Telegram
+🎮 تجربة تفاعلية داخل Telegram  
+⭐ تقدّم ومكافآت داخلية  
+🔐 بيئة آمنة
 
-👇 اضغط على الزر وابدأ
+👇 اضغط وابدأ
 """,
-        reply_markup=keyboard
+        reply_markup=kb
     )
 
 # =============================
-# صفحة اختبار للويب
+# تشغيل البوت Polling
+# =============================
+def start_bot():
+    while True:
+        try:
+            bot.infinity_polling(skip_pending=True)
+        except Exception as e:
+            print("Bot error:", e)
+            time.sleep(5)
+
+# =============================
+# FastAPI
 # =============================
 @app.get("/")
 def home():
-    return {"status": "ok", "message": "Web app is running"}
+    return {"status": "ok", "message": "Web app running"}
 
 # =============================
 # Startup
 # =============================
 @app.on_event("startup")
-async def on_startup():
-    bot.delete_webhook(drop_pending_updates=True)
-    bot.set_webhook(f"{APP_URL}/webhook")
-    print("✅ Bot webhook set successfully")
+def startup_event():
+    threading.Thread(target=start_bot, daemon=True).start()
+    print("✅ Bot polling started")
