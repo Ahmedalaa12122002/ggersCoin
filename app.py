@@ -5,7 +5,7 @@ import telebot
 import os
 
 BOT_TOKEN = "8283096353:AAEJhU6xnnZtlzake_gdUM0Zd24-5XepAxw"
-APP_URL = "https://web-production-33147.up.railway.app"  # عدّل بعد النشر
+APP_URL = "https://web-production-33147.up.railway.app"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 app = FastAPI()
@@ -24,7 +24,7 @@ async def telegram_webhook(request: Request):
     return {"ok": True}
 
 # =====================
-# /start message + button
+# /start message + button (رسالة جذابة وآمنة)
 # =====================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -38,7 +38,16 @@ def start_handler(message):
 
     bot.send_message(
         message.chat.id,
-        "👋 أهلاً بك\n\nاضغط الزر للدخول إلى التطبيق 👇",
+        """
+👋 أهلاً بك في تجربة تفاعلية جديدة 🌱
+
+🎮 العب وشارك في مهام ممتعة  
+⭐ طوّر مستواك خطوة بخطوة  
+🎁 احصل على نقاط ومكافآت داخلية  
+📈 تقدّم، استكشف، ونافس الآخرين  
+
+👇 اضغط على الزر بالأسفل وابدأ رحلتك
+""",
         reply_markup=kb
     )
 
