@@ -3,7 +3,7 @@ import express from "express";
 
 // معلوماتك التي أرسلتها
 const BOT_TOKEN = "8283096353:AAEJhU6xnnZtlzake_gdUM0Zd24-5XepAxw";
-const APP_URL = "https://web-production-33147.up.railway.app/";
+const APP_URL = "https://ggerscoin-production.up.railway.app";
 
 const bot = new Bot(BOT_TOKEN);
 
