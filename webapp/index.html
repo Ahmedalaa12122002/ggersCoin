@@ -1,43 +1,57 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>Croply</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="UTF-8">
+    <title>Croply</title>
+
+    <!-- مهم جداً -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f0f0f;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 320px;
+        }
+
+        .error {
+            color: #ff4d4d;
+            font-size: 18px;
+        }
+
+        .title {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .user {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+    </style>
 </head>
-<body style="background:#111;color:#fff;text-align:center">
+<body>
 
-<h2>🌱 مرحباً بك</h2>
-<p id="status">جاري التحقق...</p>
+<div class="container" id="app">
+    <div class="title">🌱 مرحباً بك</div>
+    <div class="user" id="username">جارٍ التحميل...</div>
+</div>
 
-<script>
-const tg = window.Telegram.WebApp;
-tg.ready();
-
-const device_id = localStorage.getItem("device_id") ||
-                  (localStorage.setItem("device_id", crypto.randomUUID()),
-                   localStorage.getItem("device_id"));
-
-fetch("/api/auth", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-        initData: tg.initData,
-        device_id: device_id
-    })
-})
-.then(r => r.json())
-.then(d => {
-    if (d.status === "ok") {
-        document.getElementById("status").innerText = "✅ تم الدخول بنجاح";
-    } else {
-        document.getElementById("status").innerText = d.error;
-    }
-})
-.catch(() => {
-    document.getElementById("status").innerText = "❌ خطأ في الاتصال";
-});
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
