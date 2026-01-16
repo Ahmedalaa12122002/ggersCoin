@@ -1,61 +1,71 @@
-const express = require("express");
-const TelegramBot = require("node-telegram-bot-api");
-const bodyParser = require("body-parser");
-const path = require("path");
+import express from "express";
+import fetch from "node-fetch";
 
 const app = express();
+app.use(express.json());
 
-// ====== ENV ======
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const APP_URL = process.env.APP_URL;
-const PORT = process.env.PORT || 3000;
 
-// ====== BOT ======
-const bot = new TelegramBot(BOT_TOKEN, { webHook: true });
+const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-// ====== MIDDLEWARE ======
-app.use(bodyParser.json());
-app.use("/static", express.static(path.join(__dirname, "webapp")));
+// Webhook endpoint
+app.post("/webhook", async (req, res) => {
+  const update = req.body;
 
-// ====== WEBHOOK ======
-app.post(`/bot${BOT_TOKEN}`, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
-});
+  if (update.message?.text === "/start") {
+    const chatId = update.message.chat.id;
 
-// ====== START MESSAGE ======
-bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id,
-`👋 أهلاً بك في تجربة تفاعلية جديدة 🌱
-
-🎮 العب وشارك في مهام ممتعة  
-⭐ طوّر مستواك خطوة بخطوة  
-🎁 احصل على نقاط ومكافآت داخلية  
-
-👇 اضغط الزر وابدأ الآن`,
-  {
-    reply_markup: {
-      inline_keyboard: [[
-        {
-          text: "🚀 دخول التطبيق",
-          web_app: { url: APP_URL }
+    await fetch(`${TELEGRAM_API}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: "👋 أهلاً بك\n\nاضغط الزر للدخول إلى التطبيق",
+        reply_markup: {
+          inline_keyboard: [[
+            {
+              text: "🚀 دخول التطبيق",
+              web_app: { url: APP_URL }
+            }
+          ]]
         }
-      ]]
-    }
-  });
+      })
+    });
+  }
+
+  res.send("ok");
 });
 
-// ====== WEBAPP ======
+// Web App
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "webapp", "index.html"));
+  res.send(`
+    <html>
+      <body style="background:#111;color:#0f0;text-align:center">
+        <h1>WebApp Works ✅</h1>
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        <script>
+          if (!window.Telegram.WebApp.initDataUnsafe.user) {
+            document.body.innerHTML = "❌ افتح من داخل Telegram فقط";
+          }
+        </script>
+      </body>
+    </html>
+  `);
 });
 
-// ====== LISTEN (ده أهم سطر) ======
-app.listen(PORT, () => {
-  console.log("✅ Server running on port", PORT);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, async () => {
+  console.log("Server running on port", PORT);
 
-// ====== SET WEBHOOK ======
-bot.setWebHook(`${APP_URL}/bot${BOT_TOKEN}`)
-  .then(() => console.log("✅ Webhook connected"))
-  .catch(err => console.error("Webhook error:", err));
+  // Set webhook
+  await fetch(`${TELEGRAM_API}/setWebhook`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      url: `${APP_URL}/webhook`
+    })
+  });
+
+  console.log("Webhook connected");
+});
