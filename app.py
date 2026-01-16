@@ -91,8 +91,10 @@ def start_handler(message):
 # =====================
 # API Auth (الحماية هنا فقط)
 # =====================
+from fastapi import Body
+
 @app.post("/api/auth")
-async def auth(data: dict):
+async def auth(data: dict = Body(...)):
     init_data = data.get("initData")
     device_id = data.get("device_id")
 
