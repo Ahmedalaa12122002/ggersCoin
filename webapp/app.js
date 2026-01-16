@@ -5,9 +5,8 @@
     // ============================
     if (typeof Telegram === "undefined" || !Telegram.WebApp) {
         document.body.innerHTML = `
-            <div class="error">
-                ❌ غير مسموح بالدخول<br>
-                افتح التطبيق من Telegram فقط
+            <div style="color:red;text-align:center;margin-top:40px">
+                ❌ افتح التطبيق من Telegram فقط
             </div>
         `;
         return;
@@ -18,55 +17,30 @@
     tg.expand();
 
     // ============================
-    // التحقق من بيانات المستخدم
+    // قراءة بيانات المستخدم
     // ============================
-    const user = tg.initDataUnsafe?.user;
+    const data = tg.initDataUnsafe || {};
+    const user = data.user || {};
 
-    if (!user) {
-        document.body.innerHTML = `
-            <div class="error">
-                ❌ صلاحية غير صحيحة<br>
-                أعد فتح التطبيق من Telegram
-            </div>
-        `;
-        return;
+    // ============================
+    // تحديد اسم آمن
+    // ============================
+    let displayName = "لاعب";
+
+    if (user.first_name && user.first_name.length > 0) {
+        displayName = user.first_name;
+    } else if (user.username && user.username.length > 0) {
+        displayName = user.username;
+    } else if (user.id) {
+        displayName = "ID " + user.id;
     }
 
     // ============================
-    // عرض اسم المستخدم
+    // عرض الاسم
     // ============================
     const usernameEl = document.getElementById("username");
-
-    const name =
-        user.first_name ||
-        user.username ||
-        "لاعب";
-
-    usernameEl.innerText = `👤 ${name}`;
-
-    // ============================
-    // (جاهز للخطوة القادمة)
-    // إرسال auth للـ backend
-    // ============================
-    /*
-    fetch("/api/auth", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            initData: tg.initData,
-            device_id: navigator.userAgent
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            document.body.innerHTML = `
-                <div class="error">${data.error}</div>
-            `;
-        }
-    });
-    */
+    if (usernameEl) {
+        usernameEl.innerText = `👤 ${displayName}`;
+    }
 
 })();
