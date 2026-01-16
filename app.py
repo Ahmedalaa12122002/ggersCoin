@@ -1,8 +1,8 @@
-from fastapi import FastAPI, Request, HTTPException, Query
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import telebot
-import os, hashlib, hmac, urllib.parse, time
+import os, time, hashlib, hmac, urllib.parse
 
 # =====================
 # الإعدادات
@@ -10,21 +10,29 @@ import os, hashlib, hmac, urllib.parse, time
 BOT_TOKEN = "8283096353:AAEJhU6xnnZtlzake_gdUM0Zd24-5XepAxw"
 APP_URL = "https://web-production-33147.up.railway.app"
 
-bot = telebot.TeleBot(BOT_TOKEN)
+MAX_USERS_PER_DEVICE = 2
+
+bot = telebot.TeleBot(BOT_TOKEN, threaded=True)
 app = FastAPI()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
 
 # =====================
-# Telegram initData verify
+# تخزين مؤقت (لاحقًا DB)
+# device_id -> set(user_ids)
+# =====================
+DEVICE_USERS = {}
+
+# =====================
+# verify initData (أمان Telegram)
 # =====================
 def verify_init_data(init_data: str):
     parsed = dict(urllib.parse.parse_qsl(init_data))
     hash_telegram = parsed.pop("hash", None)
 
     if not hash_telegram:
-        raise HTTPException(status_code=401, detail="Missing hash")
+        raise HTTPException(401, "Invalid initData")
 
     data_check = "\n".join(f"{k}={v}" for k, v in sorted(parsed.items()))
     secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
@@ -36,26 +44,26 @@ def verify_init_data(init_data: str):
     ).hexdigest()
 
     if calc_hash != hash_telegram:
-        raise HTTPException(status_code=401, detail="Invalid signature")
+        raise HTTPException(401, "Invalid signature")
 
     auth_date = int(parsed.get("auth_date", 0))
     if time.time() - auth_date > 86400:
-        raise HTTPException(status_code=401, detail="Expired auth")
+        raise HTTPException(401, "Expired")
 
-    return True
+    return eval(parsed["user"])
 
 # =====================
 # Telegram webhook
 # =====================
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    json_data = await request.json()
-    update = telebot.types.Update.de_json(json_data)
+    data = await request.json()
+    update = telebot.types.Update.de_json(data)
     bot.process_new_updates([update])
     return {"ok": True}
 
 # =====================
-# /start message + button
+# /start رسالة + زر
 # =====================
 @bot.message_handler(commands=["start"])
 def start_handler(message):
@@ -75,15 +83,45 @@ def start_handler(message):
 🎮 العب وشارك في مهام ممتعة  
 ⭐ طوّر مستواك خطوة بخطوة  
 🎁 احصل على نقاط ومكافآت داخلية  
-📈 تقدّم ونافس الآخرين  
+📈 تقدّم، استكشف، ونافس الآخرين  
 
-👇 اضغط على الزر وابدأ رحلتك
+👇 اضغط على الزر وابدأ الآن
 """,
         reply_markup=kb
     )
 
 # =====================
-# Startup: set webhook
+# API Auth + حد الجهاز
+# =====================
+@app.post("/api/auth")
+async def auth(data: dict):
+    init_data = data.get("initData")
+    device_id = data.get("device_id")
+
+    if not init_data or not device_id:
+        raise HTTPException(400, "Missing data")
+
+    user = verify_init_data(init_data)
+    user_id = user["id"]
+
+    users = DEVICE_USERS.get(device_id, set())
+
+    if user_id not in users and len(users) >= MAX_USERS_PER_DEVICE:
+        return JSONResponse(
+            status_code=403,
+            content={"error": "❌ هذا الجهاز مسموح له بحسابين فقط"}
+        )
+
+    users.add(user_id)
+    DEVICE_USERS[device_id] = users
+
+    return {
+        "status": "ok",
+        "user_id": user_id
+    }
+
+# =====================
+# Startup
 # =====================
 @app.on_event("startup")
 def on_startup():
@@ -92,31 +130,10 @@ def on_startup():
     print("✅ Webhook connected")
 
 # =====================
-# Web App (محمي)
+# Web App
 # =====================
 app.mount("/static", StaticFiles(directory=WEBAPP_DIR), name="static")
 
 @app.get("/")
-def protected_home(
-    request: Request,
-    initData: str = Query(None)
-):
-    user_agent = request.headers.get("user-agent", "").lower()
-
-    # منع المتصفح العادي
-    if "telegram" not in user_agent:
-        return HTMLResponse(
-            "<h2 style='text-align:center;margin-top:50px'>❌ افتح التطبيق من Telegram فقط</h2>",
-            status_code=403
-        )
-
-    # التحقق من initData
-    if not initData:
-        return HTMLResponse(
-            "<h2 style='text-align:center;margin-top:50px'>❌ صلاحية غير صحيحة</h2>",
-            status_code=403
-        )
-
-    verify_init_data(initData)
-
+def home():
     return FileResponse(os.path.join(WEBAPP_DIR, "index.html"))
