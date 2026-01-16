@@ -2,7 +2,7 @@ import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 BOT_TOKEN = "8283096353:AAEJhU6xnnZtlzake_gdUM0Zd24-5XepAxw"
-WEB_APP_URL = "https://web-production-2f18d.up.railway.app"
+WEB_APP_URL = "https://web-production-33147.up.railway.app"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
